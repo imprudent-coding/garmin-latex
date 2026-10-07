@@ -1,0 +1,10 @@
+# Caratteri inclusi nei font dell'orologio (contratto tra pipeline e app Garmin).
+# Formato: <gruppo><TAB><caratteri>. Lo spazio U+0020 è sempre incluso.
+# Se aggiungi caratteri: rigenera i font (python -m gwnotes.fontgen) e
+# ricompila/reinstalla l'app dell'orologio. La pipeline renderizza come
+# immagine qualunque formula che usi caratteri non presenti qui.
+ascii	!"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
+latin1	àáâäãåæçèéêëìíîïñòóôöõøùúûüýÿÀÁÂÄÃÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÖÕØÙÚÛÜÝßœŒ«»°±·×÷²³¹¼½¾§¶µ¬©®´¨¯¡¿
+punct	–—‘’‚“”„†‡•…‰′″‹›€™
+greek	ΓΔΘΛΞΠΣΥΦΨΩαβγδεζηθικλμνξοπρστυφχψωϑϕϵϱϖς
+math	∀∂∃∅∇∈∉∋∏∑−∓∗∘√∝∞∠∥∦∧∨∩∪∫∬∮∴∵∼≃≅≈≠≡≤≥≪≫⊂⊃⊆⊇⊕⊗⊥⋅⋯⋮⟨⟩←↑→↓↔↕↗↘⇐⇒⇔⇑⇓⟵⟶⟹⟸⟺↦ℓℏℜℑ℘ℰℱℋℐℒℳℛℬℯıȷ■□▪▸◂▲▼●○✓✗⊙∖⌊⌋⌈⌉‖⁄≔≝≺≻∡
