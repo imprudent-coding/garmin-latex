@@ -1,0 +1,34 @@
+# Regole di conversione LaTeX -> orologio.
+# La pipeline funziona anche con questo file vuoto: qui si mettono solo eccezioni.
+# Dopo una modifica non serve ricompilare le app: basta un push (workflow "notes").
+
+# Ridefinizioni di macro usate SOLO per la versione orologio.
+# \qref nel PDF stampa "Q. A1 (p. 12)"; sull'orologio il numero di pagina non serve.
+macros:
+  qref: {args: 1, body: 'Q.\,\ref{q:#1}'}
+
+# Esempi (decommenta e adatta):
+#
+# Una macro di sezionamento che la pipeline non riconosce da sola:
+# structure:
+#   lezione: {level: section, args: 1, title: '#1'}
+#
+# Ambienti o macro da mostrare come immagine (compilati con LaTeX):
+# image_envs: [mydiagram]
+# image_macros: {schema: 1}     # nome: numero di argomenti
+#
+# Simboli matematici non previsti (comando senza backslash -> Unicode):
+# math_symbols:
+#   oneway: "→"
+#
+# Titolo di un riquadro diverso da quello di \newtcolorbox:
+# box_titles:
+#   keyf: "Formule chiave"
+
+# Titolo del capitolo che raccoglie ciò che precede il primo capitolo.
+front_title: Introduzione
+
+# Dimensione dei pezzi in cui vengono divisi contenuti e immagini (byte UTF-8).
+# Ogni pezzo viaggia in un messaggio Bluetooth ed è salvato in una chiave di
+# Application.Storage (limite documentato: 8 KB per valore).
+chunk_bytes: 1800

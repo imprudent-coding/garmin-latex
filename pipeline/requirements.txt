@@ -1,0 +1,5 @@
+# versioni fissate (pip install -r requirements.txt)
+pillow==12.3.0
+PyYAML==6.0.1
+fonttools==4.66.1
+pytest==9.1.1
