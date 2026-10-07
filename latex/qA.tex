@@ -1,0 +1,1034 @@
+% =====================================================================
+% Group A -- Orbital mechanics, chapters 2, 3, 6 (the "third" orbital question)
+% Source: latex_notes/SFM_02_*, SFM_03_*, SFM_06_*
+% =====================================================================
+\qgroup{A}{Orbital mechanics -- Chapters 2, 3, 6}
+
+At the exam, one of the three orbital-mechanics questions is on a chapter other than 5 and 8.
+The questions below are ordered by topic: Keplerian trajectories (A1--A4), impulsive transfers (A5--A7),
+rocket dynamics (A8--A11). Adjacent questions share material but each answer is self-contained.
+
+\begin{center}
+\small
+\begin{tabular}{@{}lllr@{}}
+\toprule
+Q & Topic & Asked & Page\\
+\midrule
+\ref{q:A1} & First integral of angular momentum & Feb 2025 & \pageref{q:A1}\\
+\ref{q:A2} & Classification of Keplerian orbits ($a$, $e$) & list & \pageref{q:A2}\\
+\ref{q:A3} & Horizontal velocity at given altitude & list & \pageref{q:A3}\\
+\ref{q:A4} & Geosynchronous and geostationary orbits, ground tracks & Jan 2023 & \pageref{q:A4}\\
+\ref{q:A5} & Impulsive-thrust approximation & list & \pageref{q:A5}\\
+\ref{q:A6} & Hohmann vs bielliptic transfer & $\times$2, Jan 2025, Jun 2025 & \pageref{q:A6}\\
+\ref{q:A7} & Ellipse $\to$ hyperbola: two optimal strategies & list & \pageref{q:A7}\\
+\ref{q:A8} & $\Delta V$-loss integrals & $\times$2, Sep 2024 & \pageref{q:A8}\\
+\ref{q:A9} & Propulsive velocity and losses vs trajectory & Jul 2025 & \pageref{q:A9}\\
+\ref{q:A10} & Staging: mass parameters, why staging & list & \pageref{q:A10}\\
+\ref{q:A11} & Tsiolkovsky and multistage $\Delta V$ & Sep 2025 & \pageref{q:A11}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ---------------------------------------------------------------------
+\question{A1}{First integral of angular momentum}
+% source: cap02.tex l.168-201 (h), l.589-615 (theta-dot), l.797-848 (circular), cap03 l.51-75 (impulses)
+\begin{qbox}
+Prove the first integral of angular momentum for a Keplerian orbit and give some application examples.
+\qmeta{Feb 2025 (listed as a 2025 question).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Restricted two-body problem: equation of motion $\ddot{\underline r}=-\frac{\mu}{r^2}\hat r$ (central force).
+\item Definition $\underline h:=\underline r\times\underline v$ and proof $\dot{\underline h}=\underline 0$.
+\item Consequence (A): planar motion, $\hat h$ fixed $\Rightarrow$ orbit plane fixed in inertial space.
+\item Consequence (B): Kepler's 2nd law $h=2\,dA/dt$ (+ sketch).
+\item Applications: $\dot\theta_*=h/r^2$, $v_\theta=h/r$, $r_pv_p=r_Av_A$, $p=h^2/\mu$, orbit plane ($i,\Omega$), $h=0$ rectilinear,
+impulses ($h^+=r\,v_\theta^+$), perturbations ($\dot{\underline h}=\underline r\times\underline f$).
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Setting.} In the restricted two-body problem ($m_1\gg m_2$, so $m_1+m_2\simeq m_1$ and the effect of the
+spacecraft on the main body is neglected) the position $\underline r$ of the spacecraft relative to the centre of the
+attracting body obeys
+\begin{equation}
+\frac{d^{2}\underline{r}}{dt^{2}}=-\frac{\mu}{r^{3}}\underline{r}=-\frac{\mu}{r^{2}}\hat{r},
+\qquad \mu=Gm_1 \ (\mu_\oplus=398600.4\ \mathrm{km^3/s^2}).
+\end{equation}
+The force is \emph{central}: it is always aligned with $\underline r$. A \emph{first integral} is a quantity that remains
+constant in time along the motion.
+
+\paragraph{Definition and proof.} The specific angular momentum (per unit mass) is
+\begin{equation}
+\underline{h}:=\underline{r}\times\underline{v},\qquad \underline{v}=\frac{d\underline{r}}{dt}.
+\end{equation}
+Differentiating in the inertial frame and using the equation of motion:
+\begin{equation}
+\frac{d\underline{h}}{dt}=\underbrace{\frac{d\underline{r}}{dt}\times\underline{v}}_{\underline v\times\underline v=\underline 0}
++\underline{r}\times\underbrace{\frac{d^{2}\underline{r}}{dt^{2}}}_{-\frac{\mu}{r^{2}}\hat{r}}
+=\underline 0-\frac{\mu}{r^{2}}\,\underbrace{\underline r\times\hat r}_{\underline 0}=\underline 0
+\;\Rightarrow\;\underline{h}=\text{constant}.
+\end{equation}
+The first term vanishes because a vector crossed with itself is zero; the second because the gravitational acceleration
+is parallel to $\underline r$. Hence $\underline h$ is a vector first integral (3 scalar constants), fixed by the initial
+conditions: $\underline h=\underline r_0\times\underline v_0$.
+
+\paragraph{Consequence (A): the trajectory is planar.} Since $\underline h=\text{const}$, also $\hat h=\text{const}$
+(if $h\neq 0$). By definition $\underline r\cdot\underline h=0$ and $\underline v\cdot\underline h=0$ at all times, so
+$\underline r$ and $\underline v$ always lie in the plane through the attracting body orthogonal to $\hat h$: the orbit
+plane is fixed in inertial space. (This is why the orbit plane is described by two constant angles, $i$ and $\Omega$.)
+
+\paragraph{Consequence (B): equal areas in equal times (Kepler's 2nd law).} In $dt$ the position vector sweeps the
+triangle of sides $\underline r$ and $d\underline r=\underline v\,dt$, of area $dA=\frac12|\underline r\times d\underline r|$:
+\begin{equation}
+h\,dt=|\underline{r}\times\underline{v}|\,dt=|\underline{r}\times d\underline{r}|=2\,dA
+\;\Longrightarrow\; h=2\frac{dA}{dt}=\text{constant},
+\end{equation}
+i.e.\ the areolar velocity $dA/dt$ is constant.
+
+\begin{center}
+\includegraphics[width=0.42\linewidth]{kepler2}\\
+{\footnotesize Equal times $\Rightarrow$ equal areas: the spacecraft is fastest near periapsis.}
+\end{center}
+
+\paragraph{Application examples.}
+\begin{enumerate}[label=(\arabic*)]
+\item \textbf{Angular rate along the orbit.} Writing $\underline v=\dot r\,\hat r+\underline\omega\times\underline r$ with
+$\underline\omega=\dot\theta_*\hat h$: $\underline h=\underline r\times(\underline\omega\times\underline r)=\underline\omega r^2$, so
+\begin{equation}
+\dot\theta_*=\frac{h}{r^2}=\sqrt{\frac{\mu}{p^3}}\left(1+e\,c_{\theta_*}\right)^2 ,
+\end{equation}
+the differential equation that relates true anomaly and time (basis of Kepler's equation): the motion is fastest at periapsis.
+\item \textbf{Horizontal velocity.} $h=r\,v_\theta$ $\Rightarrow$ $v_\theta=h/r$. At the apses ($v_r=0$):
+$r_p v_p=r_A v_A=h$, hence $v_p>v_A$ (consistent with the 2nd law).
+\item \textbf{Shape of the orbit.} Combined with the eccentricity vector $\underline e=-\hat r+\underline v\times\underline h/\mu$
+it gives the polar equation $r=\dfrac{h^2/\mu}{1+e\,c_{\theta_*}}$: the semilatus rectum is $p=h^2/\mu$.
+\item \textbf{Orientation of the orbit plane.} $\hat h$ gives the inclination $c_i=\hat h\cdot\hat c_3$ and, with the node
+line $\hat c_3\times\underline h$, the RAAN $\Omega$.
+\item \textbf{Circular orbits.} $r=R$ and $h=$ const $\Rightarrow$ $\underline\omega=\underline h/R^2$ constant: uniform motion.
+\item \textbf{Rectilinear trajectories.} $h=0$ iff $\underline v\parallel\underline r$: $p=0$, $e=1$, the motion is along a line
+through the attracting body.
+\item \textbf{Impulsive manoeuvres (Ch.\,3).} After an impulse at radius $r$: $h^+=r\,v_\theta^+$, then
+$e^+=\sqrt{1-h^{+2}/(\mu a^+)}$; in the Hohmann proof $v_+c_\phi=h^+/R_k=\sqrt{\mu p^+}/R_k$.
+\item \textbf{Perturbed motion (Ch.\,8).} With a perturbing acceleration $\underline f$ the integral is lost:
+$\dot{\underline h}=\underline r\times\underline f$. Only the out-of-plane component $f_h$ rotates the plane (changes $i$,
+$\Omega$); e.g.\ third-body perturbations make $\underline h$ precess.
+\end{enumerate}
+
+\begin{keyf}
+$\underline h=\underline r\times\underline v$, \quad $\dfrac{d\underline h}{dt}=\underline v\times\underline v+\underline r\times\left(-\dfrac{\mu}{r^2}\hat r\right)=\underline 0$,
+\quad $h=2\,\dfrac{dA}{dt}$, \quad $\dot\theta_*=\dfrac{h}{r^2}$, \quad $p=\dfrac{h^2}{\mu}$, \quad $h=r\,v_\theta=r_pv_p=r_Av_A$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item State the hypothesis explicitly: \emph{central} force (restricted two-body problem, spherical attracting body).
+The proof fails for any non-central perturbation.
+\item Say \emph{why} each term vanishes ($\underline v\times\underline v=\underline 0$; $\underline r\parallel\ddot{\underline r}$).
+\item $h$ is constant as a \emph{vector}: magnitude (2nd law) and direction (planar motion). Mention both consequences.
+\item $\underline h$ and $\underline e$ give 5 independent scalar integrals, not 6, because $\underline h\cdot\underline e=0$.
+\end{itemize}
+
+\further
+The angular momentum integral is the orbital analogue of the conservation of angular momentum of a system subject to
+central (internal) forces: in the $N$-body problem the total $\underline H_c$ about the centre of mass is conserved and
+defines the invariant Laplace plane (\qref{B6}).
+
+\source{cap02.tex, \S First Integrals (l.168--201), \S Position in time (l.589--615), \S Circular orbits (l.797--848);
+cap03.tex l.51--75; cap08.tex l.87--116. Formulario: \fml{2-HEV}, \fml{2-TDT}.}
+
+% ---------------------------------------------------------------------
+\question{A2}{Classification of Keplerian orbits in terms of $a$ and $e$}
+% source: cap02.tex l.253-300 (cartesian eq.), 300-371 (conics), 554-587 (energy), 881-927 (rectilinear, classification)
+\begin{qbox}
+Describe the general classification of Keplerian orbits in terms of semi-major axis and eccentricity.
+\qmeta{list by chapter (Ch.\,2).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item First integrals $\underline h$, $\underline e$ $\Rightarrow$ polar equation $r=p/(1+e\,c_{\theta_*})$, $p=h^2/\mu$.
+\item Cartesian form $x^2(1-e^2)+y^2+2pex=p^2$: conic section, the attracting body is at a focus.
+\item Definition of $a=p/(1-e^2)$ for all conics ($a>0$, $a\to\infty$, $a<0$).
+\item Energy $\mathcal E=-\mu/(2a)$: sign of $\mathcal E$ $\leftrightarrow$ type of orbit.
+\item Degenerate case $h=0$: rectilinear trajectories ($e=1$), three types.
+\item Summary table $\mathcal E$ (or $a$) vs $e$; sketch of the conics.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{From the first integrals to the conics.} In the restricted two-body problem $\underline h=\underline r\times\underline v$
+and $\underline e=-\hat r+\underline v\times\underline h/\mu$ are constant. Projecting $\underline e$ on $\underline r$
+($\theta_*$ = true anomaly, angle from $\underline e$ to $\underline r$):
+\begin{equation}
+r\,e\cos\theta_*=-r+\frac{h^2}{\mu}\;\Longrightarrow\; r=\frac{p}{1+e\cos\theta_*},\qquad p:=\frac{h^2}{\mu}\ \text{(semilatus rectum)}.
+\end{equation}
+In a frame centred in the attracting body with $x\parallel\hat e$, using $x=r\,c_{\theta_*}$, $y=r\,s_{\theta_*}$:
+\begin{equation}
+x^{2}\left(1-e^{2}\right)+y^{2}+2p\,e\,x=p^{2}
+\end{equation}
+which is a conic section with the attracting body at one focus (Kepler's 1st law):
+\begin{itemize}
+\item $0\le e<1$: \textbf{ellipse} (circle with the body at the centre if $e=0$);
+\item $e=1$: \textbf{parabola} ($y^2+2px=p^2$, $r_p=p/2$);
+\item $e>1$: \textbf{hyperbola} (one branch, the one around the focus).
+\end{itemize}
+
+\paragraph{Semi-major axis.} Completing the square gives, for the ellipse, semi-axes $a=\dfrac{p}{1-e^2}$,
+$b=\dfrac{p}{\sqrt{1-e^2}}$, focal distance $c=ae$. By \emph{convention} the same definition is kept for hyperbolas,
+\begin{equation}
+a=\frac{p}{1-e^{2}}\quad\Rightarrow\quad a>0\ (e<1),\qquad a\to\infty\ (e=1),\qquad a<0\ (e>1),
+\end{equation}
+so that $r_p=a(1-e)$ holds for every conic and $r_A=a(1+e)$ for the ellipse.
+
+\paragraph{Energy.} The specific energy $\mathcal E=\frac{v^2}{2}-\frac{\mu}{r}$ is a further integral. Inserting $r(\theta_*)$ and
+the speed $v=\sqrt{\mu/p}\,\sqrt{1+e^2+2e\,c_{\theta_*}}$, the dependence on $\theta_*$ cancels:
+\begin{equation}
+\mathcal E=-\frac{\mu}{2p}\left(1-e^{2}\right)=-\frac{\mu}{2a}.
+\end{equation}
+Hence the sign of $\mathcal E$ (equivalently of $a$) classifies the orbit:
+\begin{center}
+\small
+\begin{tabular}{@{}lllll@{}}
+\toprule
+orbit & $e$ & $a$ & $\mathcal E$ & potential vs kinetic energy\\
+\midrule
+circle & $0$ & $=r$ & $<0$ & $|\mathrm{PE}|=2\,\mathrm{KE}$\\
+ellipse (closed, periodic) & $0<e<1$ & $>0$ & $<0$ & $|\mathrm{PE}|>\mathrm{KE}$\\
+parabola (escape, $v_\infty=0$) & $1$ & $\infty$ & $=0$ & $|\mathrm{PE}|=\mathrm{KE}$\\
+hyperbola (escape, $v_\infty>0$) & $>1$ & $<0$ & $>0$ & $|\mathrm{PE}|<\mathrm{KE}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Characteristic quantities: ellipse $r_{p,A}=a(1\mp e)$, $T=2\pi\sqrt{a^3/\mu}$; parabola $v=\sqrt{2\mu/r}\to0$ at infinity;
+hyperbola $v_\infty=\sqrt{-\mu/a}$, true anomaly limited to $|\theta_*|<\theta_*^M=\arccos(-1/e)$, deflection
+$\xi=2\theta_*^M-\pi$.
+
+\paragraph{Degenerate case: rectilinear trajectories ($h=0$).} If $\underline v\parallel\underline r$ then $\underline h=\underline 0$,
+$e=|-\hat r|=1$, $p=0$, $r_p=0$: the motion is along a straight line through the attracting body ($\theta_*=\pm\pi$). Three
+types, classified again by $a$ (or $\mathcal E$):
+$a>0,\ \mathcal E<0$ \emph{rectilinear ellipse} (segment: the body falls back);
+$a\to\infty,\ \mathcal E=0$ \emph{rectilinear parabola} ($v\to0$ as $r\to\infty$);
+$a<0,\ \mathcal E>0$ \emph{rectilinear hyperbola} ($v\not\to0$).
+
+\paragraph{Summary.} A Keplerian path is identified by \textbf{$a$ (or $\mathcal E$) and $e$}:
+\begin{center}
+\small
+\begin{tabular}{@{}c|c|c|c@{}}
+\toprule
+$\mathcal E$ & $0\le e<1$ & $e=1$ & $e>1$\\
+\midrule
+$>0$ ($a<0$) & -- & rectilinear hyperbola & hyperbola\\
+$=0$ ($a\to\infty$) & -- & parabola, rectilinear parabola & --\\
+$<0$ ($a>0$) & ellipse & rectilinear ellipse & --\\
+\bottomrule
+\end{tabular}
+\end{center}
+Conic sections have $h\neq0$, $e\ge0$; rectilinear trajectories have $h=0$, $e=1$. Given $r$ and $v$ at any point:
+$a=\left(\frac{2}{r}-\frac{v^2}{\mu}\right)^{-1}$ (vis-viva) and $e=\sqrt{1-\frac{h^2}{\mu a}}$.
+
+\begin{center}
+\includegraphics[width=0.62\linewidth]{conics}\\
+{\footnotesize Conics with the same periapsis radius $r_p$: $e$ increases from the circle to the hyperbola.}
+\end{center}
+
+\begin{fig2draw}
+Focus $F$ and a common periapsis; circle, an ellipse closing behind, the parabola (arms becoming parallel) and the
+hyperbola (arms approaching the asymptotes, more open than the parabola). Write $e$ and the sign of $a$, $\mathcal E$ on each.
+\end{fig2draw}
+
+\begin{keyf}
+$r=\dfrac{p}{1+e\,c_{\theta_*}}$, \quad $p=\dfrac{h^2}{\mu}=a(1-e^2)$, \quad $\mathcal E=\dfrac{v^2}{2}-\dfrac{\mu}{r}=-\dfrac{\mu}{2a}$,
+\quad $e=\sqrt{1-\dfrac{h^2}{\mu a}}$, \quad $v_\infty=\sqrt{-\mu/a}$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item The convention $a<0$ for hyperbolas: forgetting it gives $r_p<0$ or imaginary $v_\infty$.
+\item Do not forget the \emph{rectilinear} (degenerate) trajectories: they share $e=1$ with the parabola but have any $\mathcal E$.
+\item The circle is the special ellipse $e=0$ (attracting body at the centre), not a separate class.
+\item $e$ alone does not identify the orbit size; $a$ alone does not identify the shape: both are needed.
+\end{itemize}
+
+\source{cap02.tex l.230--300 (polar and Cartesian equations), l.300--371 (ellipse, parabola, hyperbola), l.554--587 (energy),
+l.881--927 (rectilinear trajectories, classification table), l.929--945 (vis-viva). Formulario: \fml{2-POL}, \fml{2-ENE}, \fml{2-VIS}.}
+
+% ---------------------------------------------------------------------
+\question{A3}{Trajectories from a horizontal velocity at a given altitude}
+% source: cap02.tex l.532-552 (cosmic velocities), l.929-1005 (cases a-g), l.870-879 (ballistic)
+\begin{qbox}
+A spacecraft is at a specified altitude above Earth and has horizontal velocity. Describe the different Keplerian
+trajectories it can follow for various velocity magnitudes.
+\qmeta{list by chapter (Ch.\,2).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Data: $r=R_E+$altitude, $\underline v_0\perp\underline r$ $\Rightarrow$ $P_0$ is an apse ($v_r=0$).
+\item Cosmic velocities $v_I=\sqrt{\mu/r}$ (circular), $v_{II}=\sqrt{2\mu/r}$ (escape).
+\item $a$ from vis-viva, $e$ from $h=rv_0$: $e=|v_0^2/v_I^2-1|$.
+\item Seven cases (a)--(g) with sketch; $P_0$ apoapsis below $v_I$, periapsis above.
+\item Remark: low $v_0$ $\Rightarrow$ periapsis inside the Earth: ballistic arc (impact).
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Data and cosmic velocities.} Let $P_0$ be at distance $r$ from the Earth's centre ($r=R_E+\text{altitude}$) and let
+the velocity $\underline v_0$ be horizontal, i.e.\ orthogonal to $\underline r$. Two \emph{cosmic velocities} are defined at $P_0$:
+\begin{equation}
+v_I=\sqrt{\frac{\mu}{r}}\ \ \text{(1st: circular orbit of radius $r$)},\qquad
+v_{II}=\sqrt{\frac{2\mu}{r}}=\sqrt2\,v_I\ \ \text{(2nd: escape, parabola)}.
+\end{equation}
+
+\paragraph{Orbit elements as functions of $v_0$.} With $\underline v_0\perp\underline r$: $v_r=0$, so $P_0$ is an apse (periapsis or
+apoapsis), and $h=r\,v_0$. Vis-viva and angular momentum give
+\begin{equation}
+a=\frac{1}{\dfrac{2}{r}-\dfrac{v_0^{2}}{\mu}},\qquad p=\frac{h^2}{\mu}=r\,\frac{v_0^2}{v_I^2},\qquad
+e=\left|\frac{p}{r}-1\right|=\left|\frac{v_0^{2}}{v_I^{2}}-1\right|,
+\end{equation}
+the last one because at an apse $r=p/(1\pm e)$. With $k=v_0^2/v_I^2$ the \emph{other} apse is at $r'=r\,k/(2-k)$.
+As $v_0$ grows, $\mathcal E=\frac{v_0^2}{2}-\frac{\mu}{r}$ grows monotonically.
+
+\paragraph{The cases.}
+\begin{enumerate}[label=(\alph*)]
+\item $v_0=0$: \textbf{rectilinear ellipse}, straight fall towards the centre ($h=0$, $e=1$, $a=r/2$).
+\item $0<v_0<v_I$: \textbf{ellipse with $P_0$ as apoapsis} ($e=1-k$); the periapsis radius $r_p=r\,k/(2-k)$ increases with $v_0$.
+If $r_p<R_E$ the ellipse intersects the Earth's surface: the path is a \emph{ballistic trajectory} (arc of ellipse with
+periapsis inside the Earth, as for ICBMs) and the spacecraft re-enters/impacts.
+\item $v_0=v_I$: \textbf{circular orbit} of radius $r$ ($e=0$, $a=r$).
+\item $v_I<v_0<v_{II}$: \textbf{ellipse with $P_0$ as periapsis} ($e=k-1$); the apoapsis radius $r_A=r\,k/(2-k)$ increases
+with $v_0$ and tends to infinity as $v_0\to v_{II}$.
+\item $v_0=v_{II}$: \textbf{parabola} with periapsis $r_p=r$ ($e=1$, $\mathcal E=0$): escape with zero velocity at infinity.
+\item $v_0>v_{II}$: \textbf{hyperbola} with periapsis at $P_0$; $e$ increases with $v_0$, $v_\infty=\sqrt{v_0^2-v_{II}^2}$.
+\item $v_0\to\infty$: $e\to\infty$, the path tends to the \textbf{straight line} orthogonal to $\underline r$ (gravity has no time to bend it).
+\end{enumerate}
+
+\begin{center}
+\includegraphics[width=0.86\linewidth]{vhoriz}\\
+{\footnotesize Paths computed with $r=p/(1+e\cos\theta_*)$ for $v_0/v_I=0.7,\ 1,\ 1.25,\ \sqrt2,\ 1.75$.}
+\end{center}
+
+\begin{fig2draw}
+Earth centre $B$, point $P_0$ to its right, short arrow $\underline v_0$ upwards. Draw: small ellipse inside (apoapsis at $P_0$),
+circle through $P_0$, larger ellipse outside (periapsis at $P_0$), parabola and hyperbola opening to the left, and
+the radial segment $BP_0$ for $v_0=0$. Label each with the velocity interval.
+\end{fig2draw}
+
+\begin{keyf}
+$v_I=\sqrt{\mu/r}$, \ $v_{II}=\sqrt{2\mu/r}$, \ $a=\left(\dfrac2r-\dfrac{v_0^2}{\mu}\right)^{-1}$, \ $e=\left|\dfrac{v_0^2}{v_I^2}-1\right|$,
+\ $h=rv_0$, \ other apse $r'=r\dfrac{k}{2-k}$, $k=\dfrac{v_0^2}{v_I^2}$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Below $v_I$ the starting point is the \emph{apoapsis}, above $v_I$ it is the \emph{periapsis}.
+\item $v_{II}=\sqrt2\,v_I$ holds at the same $r$; the escape speed is not "infinite energy".
+\item Mention the physical limit: for small $v_0$ the periapsis falls inside the Earth (ballistic arc).
+\end{itemize}
+
+\source{cap02.tex l.532--552 (cosmic velocities), l.870--879 (ballistic trajectories), l.929--1005 (cases (a)--(g)).
+The closed-form $e=|v_0^2/v_I^2-1|$ and $r'$ follow from the notes' formulas. Formulario: \fml{2-COS}, \fml{2-V0C}.}
+
+% ---------------------------------------------------------------------
+\question{A4}{Geosynchronous and geostationary orbits; ground tracks}
+% source: cap02.tex l.850-868 (geosynchronous), l.1657-1843 (ground track), cap08 l.80-85 (J22 resonance)
+\begin{qbox}
+Define geosynchronous and geostationary orbits, commenting on their properties. Provide a graphical representation of the
+ground track for zero/non-zero inclination and zero/non-zero eccentricity.
+\qmeta{Jan 2023.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Sidereal day $T_{sid}=2\pi/\omega_E=86164$\,s; geosynchronous: $T=T_{sid}$ $\Rightarrow$ $a=42164$\,km, any $e$, $i$.
+\item Geostationary = geosynchronous + $e=0$ + $i=0$: fixed sub-satellite point on the equator.
+\item Ground track definition: $\phi(t)$, $\lambda_g(t)=\xi-\theta_g$; $\phi=\arcsin(s_{\theta_t}s_i)$, latitude band $\pm i$.
+\item Four sketches: ($i=0,e=0$) point; ($i\neq0,e=0$) figure eight; ($i=0,e\neq0$) segment on the equator;
+($i\neq0,e\neq0$) distorted eight/drop, depending on $\omega$.
+\item Properties: closed track for direct orbits (repeats every day); symmetries; motion E/W; uses and perturbations.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Definitions.} The \emph{sidereal day} is the time the Earth takes for one rotation with respect to an inertial frame:
+$T_{sid}=2\pi/\omega_E=86164$\,s ($\omega_E=7.292115\cdot10^{-5}$\,rad/s), shorter than the solar day (86400\,s).
+An orbit is \textbf{geosynchronous} if its period equals one sidereal day:
+\begin{equation}
+2\pi\sqrt{\frac{a^{3}}{\mu_{E}}}=T_{\text{sid}}\;\Longrightarrow\;
+a_{gs}=\left[\mu_{E}\left(\frac{T_{\text{sid}}}{2\pi}\right)^{2}\right]^{1/3}=42164\ \text{km}
+\end{equation}
+(altitude $\approx35786$\,km for a circular orbit). \emph{No assumption is made on $i$ and $e$}, apart from a periapsis high
+enough to avoid the atmosphere.
+
+An orbit is \textbf{geostationary} if it is at the same time (1) geosynchronous ($a=42164$\,km), (2) circular ($e=0$),
+(3) equatorial ($i=0$). The satellite then moves with the same angular velocity as the Earth, in the same plane and
+direction: the sub-satellite point is a \textbf{fixed point on the equator} and the satellite appears motionless to a
+ground observer. Geostationary orbits are a subset of geosynchronous orbits.
+
+\paragraph{Ground track.} It is the locus of the sub-satellite points (projection of the satellite on the rotating Earth),
+plotted on a Mercator map as latitude $\phi(t)$ vs geographical longitude $\lambda_g(t)$:
+\begin{equation}
+s_\phi=s_{\theta_t}s_i,\qquad \lambda_g=\xi-\theta_g,\qquad \theta_g=\theta_{g0}+\omega_E(t-t_0),
+\end{equation}
+with $\theta_t=\omega+\theta_*$ (argument of latitude), $\xi$ the absolute (inertial) longitude and $\theta_g$ the
+longitude of Greenwich. For direct orbits $-i\le\phi\le i$.
+
+\paragraph{The four cases} (tracks computed with Kepler's equation, $a=42164$\,km):
+\begin{itemize}
+\item \textbf{$i=0$, $e=0$} (geostationary): a single \textbf{point} on the equator.
+\item \textbf{$i\neq0$, $e=0$}: a symmetric \textbf{figure eight} between latitudes $\pm i$, centred on the equator, with the
+crossing point at the equator. The satellite moves at constant inertial speed, but its eastward component varies with
+latitude, so it alternately leads and lags the Earth (small longitude excursion, $\propto i^2$). Symmetric w.r.t.\ the
+meridian through $\phi_{\max}$ and w.r.t.\ the equator crossing (both symmetries, $e=0$).
+\item \textbf{$i=0$, $e\neq0$}: a \textbf{segment on the equator} travelled back and forth once a day: near perigee the satellite
+is faster than the Earth (moves east), near apogee slower (moves west); the amplitude grows with $e$ (about $\pm2e$\,rad
+for small $e$ \notinnotes).
+\item \textbf{$i\neq0$, $e\neq0$}: a \textbf{distorted (asymmetric) eight} or a \textbf{drop/loop} shape, still closed. The shape depends on
+$\omega$: with $\omega=0,\pi$ the track is symmetric w.r.t.\ the points where it crosses the equator; with $\omega=\pm\pi/2$
+it is symmetric w.r.t.\ the meridian through the maximum and minimum latitudes (apocentre/pericentre).
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.95\linewidth]{geosync}
+\end{center}
+
+\paragraph{Properties.}
+\begin{itemize}
+\item Since the period is one sidereal day, the motion is synchronous with the Earth's rotation and the \textbf{track repeats
+every day}. For direct orbits ($0<i<\pi/2$) the track is \textbf{closed} and spans a limited range of longitudes; it is travelled
+partly towards East and partly towards West. For retrograde geosynchronous orbits ($\pi/2<i<\pi$) the track is repeating
+but covers all longitudes (always travelled westward).
+\item General rule: after one period a direct track drifts east if $T<T_{sid}$, west if $T>T_{sid}$; geosynchronous is the
+boundary case with zero drift.
+\item Geostationary orbits give continuous coverage of about one third of the Earth with fixed antennas
+(telecommunications, meteorology); they cannot see the polar regions.
+\item Perturbations: at GEO the dominant one is the sectoral harmonic $J_{22}$ (ellipticity of the equator), amplified by
+resonance because the satellite is fixed with respect to the Earth; Sun and Moon make $i$ grow, SRP changes $e$
+$\Rightarrow$ station keeping is needed.
+\end{itemize}
+
+\begin{fig2draw}
+Four small $\lambda_g$--$\phi$ frames: a dot at the origin; an "8" between $\pm i$; a horizontal segment on the equator with a
+double arrow; a lopsided "8" (or a drop) for $e\neq0$, with a note on the symmetry given by $\omega$.
+\end{fig2draw}
+
+\begin{keyf}
+$T_{sid}=\dfrac{2\pi}{\omega_E}=86164$\,s, \quad $a_{gs}=\left[\mu_E\left(\dfrac{T_{sid}}{2\pi}\right)^2\right]^{1/3}=42164$\,km,
+\quad $s_\phi=s_{\theta_t}s_i$, \quad $\lambda_g=\xi-\theta_g$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Use the \emph{sidereal} day (86164\,s), not 24\,h.
+\item "Geosynchronous" does not imply circular or equatorial; "geostationary" requires all three conditions.
+\item The figure eight of the circular inclined case is symmetric and centred on the equator; the eccentric cases are not.
+\end{itemize}
+
+\source{cap02.tex l.850--868 (geosynchronous orbits), l.1657--1739 (ground track), l.1741--1796 (latitude limits, symmetry),
+l.1798--1855 (geosynchronous and geostationary tracks, motion along the track), l.1857--1960 (examples 1--3);
+cap08.tex l.80--85 ($J_{22}$ at GEO). Formulario: \fml{2-GEO}, \fml{2-GTK}, \fml{2-GTD}.}
+
+% ---------------------------------------------------------------------
+\question{A5}{Impulsive-thrust approximation}
+% source: cap03.tex l.18-113
+\begin{qbox}
+Describe the impulsive-thrust approximation -- its validity assumptions and the change in position and velocity due to an
+impulsive $\Delta V$. Give one mission scenario where the approximation is valid and one where it is not.
+\qmeta{list by chapter (Ch.\,3).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Idea: high thrust for a short time $\Rightarrow$ instantaneous velocity change; limit $T\to\infty$, $\Delta t\to0$, $T\Delta t=\Delta v$ finite.
+\item Effects: $\underline r^+=\underline r^-$, $\underline v^+=\underline v^-+\Delta\underline v$ (magnitude and direction).
+\item Validity: burn time $\ll$ orbital period, negligible displacement and gravity/drag effects during the burn; optimistic estimate.
+\item New orbit: $a^+$ from energy, $e^+$ from $h$, $\theta_*^+$ from $r$ and $v_r$; apsidal line rotates.
+\item Examples: valid (chemical orbit transfers, Hohmann, injection); not valid (launcher ascent, low-thrust).
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{The approximation.} If a \textbf{high thrust} acts for a \textbf{short time} $\Delta t$, its effect can be approximated as an
+\emph{instantaneous} change of velocity, while the position does not change. Mathematically (thrust per unit mass $T$)
+\begin{equation}
+T\,\Delta t=\Delta v,
+\end{equation}
+and the impulsive approximation is the limit $T\to\infty$, $\Delta t\to0$ with the product $T\Delta t=\Delta v$ finite. Through a
+\textbf{velocity impulse}: (a) the velocity changes in direction and magnitude; (b) the position does not change.
+
+\paragraph{Validity assumptions.}
+\begin{itemize}
+\item High-thrust propulsion (chemical engines): the burn duration is very short compared with the orbital period, so the
+spacecraft moves negligibly during the burn and the change of $\underline r$ is negligible.
+\item During the burn gravity (and drag) do not change the velocity appreciably: no gravity/drag losses; Tsiolkovsky's law
+can be used to compute the propellant.
+\item The result is an \emph{optimistic} guess for real scenarios (finite burns always cost a little more).
+\end{itemize}
+
+\paragraph{Effect of an impulse.} At $P$ (true anomaly $\theta_*^-$ on the old orbit):
+\begin{equation}
+\underline r^+=\underline r^-,\qquad \underline v^+=\underline v^-+\Delta\underline v,\qquad
+\Delta\underline v=\Delta v_\theta\,\hat\theta+\Delta v_r\,\hat r .
+\end{equation}
+With $v_r^-=\sqrt{\mu/p^-}\,e^-s_{\theta_*^-}$ and $v_\theta^-=\sqrt{\mu/p^-}\,(1+e^-c_{\theta_*^-})$:
+\begin{equation}
+v_r^+=v_r^-+\Delta v_r,\qquad v_\theta^+=v_\theta^-+\Delta v_\theta .
+\end{equation}
+The new orbit follows in three steps:
+\begin{enumerate}
+\item $a^+$ from the \textbf{energy}: $\dfrac{(v^+)^2}{2}-\dfrac{\mu}{r}=-\dfrac{\mu}{2a^+}\Rightarrow a^+=\dfrac{\mu}{2\mu/r-(v^+)^2}$;
+\item $e^+$ from the \textbf{angular momentum}: $h^+=r\,v_\theta^+=\sqrt{\mu a^+[1-(e^+)^2]}\Rightarrow e^+=\sqrt{1-\dfrac{h^{+2}}{\mu a^+}}$;
+\item $\theta_*^+$ from \textbf{radius and radial velocity}: $c_{\theta_*^+}=\dfrac{p^+-r}{r\,e^+}$, $s_{\theta_*^+}=\dfrac{v_r^+}{e^+}\sqrt{\dfrac{p^+}{\mu}}$
+$\Rightarrow\theta_*^+=2\operatorname{atan}\dfrac{s_{\theta_*^+}}{1+c_{\theta_*^+}}$ (correct quadrant).
+\end{enumerate}
+The apsidal line rotates by $\theta_*^--\theta_*^+$; the vacant focus moves so that the new velocity satisfies the reflection
+property of the new ellipse. A tangential impulse ($\Delta v_r=0$ at an apse) does not rotate the apsidal line.
+
+\begin{center}
+\includegraphics[width=0.55\linewidth]{impulse}\\
+{\footnotesize Same position, new velocity: the orbit through $P$ changes shape and orientation.}
+\end{center}
+
+\paragraph{Examples.}
+\begin{itemize}
+\item \textbf{Valid}: orbit transfers with chemical engines (e.g.\ LEO$\to$GEO Hohmann transfer: burns of a few minutes vs
+orbital periods of hours; plane changes at the nodes; injection into an escape hyperbola; rendezvous burns). The
+Bounded Multi Impulse model, used to approximate finite burns, is itself based on impulsive $\Delta v$'s.
+\item \textbf{Not valid}: (a) the ascent trajectory of a launch vehicle (thrust acts for minutes while gravity and drag
+cause large losses and the position changes by hundreds of km); (b) low-thrust trajectories (electric propulsion), where
+continuous thrust is applied for long time intervals (weeks or months) and the orbit spirals.
+\end{itemize}
+
+\begin{keyf}
+$T\Delta t=\Delta v$ ($T\to\infty$, $\Delta t\to0$), \quad $\underline r^+=\underline r^-$, \quad $\underline v^+=\underline v^-+\Delta\underline v$,
+\quad $a^+=\dfrac{\mu}{2\mu/r-(v^+)^2}$, \quad $e^+=\sqrt{1-\dfrac{(r\,v_\theta^+)^2}{\mu a^+}}$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item The position does \emph{not} change: the old and new orbits intersect at $P$.
+\item Say that the approximation is optimistic and requires a burn time much shorter than the orbital period.
+\item Use the radial \emph{and} horizontal components; $\theta_*^+$ needs both $\sin$ and $\cos$ for the quadrant.
+\end{itemize}
+
+\source{cap03.tex l.18--43 (approximation, validity), l.45--113 (effect of velocity impulses). Formulario: \fml{3-IMP}, \fml{3-NEW}.}
+
+% ---------------------------------------------------------------------
+\question{A6}{Hohmann transfer vs bielliptic transfer}
+% source: cap03.tex l.115-377
+\begin{qbox}
+Compare a Hohmann transfer with a bielliptic transfer (between circular coplanar orbits), discussing the conditions under
+which each option is optimal.
+\qmeta{$\times$2 in the list (2025); Jan 2025; Jun 2025 ("discussing the conditions under which each option is optimal").}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Problem: coplanar circular orbits $R_i\to R_f$, minimise $\Delta v_{tot}$ (= propellant).
+\item Hohmann: bitangent ellipse, $a_T$, $e_T$, $\Delta v_1$, $\Delta v_2$, $\Delta t=\pi\sqrt{a_T^3/\mu}$; globally optimal among 2-impulse transfers (sketch of proof).
+\item Bielliptic: 3 impulses, intermediate apoapsis $r_A^{\max}$, $\Delta v_{1,2,3}$, $\Delta t$; biparabolic limit.
+\item Non-dimensional comparison $\sigma=R_f/R_i$, $\rho=r_A^{\max}/R_i\ge\sigma$; plot.
+\item Result: $\sigma<11.94$ Hohmann; $11.94<\sigma<15.58$ depends on $\rho$; $\sigma>15.58$ bielliptic. Trade-off with time of flight.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Problem.} Given two coplanar circular orbits of radii $R_i$ and $R_f$ ($R_f>R_i$), find the impulsive transfer that
+minimises $\Delta v_{tot}$, i.e.\ the propellant consumption (Tsiolkovsky).
+
+\paragraph{Hohmann transfer.} The transfer arc is an ellipse tangent to both circles (bitangent), with periapsis on the
+initial orbit and apoapsis on the final one:
+\begin{equation}
+a_{T}=\frac{R_{i}+R_{f}}{2},\qquad e_{T}=\frac{R_{f}-R_{i}}{R_{f}+R_{i}} .
+\end{equation}
+Two impulses, both \emph{tangent and in the direction of motion} (both increase $a$):
+\begin{equation}
+\Delta v_{1}=\sqrt{\frac{2\mu}{R_{i}+R_{f}}\frac{R_{f}}{R_{i}}}-\sqrt{\frac{\mu}{R_{i}}},\qquad
+\Delta v_{2}=\sqrt{\frac{\mu}{R_{f}}}-\sqrt{\frac{2\mu}{R_{i}+R_{f}}\frac{R_{i}}{R_{f}}},\qquad
+\Delta t=\pi\sqrt{\frac{a_{T}^{3}}{\mu}} .
+\end{equation}
+\emph{Optimality.} Among all two-impulse transfers with an elliptic arc, the feasible ones satisfy $r_{P_T}\le R_i$ and
+$r_{A_T}\ge R_f$. For each impulse
+$(\Delta v_k)^2=\frac{3\mu}{R_k}-2\frac{\mu}{R_k}\sqrt{\frac{p_T}{R_k}}-\frac{\mu}{p_T}(1-e_T^2)$, and
+$\partial(\Delta v_k)^2/\partial e_T=2e_T\mu/p_T>0$: at fixed $p_T$ the cost grows with $e_T$; along both boundaries of the
+feasible region $d(\Delta v_1+\Delta v_2)/de_T>0$ too. Hence the minimum is at the corner point $H$ where both constraints
+are active, the bitangent ellipse: the Hohmann transfer is the \textbf{globally optimal two-impulse} transfer.
+
+With $\sigma=R_f/R_i$:
+$\dfrac{\Delta v^{(H)}_{tot}}{\sqrt{\mu/R_i}}=\sqrt{\dfrac{2\sigma}{1+\sigma}}-1+\dfrac{1}{\sqrt\sigma}-\sqrt{\dfrac{2}{\sigma(1+\sigma)}}$;
+it has a \textbf{maximum at $\sigma\simeq15.58$} and the asymptote $\sqrt2-1$ (transfer to a parabola) as $\sigma\to\infty$.
+
+\paragraph{Bielliptic transfer.} Three impulses and two half-ellipses with a common apoapsis $r_A^{\max}\ge R_f$:
+\begin{equation}
+\sys{\Delta v_{1}^{(BE)}&=\sqrt{\tfrac{2\mu}{R_{i}+r_{A}^{\max}}\tfrac{r_{A}^{\max}}{R_{i}}}-\sqrt{\tfrac{\mu}{R_{i}}}
+&&\text{(at $R_i$, along the motion)}\\
+\Delta v_{2}^{(BE)}&=\sqrt{\tfrac{2\mu}{R_{f}+r_{A}^{\max}}\tfrac{R_{f}}{r_{A}^{\max}}}-\sqrt{\tfrac{2\mu}{R_{i}+r_{A}^{\max}}\tfrac{R_{i}}{r_{A}^{\max}}}
+&&\text{(at $r_A^{\max}$: raises the periapsis to $R_f$)}\\
+\Delta v_{3}^{(BE)}&=\sqrt{\tfrac{2\mu}{R_{f}+r_{A}^{\max}}\tfrac{r_{A}^{\max}}{R_{f}}}-\sqrt{\tfrac{\mu}{R_{f}}}
+&&\text{(at $R_f$, \emph{opposite} to the motion: circularises)}}
+\end{equation}
+\begin{equation}
+\Delta t=\pi\sqrt{\frac{a_{T1}^{3}}{\mu}}+\pi\sqrt{\frac{a_{T2}^{3}}{\mu}},\qquad a_{T1}=\frac{R_i+r_A^{\max}}{2},\ a_{T2}=\frac{R_f+r_A^{\max}}{2}.
+\end{equation}
+As $r_A^{\max}$ increases $\Delta v_{tot}$ decreases but $\Delta t$ increases. The limit $r_A^{\max}\to\infty$ is the
+\textbf{biparabolic transfer}: $\Delta v_1=(\sqrt2-1)\sqrt{\mu/R_i}$, $\Delta v_2=0$, $\Delta v_3=(\sqrt2-1)\sqrt{\mu/R_f}$,
+$\Delta t=\infty$ (best of all bielliptic transfers, but infeasible). The idea: the expensive part of the plane-raising is done
+far away, where the velocity is small and a small $\Delta v_2$ raises the periapsis a lot.
+
+\begin{center}
+\includegraphics[width=0.9\linewidth]{hoh_be_geom}
+\end{center}
+
+\paragraph{Comparison.} With $\sigma=R_f/R_i$ and $\rho=r_A^{\max}/R_i\ge\sigma$ both costs are functions of $(\sigma,\rho)$ only:
+\begin{center}
+\includegraphics[width=0.72\linewidth]{hoh_be_dv}\\
+{\footnotesize $\Delta v_{tot}/\sqrt{\mu/R_i}$ computed from the formulas above; bielliptic curves exist only for $\sigma\le\rho$.}
+\end{center}
+\begin{itemize}
+\item Hohmann and biparabolic curves intersect at $\sigma=11.94$; both tend to $\sqrt2-1$.
+\item For finite $\rho$ the intersection with the Hohmann curve moves towards $\sigma=15.58$ as $\rho$ decreases: all
+intersections lie in $11.94\le\sigma\le15.58$.
+\end{itemize}
+\begin{equation}
+\begin{cases}
+\sigma<11.94: & \text{Hohmann is globally optimal;}\\
+11.94<\sigma<15.58: & \text{either may be optimal, depending on }\rho=r_A^{\max}/R_i\ge\sigma;\\
+\sigma>15.58: & \text{the bielliptic transfer is optimal (for any }\rho\ge\sigma).
+\end{cases}
+\end{equation}
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{3.4cm}p{5.6cm}p{5.6cm}@{}}
+\toprule
+ & Hohmann & Bielliptic\\
+\midrule
+impulses & 2, both along the motion & 3 (two along, the last against the motion)\\
+free parameter & none & $r_A^{\max}$ (limited by the mission time)\\
+$\Delta v_{tot}$ & minimum for $\sigma<11.94$ & lower for $\sigma>15.58$; gain small (few \%)\\
+time of flight & half period of one ellipse & two half periods, much longer (grows with $r_A^{\max}$)\\
+optimality & globally optimal among 2-impulse transfers & beats Hohmann only for large $\sigma$\\
+practical use & almost always (e.g.\ LEO$\to$GEO: $\sigma\approx6.3$) & rare: large $\sigma$ and no time constraint\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{keyf}
+$a_T=\dfrac{R_i+R_f}{2}$, \ $\Delta v_1=\sqrt{\dfrac{2\mu R_f}{R_i(R_i+R_f)}}-\sqrt{\dfrac{\mu}{R_i}}$, \
+$\Delta v_2=\sqrt{\dfrac{\mu}{R_f}}-\sqrt{\dfrac{2\mu R_i}{R_f(R_i+R_f)}}$, \ $\Delta t=\pi\sqrt{a_T^3/\mu}$;
+thresholds $\sigma=11.94$ and $15.58$; biparabolic $\Delta v=(\sqrt2-1)(\sqrt{\mu/R_i}+\sqrt{\mu/R_f})$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Hohmann is optimal among \emph{two}-impulse transfers only; three-impulse transfers can do better for large $\sigma$.
+\item $\Delta v_3$ of the bielliptic transfer is a braking impulse (opposite to the motion).
+\item Always mention the time of flight: the gain of the bielliptic transfer is paid with a much longer transfer.
+\item The 15.58 value is also the maximum of the Hohmann cost; 11.94 is the Hohmann--biparabolic crossing.
+\end{itemize}
+
+\source{cap03.tex l.115--240 (two-impulse optimality), l.242--284 (Hohmann), l.286--344 (bielliptic, biparabolic), l.346--377
+(comparison). Thresholds re-checked numerically in \texttt{figures/src/make\_figures.py}. Formulario: \fml{3-HOH}, \fml{3-BEL}, \fml{3-HVB}.}
+
+% ---------------------------------------------------------------------
+\question{A7}{Globally optimal transfers from an elliptic orbit to a hyperbolic path}
+% source: cap03.tex l.379-449
+\begin{qbox}
+Describe two optimal ways to transfer a spacecraft from an elliptical orbit to a hyperbolic trajectory and discuss their
+global optimality.
+\qmeta{list by chapter (Ch.\,3).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Problem: planar; initial ellipse ($r_p$, $r_A$); final hyperbola/parabola with given energy $\mathcal E_f\ge0$; no orientation constraint;
+bounds $r_A^{\max}$, $r_p^{\min}$ on intermediate orbits.
+\item Why periapsis: at fixed $r$, $\Delta\mathcal E=v\,\Delta v+\Delta v^2/2$ $\Rightarrow$ impulses are most effective where $v$ is largest.
+\item Case 1, $\mathcal E_f<\mu/r_A^{\max}$: one tangential impulse at periapsis.
+\item Case 2, $\mathcal E_f>\mu/r_A^{\max}$: three impulses (raise apoapsis to $r_A^{\max}$, lower periapsis to $r_p^{\min}$, escape at the new periapsis).
+\item Global optimality: these are the globally optimal solutions of the problem; analogy with Hohmann/bielliptic; application to interplanetary injection.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Problem statement.} Planar transfer, with no constraint on the orientation of the terminal orbits:
+\begin{itemize}
+\item initial ellipse with specified $r_A$ and $r_p$;
+\item final hyperbola ($\mathcal E_f>0$) or parabola ($\mathcal E_f=0$) with specified specific energy $\mathcal E_f$,
+coplanar with the ellipse (only the energy, i.e.\ $v_\infty=\sqrt{2\mathcal E_f}$, matters, not the direction);
+\item intermediate orbits are bounded: apoapsis radius $\le r_A^{\max}$ (e.g.\ sphere of influence, time) and periapsis radius
+$\ge r_p^{\min}$ (e.g.\ planetary radius plus atmosphere).
+\end{itemize}
+
+\paragraph{Why impulses at periapsis.} An impulse does not change $r$, so from $\mathcal E=v^2/2-\mu/r$ a tangential impulse gives
+\begin{equation}
+\Delta\mathcal E=\frac{(v+\Delta v)^2-v^2}{2}=v\,\Delta v+\frac{\Delta v^2}{2}:
+\end{equation}
+the same $\Delta v$ produces the largest energy increase where the speed is largest, i.e.\ at periapsis; and the lower the
+periapsis, the larger the speed there.
+
+\paragraph{The two globally optimal strategies.}
+\begin{enumerate}[label=(\arabic*)]
+\item $\mathcal E_f<\mu/r_A^{\max}$: the globally optimal transfer is a \textbf{single tangential impulse at periapsis} that raises
+the energy to $\mathcal E_f$:
+\begin{equation}
+\Delta v=\sqrt{2\left(\mathcal E_f+\frac{\mu}{r_p}\right)}-v_p,\qquad v_p=\sqrt{\frac{\mu}{a}\frac{1+e}{1-e}} .
+\end{equation}
+\item $\mathcal E_f>\mu/r_A^{\max}$: the globally optimal transfer has \textbf{three impulses}:
+\begin{enumerate}[label=(\alph*)]
+\item impulse at periapsis, to raise the apoapsis radius to $r_A^{\max}$;
+\item impulse at apoapsis (where the speed is small, so it is cheap), to lower the periapsis radius to $r_p^{\min}$;
+\item impulse at the new periapsis $r_p^{\min}$, where the speed is now much higher, to increase the energy to $\mathcal E_f$.
+\end{enumerate}
+\end{enumerate}
+\begin{center}
+\includegraphics[width=0.92\linewidth]{ell_hyp}
+\end{center}
+
+\paragraph{Global optimality (discussion).} The two solutions are the global optima of the problem above, i.e.\ no other
+sequence of impulses within the bounds yields a smaller $\Delta v_{tot}$; which one applies depends only on the comparison
+between $\mathcal E_f$ and $\mu/r_A^{\max}$. The three-impulse strategy pays two extra impulses to "move" the final burn
+to a lower periapsis, which is convenient only when the final energy (the escape burn) is large enough; otherwise the single
+periapsis burn is optimal. The logic is the same as for circle-to-circle transfers: the Hohmann transfer is optimal for
+moderate changes, the bielliptic one (going far away, where velocity changes are cheap) for large changes. The limiting
+values $r_A^{\max}$, $r_p^{\min}$ come from practical constraints (time, sphere of influence, atmosphere, safety).
+
+\paragraph{Application: injection into an interplanetary hyperbola.} From a circular parking orbit of radius $r_p$
+the required hyperbolic excess speed $v_\infty$ (from the heliocentric transfer, e.g.\ $v_\infty^{(E)}=\Delta v_1^{(H)}$) fixes
+$\mathcal E_f=v_\infty^2/2$, and the single periapsis burn is
+$\Delta v=\sqrt{v_\infty^2+2\mu/r_p}-\sqrt{\mu/r_p}$, which is smaller for lower parking orbits.
+
+\begin{keyf}
+$\Delta\mathcal E=v\Delta v+\tfrac12\Delta v^2$; \ case 1 ($\mathcal E_f<\mu/r_A^{\max}$): $\Delta v=\sqrt{2(\mathcal E_f+\mu/r_p)}-v_p$;
+\ case 2: periapsis $\to r_A^{\max}$, apoapsis $\to r_p^{\min}$, periapsis $\to\mathcal E_f$; \ $v_p=\sqrt{v_\infty^2+2\mu/r_p}$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Specify the assumptions: planar, no constraint on the orientation of the hyperbola, only $\mathcal E_f$ prescribed.
+\item State the threshold $\mu/r_A^{\max}$ that separates the two cases.
+\item Explain physically why burns are done at periapsis (energy gain proportional to the speed).
+\end{itemize}
+
+\source{cap03.tex l.379--401 (globally optimal transfer from ellipse to hyperbola), l.403--449 (injection into a hyperbolic path).
+The energy-gain argument $\Delta\mathcal E=v\Delta v+\Delta v^2/2$ follows from the energy integral. Formulario: \fml{3-EHY}, \fml{3-INJ}.}
+
+% ---------------------------------------------------------------------
+\question{A8}{Losses with respect to Tsiolkovsky: the $\Delta V$-loss integrals}
+% source: cap06.tex l.112-162 (Tsiolkovsky), l.504-571 (losses equation)
+\begin{qbox}
+Losses with respect to the Tsiolkovsky equation: define the $\Delta V$-loss integrals and explain their physical meaning.
+\qmeta{$\times$2 in the list; Sep 2024.}
+\qnote{Difference from \qref{A9}: here the focus is on the derivation and meaning of the integrals; A9 adds the
+propulsive velocity and how each loss depends on the trajectory and on the vehicle.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Tsiolkovsky: assumptions (no gravity, no drag, thrust along $\underline v$) $\Rightarrow$ ideal upper bound $\Delta v=c\ln(m_0/m_f)$.
+\item General equation $\dot{\underline v}=(\underline G+\underline A+\underline T)/m$, projection on $\hat v$ with $\gamma$, $\alpha$, $D$ (sketch).
+\item Rearrange and integrate: $\Delta v=\Delta v_T-\Delta v_G-\Delta v_M-\Delta v_D$ (the four integrals).
+\item Physical meaning of each term; typical values (VEGA); when each one dominates.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Tsiolkovsky's law and its assumptions.} With (i) no aerodynamic force, (ii) no gravity, (iii) thrust aligned with
+the velocity: $\dot v=T/m$, $\dot m=-T/c$ $\Rightarrow$ $\dot v=-c\,\dot m/m$, whose integral is
+\begin{equation}
+\Delta v=v_f-v_0=c\ln\frac{m_0}{m_f}\qquad(c=g_0I_{sp}).
+\end{equation}
+It gives the \emph{maximum} $\Delta v$ obtainable from a given mass variation (the limiting performance). For a launch vehicle
+the assumptions are violated, and the actual velocity gain is smaller: the differences are the \emph{losses}.
+
+\paragraph{Losses equation.} The general vector equation is
+\begin{equation}
+\frac{d\underline v}{dt}=\frac{\underline G+\underline A+\underline T}{m},\qquad \underline G=-\frac{\mu}{r^2}\hat r\ (\text{per unit mass: } m\underline g) .
+\end{equation}
+Project it on $\hat v$. Let $\gamma$ = flight-path angle (between $\underline v$ and the local horizontal), $\alpha$ = misalignment
+(incidence) angle between $\underline T$ and $\underline v$, $D$ = drag magnitude (lift and side force neglected):
+\begin{center}\includegraphics[width=0.36\linewidth]{losses}\end{center}
+\begin{equation}
+\frac{dv}{dt}=-\frac{\mu}{r^{2}}\,s_{\gamma}+\frac{T}{m}\,c_{\alpha}-\frac{D}{m}
+=\frac{T}{m}-\frac{\mu}{r^{2}}\,s_{\gamma}-\frac{T}{m}\left(1-c_{\alpha}\right)-\frac{D}{m}.
+\end{equation}
+Integrating from $t_0$ to $t_f$:
+\begin{equation}
+\Delta v=\underbrace{\int_{t_0}^{t_f}\!\frac{T}{m}\,dt}_{\Delta v_T}
+-\underbrace{\int_{t_0}^{t_f}\!\frac{\mu}{r^{2}}\,s_{\gamma}\,dt}_{\Delta v_G}
+-\underbrace{\int_{t_0}^{t_f}\!\frac{T}{m}\left(1-c_{\alpha}\right)dt}_{\Delta v_M}
+-\underbrace{\int_{t_0}^{t_f}\!\frac{D}{m}\,dt}_{\Delta v_D}.
+\end{equation}
+
+\paragraph{Physical meaning.}
+\begin{itemize}
+\item $\Delta v_T$ -- \textbf{ideal (Tsiolkovsky) velocity change}: since $T=-c\,\dot m$, $\Delta v_T=c\ln(m_0/m_f)$. It depends only
+on the engine ($c$) and on the mass ratio, not on the trajectory.
+\item $\Delta v_G$ -- \textbf{gravity loss}: the component of gravity along the velocity, $-g\,s_\gamma$, decelerates the vehicle
+while it climbs (thrust spent to hold the vehicle up against gravity instead of accelerating it). It is large when the path is
+steep ($\gamma$ near $90^\circ$) and the burn is long; it vanishes for horizontal flight.
+\item $\Delta v_M$ -- \textbf{misalignment loss}: only the component $T c_\alpha$ changes the speed; the normal component
+$T s_\alpha$ only rotates the velocity. It vanishes for $\alpha=0$ (gravity turn, thrust along $\underline v$).
+\item $\Delta v_D$ -- \textbf{drag loss}: the work of the aerodynamic drag, which dissipates kinetic energy; it depends on
+density, speed and on $S/m$ ($D/m=\frac12\rho v_R^2C_DS/m$).
+\end{itemize}
+All losses are positive integrals, so $\Delta v<\Delta v_T$. The equation holds for each sub-rocket.
+
+\paragraph{Typical values and trends.} For VEGA: $\Delta v_T=3.054$, $\Delta v_G=0.683$, $\Delta v_M=0.019$, $\Delta v_D=0.107$\,km/s:
+\textbf{gravity loss dominates}. In the early ascent $\gamma$ is large and $\Delta v_G$ dominates; a gravity-turn condition
+($\alpha=0$) gives $\Delta v_M=0$; as velocity grows $D$ grows while $\gamma$ decreases, reducing $\Delta v_G$. Hence:
+(a) the thick atmospheric layers are crossed along a \emph{near-radial} path, to limit drag and minimise the time spent in
+them; (b) as soon as the density decreases the velocity is rotated to reduce $\gamma$, to avoid excessive gravity losses.
+
+\begin{keyf}
+$\dfrac{dv}{dt}=-\dfrac{\mu}{r^2}s_\gamma+\dfrac{T}{m}c_\alpha-\dfrac{D}{m}$; \
+$\Delta v=\Delta v_T-\Delta v_G-\Delta v_M-\Delta v_D$; \ $\Delta v_T=\displaystyle\int\frac{T}{m}dt=c\ln\frac{m_0}{m_f}$, \
+$\Delta v_G=\displaystyle\int\frac{\mu}{r^2}s_\gamma dt$, \ $\Delta v_M=\displaystyle\int\frac{T}{m}(1-c_\alpha)dt$, \ $\Delta v_D=\displaystyle\int\frac{D}{m}dt$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Define $\gamma$ and $\alpha$ with a sketch; the gravity term has $s_\gamma$ (not $c_\gamma$) because $\gamma$ is measured from the horizontal.
+\item The misalignment loss is $T(1-c_\alpha)/m$, not $T s_\alpha/m$.
+\item Recall that $\Delta v_T$ is exactly Tsiolkovsky's $\Delta v$ and that the losses are always subtracted.
+\end{itemize}
+
+\source{cap06.tex l.112--162 (Tsiolkovsky's law), l.504--571 (losses equation, VEGA values, comments). Formulario: \fml{6-TSI}.}
+
+% ---------------------------------------------------------------------
+\question{A9}{Propulsive velocity and velocity losses in the ascent trajectory}
+% source: cap06.tex l.356-502 (ascent phases), l.504-571 (losses)
+\begin{qbox}
+Define propulsive velocity and the velocity losses due to misalignment, gravity and aerodynamic effects in the ascent
+trajectory of the launch vehicle. Explain how each type of velocity loss depends on vehicle trajectory and possibly other
+launch vehicle features.
+\qmeta{Jul 2025 (listed as a 2025 question).}
+\qnote{Difference from \qref{A8}: same integrals; here the emphasis is on the dependence on the trajectory and the vehicle.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Equation along $\hat v$ and the four integrals (sketch with $\gamma$, $\alpha$).
+\item Propulsive (ideal) velocity $\Delta v_T=\int T/m\,dt=c\ln(m_0/m_f)$: engine and mass ratio only.
+\item Gravity loss: depends on $\gamma(t)$ and burn time $\Rightarrow$ thrust-to-weight ratio, steepness of the path.
+\item Misalignment loss: depends on $\alpha(t)$ $\Rightarrow$ gravity turn, structural limit $q\alpha$.
+\item Drag loss: depends on $\rho(h)$, $v$, ballistic coefficient $C_DS/m$ $\Rightarrow$ fast near-vertical crossing.
+\item Trade-off steep vs shallow ascent; phases of the ascent; VEGA numbers.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Losses equation.} Projecting $\dot{\underline v}=(\underline G+\underline A+\underline T)/m$ on the velocity direction
+($\gamma$ = flight-path angle from the local horizontal, $\alpha$ = angle between thrust and velocity, $D$ = drag):
+\begin{equation}
+\frac{dv}{dt}=\frac{T}{m}-\frac{\mu}{r^{2}}\,s_{\gamma}-\frac{T}{m}\left(1-c_{\alpha}\right)-\frac{D}{m}
+\;\Rightarrow\;
+\Delta v=\Delta v_T-\Delta v_G-\Delta v_M-\Delta v_D .
+\end{equation}
+\begin{center}\includegraphics[width=0.33\linewidth]{losses}\end{center}
+
+\paragraph{Propulsive velocity.} The propulsive (ideal) velocity is the velocity change that the thrust alone would produce:
+\begin{equation}
+\Delta v_T=\int_{t_0}^{t_f}\frac{T}{m}\,dt=\int_{t_0}^{t_f}-c\frac{\dot m}{m}\,dt=c\ln\frac{m_0}{m_f}\qquad(c=g_0I_{sp}).
+\end{equation}
+It coincides with Tsiolkovsky's $\Delta v$; it depends only on the engine (effective exhaust velocity) and on the mass
+ratio of the stage, \emph{not} on the trajectory. The actual gain is $\Delta v_T$ minus the three losses.
+
+\paragraph{Gravity loss} $\Delta v_G=\displaystyle\int\frac{\mu}{r^2}s_\gamma\,dt$.
+\begin{itemize}
+\item \emph{Trajectory}: proportional to $s_\gamma$: maximum during the vertical arc ($\gamma=90^\circ$), small when the path is
+nearly horizontal. Early pitch-over / lower $\gamma$ reduce it.
+\item \emph{Vehicle}: it is an integral over time, so it grows with the \emph{burn duration}: a high thrust-to-weight ratio
+(short burns) reduces it, a low-thrust upper stage that burns long while climbing increases it.
+\item Usually the largest loss (VEGA: 0.683\,km/s out of 3.054).
+\end{itemize}
+
+\paragraph{Misalignment loss} $\Delta v_M=\displaystyle\int\frac{T}{m}(1-c_\alpha)\,dt$.
+\begin{itemize}
+\item \emph{Trajectory/steering}: zero when the thrust is aligned with the velocity ($\alpha=0$), as in the \textbf{gravity turn}, where
+gravity alone turns the velocity. It appears in the pitch manoeuvre and in the rarefied-atmosphere arcs where an incidence is used
+to shape the trajectory.
+\item \emph{Vehicle}: the admissible $\alpha$ is limited by structural loads, $q\alpha\le(q\alpha)_{\max}$ with $q=\frac12\rho v_R^2$; vehicles
+that tolerate an incidence (military-derived) can steer more but pay this loss. It is the smallest (VEGA: 0.019\,km/s).
+\end{itemize}
+
+\paragraph{Drag loss} $\Delta v_D=\displaystyle\int\frac{D}{m}\,dt$, \quad $\dfrac{D}{m}=\dfrac12\rho v_R^2\,C_D\dfrac{S}{m}$.
+\begin{itemize}
+\item \emph{Trajectory}: depends on the density along the path ($\rho$ decreases exponentially with altitude) and on the speed:
+the dense layers (below $\sim40$\,km) must be crossed \emph{quickly and near-vertically}, before reaching high speeds.
+\item \emph{Vehicle}: proportional to the ballistic coefficient $C_DS/m$ (shape, cross-section, mass); large, heavy vehicles have
+smaller $S/m$ and hence smaller drag losses \notinnotes. VEGA: 0.107\,km/s.
+\end{itemize}
+
+\paragraph{Trade-off and ascent phases.} A steep path reduces drag losses but increases gravity losses; a shallow path does the
+opposite. Real ascents: vertical arc at launch (launch-site safety; avoid premature rotation of $\underline v$), roll and pitch
+manoeuvres (select the orbit plane; some misalignment), \textbf{gravity turn} ($\alpha=0$ to avoid destructive bending loads:
+$\Delta v_M\approx0$), rarefied-atmosphere arc (small $\alpha$ allowed), coast arc, injection arc (thrust nearly horizontal:
+$\Delta v_G\approx0$). Hence: near-radial crossing of the thick atmosphere, then rotation of $\underline v$ to reduce $\gamma$.
+
+\begin{keyf}
+$\Delta v_T=\displaystyle\int\frac Tm dt=c\ln\frac{m_0}{m_f}$; \ $\Delta v_G=\displaystyle\int g\,s_\gamma dt$ (steepness, burn time);
+\ $\Delta v_M=\displaystyle\int\frac Tm(1-c_\alpha)dt$ (steering, $q\alpha$ limit); \ $\Delta v_D=\displaystyle\int\frac12\rho v^2C_D\frac{S}{m}dt$ (density, speed, $C_DS/m$).
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item "Propulsive velocity" is the ideal $\Delta v_T$, not the final orbital speed.
+\item For each loss say both the trajectory dependence and a vehicle feature (thrust-to-weight, structural $q\alpha$ limit, $C_DS/m$).
+\item Mention the conflicting requirements (drag vs gravity) and the gravity turn.
+\end{itemize}
+
+\source{cap06.tex l.356--482 (phases of the ascent), l.504--571 (losses). Formulario: \fml{6-TSI}.}
+
+% ---------------------------------------------------------------------
+\question{A10}{Rocket staging: mass-distribution parameters and motivation}
+% source: cap06.tex l.164-224, 225-354
+\begin{qbox}
+With regard to rocket staging, define the key mass-distribution parameters of each stage and briefly justify the use of
+staging for launch vehicles.
+\qmeta{list by chapter (Ch.\,6).}
+\qnote{Adjacent to \qref{A11} (same parameters; A11 asks for the total $\Delta V$ formula).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Sub-rocket $i$: $m_0^{(i)}=m_s^{(i)}+m_p^{(i)}+m_u^{(i)}$, $m_u^{(i)}=m_0^{(i+1)}$ (sketch).
+\item Structural coefficient $\epsilon_s^{(i)}$ (technology, $\ge\epsilon_{s,\min}$) and mass ratio $u_0^{(i)}=m_f^{(i)}/m_0^{(i)}$.
+\item Masses in terms of $(\epsilon_s,u_0)$; $\Delta v^{(i)}=-c_i\ln u_0^{(i)}$; $m_u>0$ iff $u_0>\epsilon_s$; low $\epsilon_s$ desirable.
+\item Why staging: discard useless structural mass; single-stage limit $c\ln(1/\epsilon_s)$; $\Delta v_{\max}(N)$ with diminishing returns, 3--4 stages.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Definitions.} A multistage launch vehicle is a sequence of sub-rockets. Sub-rocket $i$ has initial mass
+\begin{equation}
+m_{0}^{(i)}=m_{s}^{(i)}+m_{p}^{(i)}+m_{u}^{(i)},
+\end{equation}
+$m_s^{(i)}$ = structural (inert) mass of stage $i$ (tanks, engines, structure), $m_p^{(i)}$ = propellant mass,
+$m_u^{(i)}$ = "payload" of sub-rocket $i$, i.e.\ the initial mass of the next sub-rocket, $m_u^{(i)}=m_0^{(i+1)}$, and the true
+payload for the last one.
+\begin{center}\includegraphics[width=0.7\linewidth]{staging}\end{center}
+The mass distribution of each stage is described by two parameters:
+\begin{equation}
+\epsilon_{s}^{(i)}=\frac{m_{s}^{(i)}}{m_{s}^{(i)}+m_{p}^{(i)}}\quad\text{(structural coefficient)},\qquad
+u_{0}^{(i)}=\frac{m_{f}^{(i)}}{m_{0}^{(i)}}=\frac{m_{s}^{(i)}+m_{u}^{(i)}}{m_{0}^{(i)}}\quad\text{(mass ratio)}.
+\end{equation}
+$\epsilon_s$ depends on the \textbf{technology} (materials, tank pressure, engine mass), so $\epsilon_s^{(i)}\ge\epsilon_{s,\min}^{(i)}$;
+$u_0$ is the final-to-initial mass ratio of the burn. Inverting the definitions:
+\begin{equation}
+m_{p}^{(i)}=m_{0}^{(i)}\left[1-u_{0}^{(i)}\right],\quad
+m_{s}^{(i)}=m_{0}^{(i)}\frac{\epsilon_{s}^{(i)}\left[1-u_{0}^{(i)}\right]}{1-\epsilon_{s}^{(i)}},\quad
+m_{u}^{(i)}=m_{0}^{(i)}\frac{u_{0}^{(i)}-\epsilon_{s}^{(i)}}{1-\epsilon_{s}^{(i)}},
+\end{equation}
+and the velocity change of stage $i$ (Tsiolkovsky) is $\Delta v^{(i)}=-c_i\ln u_0^{(i)}$.
+\begin{itemize}
+\item $m_u^{(i)}>0$ only if $u_0^{(i)}>\epsilon_s^{(i)}$; for $u_0=\epsilon_s$ the stage carries nothing.
+\item At given $u_0$ (i.e.\ given $\Delta v^{(i)}$) the payload fraction $m_u/m_0$ is maximum for $\epsilon_s=\epsilon_{s,\min}$:
+\textbf{low structural coefficients} improve performance.
+\end{itemize}
+
+\paragraph{Why staging.} The purpose is to increase the overall $\Delta v$ by \textbf{discarding structural masses that have become
+useless} (empty tanks and their engines). With a single stage the whole structure must be accelerated up to the final speed;
+even with zero payload ($u_0\to\epsilon_s$) the maximum is
+\begin{equation}
+\Delta v_{\max}^{\text{single}}=c\ln\frac{1}{\epsilon_s},
+\end{equation}
+e.g.\ $c=3$\,km/s, $\epsilon_s=0.1$ $\Rightarrow$ 6.9\,km/s, below the $\approx9$--10\,km/s needed to reach LEO including
+losses \notinnotes. With $N$ stages the velocity changes add up, $\Delta v=-\sum_i c_i\ln u_0^{(i)}$; for similar stages the optimal
+distribution (all $u_0^{(i)}$ equal) gives
+\begin{equation}
+\Delta v_{\max}=-c\,N\ln\left\{\epsilon_{s}+(1-\epsilon_{s})\left[\frac{m_{u}^{(N)}}{m_{0}^{(1)}}\right]^{1/N}\right\},
+\end{equation}
+which increases with $N$ with diminishing returns and has a finite limit for $N\to\infty$. Structural and operational complexity
+grow with $N$: launch vehicles rarely have more than 5 stages (often 3--4). Staging also allows engines optimised for
+different altitudes (sea-level vs vacuum nozzles) \notinnotes.
+
+\begin{keyf}
+$m_0^{(i)}=m_s^{(i)}+m_p^{(i)}+m_u^{(i)}$, \ $\epsilon_s=\dfrac{m_s}{m_s+m_p}$, \ $u_0=\dfrac{m_s+m_u}{m_0}$, \
+$\dfrac{m_u}{m_0}=\dfrac{u_0-\epsilon_s}{1-\epsilon_s}$, \ $\Delta v^{(i)}=-c_i\ln u_0^{(i)}$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item $\epsilon_s$ uses structure + propellant only (no payload); $u_0$ uses the final mass, which includes the upper stages.
+\item The "payload" of stage $i$ is the whole upper composite, $m_u^{(i)}=m_0^{(i+1)}$.
+\item Justify staging with the single-stage limit and the diminishing returns with $N$.
+\end{itemize}
+
+\source{cap06.tex l.164--224 (rocket staging), l.225--354 (optimal staging, plot of $\Delta v_{\max}$ vs $N$; source errata \#5--6). Formulario: \fml{6-STG}, \fml{6-STM}, \fml{6-OPT}.}
+
+% ---------------------------------------------------------------------
+\question{A11}{Tsiolkovsky's law and the $\Delta V$ of a multistage rocket}
+% source: cap06.tex l.21-110 (thrust, c, Isp), l.112-162 (Tsiolkovsky), l.164-354 (staging)
+\begin{qbox}
+State Tsiolkovsky's law and use it to evaluate the total $\Delta V$ of a multiple-stage rocket in terms of its propellant, inert,
+and payload mass. Define the structural coefficient and specific impulse and discuss their effect on the total $\Delta V$.
+\qmeta{Sep 2025 (listed as a 2025 question).}
+\qnote{Adjacent to \qref{A10} (parameters of each stage) and \qref{A8} (losses with respect to this ideal law).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Thrust and effective exhaust velocity $c=g_0I_{sp}$; $\dot m=-T/c$.
+\item Assumptions; derivation $\dot v=-c\dot m/m$ $\Rightarrow$ $\Delta v=c\ln(m_0/m_f)$, $m_f=m_0e^{-\Delta v/c}$; meaning (upper bound).
+\item Multistage: masses of each stage, $m_0^{(i)}$ and $m_f^{(i)}$ in terms of $m_p$, $m_s$, $m_{PL}$; $\Delta v_{tot}=\sum c_i\ln(m_0^{(i)}/m_f^{(i)})$.
+\item Structural coefficient $\epsilon_s$ and specific impulse $I_{sp}$: definitions and effect on $\Delta v_{tot}$.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Thrust and specific impulse.} From the momentum balance of the vehicle and of the ejected mass,
+$\underline T=\dot m\,\underline c_{ej}+A_e(p_e-p_a)\hat v=-\dot m\,(-\underline c)$, i.e.\ $T=|\dot m|\,c$, with the
+\emph{effective exhaust velocity} $\underline c=\underline c_{ej}+A_e(p_e-p_a)\hat v/\dot m$ (includes the pressure thrust), and
+\begin{equation}
+\dot m=-\frac{T}{c},\qquad c=g_0I_{sp}.
+\end{equation}
+The \textbf{specific impulse} $I_{sp}$ [s] is the effective exhaust velocity divided by $g_0$ (sea-level gravity): the impulse
+delivered per unit weight of propellant consumed. Typical: solid $\sim$270--290\,s, LOX/LH$_2$ $\sim$450\,s \notinnotes.
+
+\paragraph{Tsiolkovsky's law.} Assumptions: no aerodynamic force, no gravity, thrust aligned with the velocity (valid for
+impulsive manoeuvres or motion without $\underline G$ and $\underline A$). Then
+\begin{equation}
+\sys{\frac{dv}{dt}&=\frac{T}{m}\\ \dot m&=-\frac{T}{c}}\;\Rightarrow\;\dot v=-c\,\frac{\dot m}{m}
+\;\Rightarrow\;\Delta v=v_f-v_0=c\ln\frac{m_0}{m_f},\qquad m_f=m_0\,e^{-\Delta v/c}.
+\end{equation}
+It relates the propellant consumption $m_p=m_0-m_f$ to the velocity change; it gives the \emph{maximum} $\Delta v$ for a given
+mass ratio (minimum propellant for a given $\Delta v$): real ascents suffer gravity, drag and misalignment losses.
+
+\paragraph{Multistage rocket.} Stage $j$ ($j=1\dots N$, burnt in this order) has propellant $m_p^{(j)}$ and inert mass $m_s^{(j)}$; the
+payload is $m_{PL}$. Stage $i$ burns while all upper stages and the payload are attached and the lower stages have been jettisoned:
+\begin{equation}
+m_0^{(i)}=m_{PL}+\sum_{j=i}^{N}\left(m_s^{(j)}+m_p^{(j)}\right),\qquad m_f^{(i)}=m_0^{(i)}-m_p^{(i)},
+\end{equation}
+\begin{equation}
+\boxed{\;\Delta v_{tot}=\sum_{i=1}^{N}c_i\ln\frac{m_0^{(i)}}{m_f^{(i)}}
+=\sum_{i=1}^{N}g_0I_{sp}^{(i)}\ln\frac{m_{PL}+\sum_{j=i}^{N}\left(m_s^{(j)}+m_p^{(j)}\right)}{m_{PL}+m_s^{(i)}+\sum_{j=i+1}^{N}\left(m_s^{(j)}+m_p^{(j)}\right)}\;}
+\end{equation}
+In the notation of the notes, $m_u^{(i)}=m_0^{(i+1)}$, $u_0^{(i)}=m_f^{(i)}/m_0^{(i)}$ and $\Delta v_{tot}=-\sum_ic_i\ln u_0^{(i)}$.
+The dropped inert mass $m_s^{(i)}$ is no longer accelerated by the upper stages: this is the gain of staging.
+
+\paragraph{Structural coefficient and its effect.} $\epsilon_s^{(i)}=\dfrac{m_s^{(i)}}{m_s^{(i)}+m_p^{(i)}}$ (fraction of inert mass in
+the stage; set by technology, $\epsilon_s\ge\epsilon_{s,\min}$). Since $u_0^{(i)}=\epsilon_s^{(i)}+(1-\epsilon_s^{(i)})\,m_u^{(i)}/m_0^{(i)}$, at
+given payload fractions a smaller $\epsilon_s$ gives a smaller $u_0$ and a larger $\Delta v$; at given $\Delta v$, it gives a larger payload.
+Each stage is limited by $\Delta v^{(i)}<c_i\ln(1/\epsilon_s^{(i)})$, and for similar optimal stages
+$\Delta v_{\max}=-cN\ln\{\epsilon_s+(1-\epsilon_s)[m_u^{(N)}/m_0^{(1)}]^{1/N}\}$ decreases as $\epsilon_s$ increases.
+
+\paragraph{Specific impulse and its effect.} $\Delta v$ is \emph{proportional} to $c=g_0I_{sp}$: at given masses, $\Delta v$ scales linearly
+with $I_{sp}$ ($\partial\Delta v^{(i)}/\partial c_i=\ln(m_0^{(i)}/m_f^{(i)})$); at given $\Delta v$ the propellant fraction
+$1-e^{-\Delta v/c}$ decreases exponentially with $I_{sp}$. High-$I_{sp}$ engines are therefore most valuable on the upper stages,
+whose mass ratio multiplies the whole payload \notinnotes.
+
+\begin{keyf}
+$c=g_0I_{sp}$, $\dot m=-T/c$; \ $\Delta v=c\ln\dfrac{m_0}{m_f}$; \ $\Delta v_{tot}=\displaystyle\sum_i c_i\ln\frac{m_0^{(i)}}{m_0^{(i)}-m_p^{(i)}}$,
+$m_0^{(i)}=m_{PL}+\displaystyle\sum_{j\ge i}(m_s^{(j)}+m_p^{(j)})$; \ $\epsilon_s=\dfrac{m_s}{m_s+m_p}$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item In stage $i$ the initial mass includes all upper stages and the payload, but not the jettisoned lower stages.
+\item State the three assumptions of Tsiolkovsky's law and that it gives an upper bound.
+\item $I_{sp}$ in seconds: multiply by $g_0=9.80665$\,m/s$^2$.
+\end{itemize}
+
+\source{cap06.tex l.21--110 (thrust, $c$, $I_{sp}$), l.112--162 (Tsiolkovsky), l.164--224 (staging parameters), l.225--354 (optimal staging).
+Formulario: \fml{6-ISP}, \fml{6-TSI}, \fml{6-DVN}.}

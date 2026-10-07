@@ -1,0 +1,772 @@
+% =====================================================================
+% Group C -- Chapter 8: orbit perturbations (one question per exam)
+% Source: latex_notes/SFM_08_Orbit Perturbations/cap08.tex
+% =====================================================================
+\qgroup{C}{Chapter 8 -- Orbit perturbations}
+
+One of the three orbital-mechanics questions is always on Chapter 8. Per the course program, for SRP and drag only the
+definition, the expression and the overall effect may be asked (not the derivation of the exact components), and for the
+third body the positions of Sun and Moon are not requested.
+
+Perturbed motion: $\ddot{\underline r}=-\frac{\mu}{r^3}\underline r+\underline f$; $\underline h$ and $\underline e$ are no longer constant:
+$\dot{\underline h}=\underline r\times\underline f$. Order of magnitude at 1000\,km of altitude ($a_0=\mu/r^2$):
+$a_{J2}\simeq10^{-2}a_0$, $a_{3B}\simeq10^{-7}a_0$, $a_{RP}\simeq10^{-9}a_0$, $a_D\simeq10^{-10}a_0$.
+Asphericity and third body are conservative; drag and SRP are \emph{surface} perturbations (depend on the spacecraft area);
+all of them except SRP depend on the altitude.
+
+\begin{center}
+\small
+\begin{tabular}{@{}lllr@{}}
+\toprule
+Q & Topic & Asked & Page\\
+\midrule
+\ref{q:C1} & Solar radiation pressure: nature and formula & $\times$3, Jan 2023 & \pageref{q:C1}\\
+\ref{q:C2} & SRP + geometry of eclipses & Jun 2025 & \pageref{q:C2}\\
+\ref{q:C3} & $J_2$: nature, two averaged effects, lat/long dependence & list & \pageref{q:C3}\\
+\ref{q:C4} & $J_2$ and $J_{22}$: meridians and parallels & list, Sep 2024 & \pageref{q:C4}\\
+\ref{q:C5} & Three types of harmonics; $J_{32}$ & list, Sep 2024 & \pageref{q:C5}\\
+\ref{q:C6} & Sun-synchronous orbits & list & \pageref{q:C6}\\
+\ref{q:C7} & Third body: exact acceleration, effect on $\underline h$ & list, Jan 2025 & \pageref{q:C7}\\
+\ref{q:C8} & Gravity-gradient dyadic & $\times$2, Feb 2025, Sep 2025 & \pageref{q:C8}\\
+\ref{q:C9} & Drag: acceleration and effect on $a$, $e$ & Jul 2025, Mar 2025 & \pageref{q:C9}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ---------------------------------------------------------------------
+\question{C1}{Solar radiation pressure: physical nature and perturbing acceleration}
+% source: cap08.tex l.41-60 (intro), l.561-687 (SRP), l.714-726 (effect)
+\begin{qbox}
+Describe the physical nature of solar-radiation pressure; write the fundamental formula for the perturbing acceleration,
+identifying and explaining each term.
+\qmeta{$\times$3 in the list (2025); Jan 2023.}
+\qnote{\qref{C2} is the same question plus the geometry of the Earth's shadow.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Nature: electromagnetic radiation carries momentum; absorbed/reflected photons exert a pressure on the surface.
+\item Intensity: $S=S_0(R_0/R)^2$; at 1\,AU $S_E=1367$\,W/m$^2$; pressure $P_{SR}=S_E/c=4.56\cdot10^{-6}$\,N/m$^2$.
+\item Formula $\underline f^{(SR)}=-\nu\,\frac{P_{SR}A}{m}\,C_R\,\hat r_{SUN}$ (cannon-ball model) and meaning of $\nu$, $A$, $m$, $C_R\in[1,2]$, $\hat r_{SUN}$.
+\item Characteristics: surface, independent of altitude, important at high orbits; effect: all elements, $\underline e$ orthogonal to the Sun direction.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Physical nature.} Solar radiation is electromagnetic radiation, and photons carry linear momentum ($p=E/c$). When
+radiation hits the spacecraft surface, the absorbed photons transfer their momentum and the reflected ones transfer about
+twice as much: the result is a small force on the illuminated surface, i.e.\ a \emph{pressure}. It is a \textbf{surface} perturbation
+(it depends on the area exposed and on the optical properties of the surface) and, unlike all other perturbations, it does
+\textbf{not depend on the altitude} of the orbit, only on the distance from the Sun.
+
+\paragraph{Radiation pressure.} The radiated power intensity at the photosphere is $S_0=63.15\cdot10^6$\,W/m$^2$; radiation follows the
+inverse-square law, so at a distance $R$ from the Sun centre
+\begin{equation}
+S=S_{0}\left(\frac{R_{0}}{R}\right)^{2},\qquad R_0=696\,000\ \text{km (photospheric radius)}.
+\end{equation}
+At the Earth's distance ($1\,\text{AU}=149.6\cdot10^6$\,km) $S_E=1367$\,W/m$^2$ (\emph{solar constant}). Dividing by the speed of light:
+\begin{equation}
+P_{SR}=\frac{S_{E}}{c}=4.56\cdot10^{-6}\ \frac{\text{N}}{\text{m}^{2}}.
+\end{equation}
+
+\paragraph{Perturbing acceleration (cannon-ball model).} The spacecraft is modelled as a sphere of radius $\sigma$:
+\begin{equation}
+\boxed{\;\underline{f}^{(SR)}=-\nu\,\frac{P_{SR}\,A}{m}\,C_{R}\,\hat{r}_{\text{SUN}}\;}
+\end{equation}
+\begin{itemize}
+\item $\nu$ = \textbf{shadow function}: $\nu=1$ if the spacecraft is illuminated, $\nu=0$ if it is in the Earth's shadow (eclipse).
+\item $P_{SR}$ = solar radiation pressure at the spacecraft distance from the Sun (4.56\,$\mu$N/m$^2$ at 1\,AU).
+\item $A=\pi\sigma^2$ = \textbf{illuminated cross-section} (area projected on the plane normal to the Sun rays).
+\item $m$ = spacecraft mass; $A/m$ (area-to-mass ratio) measures the sensitivity to SRP: large, light structures (solar sails,
+balloons, large panels) are strongly affected.
+\item $C_R$ = \textbf{radiation-pressure coefficient}, between 1 (totally absorbing surface) and 2 (totally reflecting surface). The
+limits follow from conservation of linear momentum: a reflected photon reverses its momentum, so it transfers twice the
+momentum of an absorbed one.
+\item $\hat r_{SUN}$ = unit vector \textbf{from the spacecraft to the Sun}; the minus sign means the acceleration points away
+from the Sun. Since $r\ll1$\,AU it can be approximated with the Earth-to-Sun direction:
+$\underline r_{SUN}=1\,\text{AU}\,[c_{\theta_s}\ \ c_\epsilon s_{\theta_s}\ \ s_\epsilon s_{\theta_s}]\,[\hat c_1\ \hat c_2\ \hat c_3]^T$
+($\epsilon$ = obliquity of the ecliptic, $\theta_s$ = ecliptic longitude of the Sun, increasing by $2\pi$ per sidereal year).
+\end{itemize}
+\begin{center}\includegraphics[width=0.62\linewidth]{srp}\end{center}
+
+\paragraph{Effect on the orbit.} Projected on $(\hat r,\hat\theta,\hat h)$ the acceleration enters the Gauss equations. SRP perturbs
+\textbf{all orbit elements}. Its relative importance grows with altitude (at 1000\,km $a_{RP}\sim10^{-9}a_0$; at GEO it is one of the main
+perturbations together with the third body). For an initially circular orbit SRP adds velocity on one side of the orbit
+(positive tangential acceleration, $P_1$) and removes it on the opposite side ($P_2$): the orbit becomes elliptic with an
+\textbf{eccentricity vector orthogonal to $\hat r_{SUN}$}, which then precesses following the yearly motion of the Earth around the Sun.
+
+\begin{keyf}
+$S=S_0(R_0/R)^2$, \ $S_E=1367$\,W/m$^2$, \ $P_{SR}=S_E/c=4.56\cdot10^{-6}$\,N/m$^2$, \
+$\underline f^{(SR)}=-\nu\dfrac{P_{SR}A}{m}C_R\hat r_{SUN}$, \ $1\le C_R\le2$, \ $A=\pi\sigma^2$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item $\hat r_{SUN}$ points from the spacecraft to the Sun: hence the minus sign (the push is away from the Sun).
+\item $C_R=1$ absorbing, $C_R=2$ reflecting (not the reverse); justify with momentum conservation.
+\item Do not forget the shadow function $\nu$: no SRP in eclipse.
+\end{itemize}
+
+\source{cap08.tex l.41--60 (classification), l.561--687 (SRP and Sun position), l.714--726 (effect on the elements). Formulario: not included (T only).}
+
+% ---------------------------------------------------------------------
+\question{C2}{Solar radiation pressure and the geometry of eclipses}
+% source: cap08.tex l.561-726
+\begin{qbox}
+Outline the physical nature of solar radiation perturbation, provide the expression of the perturbing acceleration, and describe
+the geometry of eclipsing due to Earth.
+\qmeta{Jun 2025.}
+\qnote{Difference from \qref{C1}: adds the shadow (eclipse) computation, i.e.\ how $\nu$ is evaluated.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Nature (photon momentum, surface perturbation, independent of altitude); $S$, $S_E$, $P_{SR}=S_E/c$.
+\item $\underline f^{(SR)}=-\nu\frac{P_{SR}A}{m}C_R\hat r_{SUN}$ and meaning of the terms.
+\item Eclipse geometry: angle $\Theta$ between $\underline r$ and $\underline r_{SUN}$; $\theta_1=\arccos(R_E/r)$, $\theta_2=\arccos(R_E/r_{SUN})$; sketch.
+\item Test: $\Theta>\theta_1+\theta_2$ shadow ($\nu=0$), otherwise illuminated ($\nu=1$); comments.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Physical nature and acceleration.} Photons carry momentum; when absorbed or reflected by the spacecraft surface they
+exert a pressure. At distance $R$ from the Sun $S=S_0(R_0/R)^2$; at 1\,AU $S_E=1367$\,W/m$^2$ and the pressure is
+$P_{SR}=S_E/c=4.56\cdot10^{-6}$\,N/m$^2$. With the cannon-ball model (sphere of radius $\sigma$):
+\begin{equation}
+\underline{f}^{(SR)}=-\nu\,\frac{P_{SR}\,A}{m}\,C_{R}\,\hat{r}_{\text{SUN}},
+\end{equation}
+$\nu$ shadow function (1 illuminated, 0 in shadow), $A=\pi\sigma^2$ illuminated area, $m$ mass, $C_R\in[1,2]$ radiation-pressure
+coefficient (1 absorbing, 2 reflecting: a reflected photon transfers twice the momentum), $\hat r_{SUN}$ unit vector from the
+spacecraft to the Sun ($\simeq$ Earth--Sun direction since $r\ll1$\,AU). It is a surface perturbation, independent of the
+altitude, relevant for high orbits and for high $A/m$; it perturbs all elements and, on a circular orbit, creates an
+eccentricity vector orthogonal to the Sun direction (see \qref{C1}).
+
+\paragraph{Geometry of the eclipse (shadow computation).} The spacecraft is in shadow when the Earth (sphere of radius $R_E$) blocks
+the line of sight between spacecraft and Sun. Let
+\begin{equation}
+\Theta=\arccos\!\left(\frac{\underline r\cdot\underline r_{SUN}}{|\underline r|\,|\underline r_{SUN}|}\right)
+\end{equation}
+be the angle, at the Earth's centre, between the spacecraft position $\underline r$ and the Sun position $\underline r_{SUN}$. Draw from the
+spacecraft and from the Sun the lines tangent to the Earth: the radius to each tangent point is orthogonal to the tangent, so
+\begin{equation}
+\theta_{1}=\arccos\!\left(\frac{R_{E}}{|\underline r|}\right),\qquad
+\theta_{2}=\arccos\!\left(\frac{R_{E}}{|\underline r_{SUN}|}\right)
+\end{equation}
+are the angles between $\underline r$ (resp.\ $\underline r_{SUN}$) and the radius to its tangent point. The segment spacecraft--Sun is tangent to the
+Earth when $\Theta=\theta_1+\theta_2$. Hence
+\begin{equation}
+\boxed{\;\Theta>\theta_1+\theta_2\ \Rightarrow\ \text{SHADOW }(\nu=0),\qquad \Theta\le\theta_1+\theta_2\ \Rightarrow\ \text{ILLUMINATION }(\nu=1).\;}
+\end{equation}
+\begin{center}\includegraphics[width=0.9\linewidth]{eclipse}\\
+{\footnotesize Not to scale ($r_{SUN}$ drawn small): in reality $\theta_2\simeq90^\circ$.}\end{center}
+
+\paragraph{Comments.}
+\begin{itemize}
+\item Since $|\underline r_{SUN}|\gg R_E$, $\theta_2\simeq\pi/2$: the shadow is practically a cylinder of radius $R_E$ behind the Earth, and the
+test becomes $\Theta>\pi/2+\theta_1$ \notinnotes.
+\item The model is a sharp on/off shadow (no penumbra, spherical Earth, no atmospheric refraction) \notinnotes.
+\item Eclipses make $\underline f^{(SR)}$ discontinuous along the orbit. Their duration is maximum when the Sun lies in the orbit plane:
+for a circular orbit the shadow arc is $\pi-2\theta_1$, e.g.\ $r=7000$\,km: $\theta_1=24.3^\circ$, about 36\% of the period
+(35\,min) \notinnotes. High orbits (GEO) are eclipsed only near the equinoxes.
+\item Eclipses also matter for power (batteries) and thermal design.
+\end{itemize}
+
+\begin{fig2draw}
+Earth circle with centre $O$; arrow $\underline r_{SUN}$ to the right, arrow $\underline r$ up-left; dashed tangent lines from the tip of each
+arrow to the circle; mark $\theta_1$, $\theta_2$ at $O$ between each arrow and its tangent-point radius, and $\Theta$ between the arrows.
+\end{fig2draw}
+
+\begin{keyf}
+$\underline f^{(SR)}=-\nu\dfrac{P_{SR}A}{m}C_R\hat r_{SUN}$; \ $\Theta=\arccos\dfrac{\underline r\cdot\underline r_{SUN}}{r\,r_{SUN}}$, \
+$\theta_1=\arccos\dfrac{R_E}{r}$, \ $\theta_2=\arccos\dfrac{R_E}{r_{SUN}}$; \ shadow iff $\Theta>\theta_1+\theta_2$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item The angles $\theta_1$, $\theta_2$ are measured at the Earth's centre, between the position vectors and the radii to the tangent points.
+\item Shadow for \emph{large} $\Theta$ (spacecraft behind the Earth), not small.
+\end{itemize}
+
+\source{cap08.tex l.561--687 (SRP), l.689--712 (shadow computation), l.714--726 (effect on the elements).}
+
+% ---------------------------------------------------------------------
+\question{C3}{$J_2$ perturbation: physical nature and averaged effects}
+% source: cap08.tex l.728-836 (harmonics), l.838-949 (J2), l.951-1062 (averaging)
+\begin{qbox}
+Describe the physical nature of the $J_2$ perturbation, its two main averaged effects on orbital elements, and state whether it
+depends on geographic latitude and/or longitude.
+\qmeta{list by chapter (Ch.\,8).}
+\qnote{Possibly the "question about $\Omega$" of Sep 2024 (regression of the node). Adjacent: \qref{C4}, \qref{C5}, \qref{C6}.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Geopotential expansion; $J_2$ is the zonal harmonic of degree 2: Earth \textbf{oblateness} (equatorial bulge); dominant ($J_2=1.083\cdot10^{-3}$).
+\item $U_{J2}=-\frac{\mu}{r}\left(\frac{R_E}{r}\right)^2J_2\frac{3s_\phi^2-1}{2}$: depends on latitude (and $r$), \textbf{not on longitude}; sign map ($\pm35.3^\circ$).
+\item Perturbing acceleration (radial + northward) and averaging over one orbit: $\langle\dot a\rangle=\langle\dot e\rangle=\langle\dot i\rangle=0$.
+\item Effect 1: precession of the orbit plane, $\langle\dot\Omega\rangle\propto-c_i$ (westward for direct orbits). Effect 2: rotation of the apsidal line, $\langle\dot\omega\rangle$; critical inclination $63.4^\circ$.
+\item Applications: sun-synchronous orbits, frozen apsidal line (Molniya).
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Physical nature.} The Earth is not a sphere with spherical mass distribution: its potential is expanded in harmonics
+(Legendre polynomials $P_{lm}$),
+\begin{equation}
+U=\frac{\mu_E}{r}-\frac{\mu_E}{r}\sum_{l=2}^{\infty}\left(\frac{R_E}{r}\right)^{l}J_lP_{l0}(s_\phi)
++\frac{\mu_E}{r}\sum_{l=2}^{\infty}\sum_{m=1}^{l}\left(\frac{R_E}{r}\right)^{l}J_{lm}P_{lm}(s_\phi)\cos\!\left[m(\lambda_g-\lambda_{lm})\right].
+\end{equation}
+The first term is the Keplerian potential; $J_2$ (zonal harmonic of degree 2, $P_{20}=\frac{3s_\phi^2-1}{2}$) represents the
+\textbf{oblateness} of the Earth, i.e.\ the equatorial bulge due to its rotation:
+\begin{equation}
+U_{J2}=-\frac{\mu_{E}}{r}\left(\frac{R_{E}}{r}\right)^{2}J_{2}\,\frac{3s_{\phi}^{2}-1}{2},\qquad J_2=1.083\cdot10^{-3}.
+\end{equation}
+$U_{J2}>0$ for $|\phi|<\arcsin(1/\sqrt3)=35.3^\circ$ (extra mass around the equator) and $U_{J2}<0$ for higher latitudes (less mass at
+the poles). $J_2$ is about three orders of magnitude larger than any other harmonic, so it is the dominant perturbation in LEO and
+MEO (at 1000\,km, $a_{J2}\simeq10^{-2}a_0$), decreasing rapidly with altitude ($\propto1/r^4$).
+
+\paragraph{Dependence on latitude and longitude.} $U_{J2}$ depends only on $r$ and on the \textbf{latitude} $\phi$; it does \textbf{not depend on the
+longitude} ($\partial U_{J2}/\partial\lambda_g=0$): the field is axially symmetric about the polar axis (zonal harmonic). Hence
+the perturbing acceleration has only radial and northward components:
+\begin{equation}
+\underline f_{J2}=\frac{3\mu_E}{r^4}R_E^2J_2\left[\frac{3s_\phi^2-1}{2}\,\hat r-s_\phi c_\phi\,\hat N_L\right]
+=\frac{3\mu_{E}}{r^{4}}R_{E}^{2}J_{2}\left[\frac{3s_{\theta_t}^{2}s_{i}^{2}-1}{2}\ \ \ -s_{i}^{2}s_{\theta_t}c_{\theta_t}\ \ \ -s_{i}c_{i}s_{\theta_t}\right]^{\!T}
+\end{equation}
+(components along $\hat r,\hat\theta,\hat h$). Through the orbit the satellite sweeps latitudes $|\phi|\le i$, so the effect depends on
+the inclination.
+
+\paragraph{Averaging.} The osculating elements show short-period oscillations, long-period oscillations and secular drifts. Averaging
+the Gauss equations over one orbital period (changing variable from $t$ to $\theta_*$, $d/d\theta_*\simeq(r^2/h)\,d/dt$) removes the
+short-period terms. Example for $\Omega$: $\langle\Omega'\rangle=\frac{1}{2\pi}\int_0^{2\pi}\frac{r^2}{h}\frac{rf_h s_{\theta_t}}{hs_i}d\theta_*=-\frac{3R_E^2J_2c_i}{2p^2}$, then
+multiplied by the mean motion. The results are
+\begin{equation}
+\langle\dot a\rangle=\langle\dot e\rangle=\langle\dot i\rangle=0,\qquad
+\langle\dot{\Omega}\rangle=-\frac{3R_{E}^{2}J_{2}\sqrt{\mu_{E}}}{2a^{7/2}(1-e^{2})^{2}}\,c_{i},\qquad
+\langle\dot{\omega}\rangle=-\frac{3R_{E}^{2}J_{2}\sqrt{\mu_{E}}}{2a^{7/2}(1-e^{2})^{2}}\left(\frac52s_{i}^{2}-2\right).
+\end{equation}
+Size and shape of the orbit and its inclination are unchanged on average (conservative, axisymmetric field).
+
+\paragraph{The two main effects.}
+\begin{enumerate}
+\item \textbf{Precession of the orbital plane (regression of the nodes).} $\langle\dot\Omega\rangle\neq0$ with $i$ constant: the angular momentum
+vector rotates about $\hat c_3$ (the Earth's axis) with period $T_{prec}=2\pi/|\langle\dot\Omega\rangle|$. The precession is clockwise (westward,
+$\langle\dot\Omega\rangle<0$) for direct orbits ($i<\pi/2$), counter-clockwise for retrograde ones, and zero for polar orbits. Physically, the
+equatorial bulge exerts a torque that tries to pull the orbit plane towards the equator; like a gyroscope, the plane precesses
+instead of changing $i$ \notinnotes. Faster for low, near-equatorial orbits (several degrees per day in LEO).
+\item \textbf{Rotation of the apsidal line.} $\langle\dot\omega\rangle\neq0$: the periapsis direction rotates within the orbit plane (forward for
+$i<63.4^\circ$, backward between $63.4^\circ$ and $116.6^\circ$). It vanishes at the \textbf{critical inclinations}
+\begin{equation}
+5s_i^2-4=0\ \Rightarrow\ i=\arcsin\frac{2}{\sqrt5}\simeq63.4^\circ\ \text{or}\ 116.6^\circ,
+\end{equation}
+where the apsidal line is "frozen" in space (used by highly elliptic Molniya orbits to keep the apogee over high latitudes \notinnotes).
+\end{enumerate}
+\begin{center}\includegraphics[width=0.85\linewidth]{j2_effects}\end{center}
+Application: the nodal precession can be tuned to $360^\circ$/year to obtain \textbf{sun-synchronous orbits} (\qref{C6}).
+
+\begin{keyf}
+$U_{J2}=-\dfrac{\mu_E}{r}\left(\dfrac{R_E}{r}\right)^2J_2\dfrac{3s_\phi^2-1}{2}$; \ $\langle\dot a\rangle=\langle\dot e\rangle=\langle\dot i\rangle=0$; \
+$\langle\dot\Omega\rangle=-\dfrac{3R_E^2J_2\sqrt{\mu_E}}{2a^{7/2}(1-e^2)^2}c_i$; \
+$\langle\dot\omega\rangle=-\dfrac{3R_E^2J_2\sqrt{\mu_E}}{2a^{7/2}(1-e^2)^2}\left(\frac52s_i^2-2\right)$; \ $i_{crit}=63.4^\circ,\,116.6^\circ$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item $J_2$ depends on latitude only (zonal), not on longitude: say it explicitly with $\partial U_{J2}/\partial\lambda_g=0$.
+\item Sign of $\langle\dot\Omega\rangle$: negative (westward) for direct orbits.
+\item The secular effects are on $\Omega$ and $\omega$ (and on the mean motion), not on $a$, $e$, $i$.
+\end{itemize}
+
+\source{cap08.tex l.728--836 (geopotential harmonics), l.838--868 ($J_2$), l.870--949 (perturbing acceleration; errata \#12--13),
+l.951--1062 (averaging, precession, critical inclinations). Formulario: \fml{8-J2V}, \fml{8-J2A}, \fml{8-PRC}.}
+
+% ---------------------------------------------------------------------
+\question{C4}{Physical nature of $J_2$ and $J_{22}$; meridians and parallels}
+% source: cap08.tex l.728-868
+\begin{qbox}
+State the physical nature of $J_2$ and $J_{22}$ and how many meridians/parallels each corresponds to.
+\qmeta{list by chapter (Ch.\,8); Sep 2024 (together with \qref{C5}).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Geopotential expansion; $J_{lm}$ terms; rule: $J_{lm}$ has $l-m$ parallels and $m$ meridians as nodal (equipotential) lines.
+\item $J_2=J_{20}$: zonal, Earth oblateness (equatorial bulge); $P_{20}=0$ at $\phi=\pm35.3^\circ$: 2 parallels, 0 meridians; depends on latitude only.
+\item $J_{22}$: sectoral, ellipticity of the equator; zero at $\lambda_g=30.1^\circ,120.1^\circ,210.1^\circ,300.1^\circ$: 2 meridians, 0 parallels; depends on longitude.
+\item Magnitudes and effects ($J_2$ dominant in LEO/MEO; $J_{22}$ dominant at GEO by resonance). Sketch.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Geopotential.} The Earth's gravitational potential is written as a series of harmonics:
+\begin{equation}
+U=\frac{\mu_E}{r}-\frac{\mu_E}{r}\sum_{l\ge2}\left(\frac{R_E}{r}\right)^{l}J_lP_{l0}(s_\phi)
++\frac{\mu_E}{r}\sum_{l\ge2}\sum_{m=1}^{l}\left(\frac{R_E}{r}\right)^{l}J_{lm}P_{lm}(s_\phi)\cos\!\left[m(\lambda_g-\lambda_{lm})\right],
+\end{equation}
+\begin{equation}
+P_{lm}(x)=\frac{1}{2^{l}l!}\left(1-x^{2}\right)^{m/2}\frac{d^{\,l+m}}{dx^{\,l+m}}\left[(x^{2}-1)^{l}\right],\qquad x=s_\phi .
+\end{equation}
+Each harmonic is a correction to the potential of a spherical Earth; its nodal lines (where the term vanishes) are parallels and/or
+meridians. General rule: \textbf{$J_{lm}$ has $l-m$ parallels and $m$ meridians} as equipotential (zero) lines.
+
+\paragraph{$J_2$ ($l=2$, $m=0$): zonal harmonic -- Earth oblateness.} Since $P_{20}=\frac{3s_\phi^2-1}{2}$,
+\[U_{J2}=-\frac{\mu_E}{r}\left(\frac{R_E}{r}\right)^2J_2\,\frac{3s_\phi^2-1}{2}\]
+depends only on latitude. It vanishes where
+$s_\phi=\pm1/\sqrt3$, i.e.\ at $\phi=\pm35.3^\circ$: \textbf{2 parallels and 0 meridians} ($l-m=2$, $m=0$). It is positive in the
+equatorial band and negative at high latitudes: it models the \textbf{equatorial bulge} (extra mass at the equator, less at the poles)
+produced by the Earth's rotation. $J_2=1.083\cdot10^{-3}$, about $10^3$ times larger than any other coefficient: it dominates the
+perturbations of LEO and MEO satellites (nodal regression, apsidal rotation, \qref{C3}).
+
+\paragraph{$J_{22}$ ($l=m=2$): sectoral harmonic -- ellipticity of the equator.} $P_{22}=3(1-s_\phi^2)=3c_\phi^2$ never vanishes except at the
+poles, so the sign of the term is set by $\cos[2(\lambda_g-\lambda_{22})]$: it depends on longitude and vanishes at
+\begin{equation}
+\lambda_g=30.1^\circ,\ 120.1^\circ,\ 210.1^\circ,\ 300.1^\circ\quad(90^\circ\text{ apart}),
+\end{equation}
+i.e.\ on \textbf{2 meridians (full great circles) and 0 parallels} ($l-m=0$, $m=2$), dividing the Earth into 4 sectors of alternating sign
+("orange slices"). It is related to the modest \textbf{eccentricity (ellipticity) of the Earth's equator}: the equatorial section is slightly
+elliptic, not circular. $J_{22}=1.816\cdot10^{-6}$ ($\lambda_{22}=-0.261$\,rad). Small, but it \textbf{dominates for geostationary orbits}: a GEO
+satellite is fixed with respect to the Earth, so the longitude-dependent force always acts in the same direction (resonance) and
+makes the satellite drift in longitude (station keeping needed).
+\begin{center}\includegraphics[width=0.9\linewidth]{harmonics}\\
+{\footnotesize Sign maps of the three types of harmonics (hatched = negative), computed from $P_{lm}(s_\phi)\cos m\lambda$.}\end{center}
+
+\begin{center}
+\small
+\begin{tabular}{@{}llllll@{}}
+\toprule
+ & type & physical meaning & depends on & parallels & meridians\\
+\midrule
+$J_2$ & zonal ($m=0$) & oblateness (equatorial bulge) & latitude & 2 ($\pm35.3^\circ$) & 0\\
+$J_{22}$ & sectoral ($l=m$) & elliptic equator & longitude & 0 & 2 (4 sectors)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{keyf}
+$J_{lm}$: $l-m$ parallels, $m$ meridians; \ $P_{20}=\frac{3s_\phi^2-1}{2}=0\Rightarrow\phi=\pm35.3^\circ$; \ $J_{22}$ zero at $\lambda_g=30.1^\circ+k\,90^\circ$; \
+$J_2=1.083\cdot10^{-3}$, $J_{22}=1.816\cdot10^{-6}$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item "2 meridians" for $J_{22}$ means 2 great circles through the poles, i.e.\ 4 longitudes where the term vanishes.
+\item $J_2$ = oblateness (polar flattening), $J_{22}$ = ellipticity of the \emph{equator}: different physical features.
+\end{itemize}
+
+\source{cap08.tex l.62--85 (perturbations on different orbits, $J_{22}$ at GEO), l.728--836 (harmonics, nodal lines, coefficients), l.838--868 ($J_2$).}
+
+% ---------------------------------------------------------------------
+\question{C5}{The three types of geopotential harmonics; the $J_{32}$ harmonic}
+% source: cap08.tex l.728-836
+\begin{qbox}
+Describe the three types of geopotential harmonics; indicate whether they depend on latitude, longitude, or both, and give the
+number and type of equipotential lines for the $J_{32}$ harmonic.
+\qmeta{list by chapter (Ch.\,8); Sep 2024 (together with \qref{C4}: "also discuss the physical nature of $J_2$ and $J_{22}$").}
+\qnote{In Sep 2024 this question was asked together with C4: write C5 and then the two paragraphs on $J_2$ and $J_{22}$ of C4.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Geopotential series with $J_l$ and $J_{lm}$, $P_{lm}(s_\phi)$, $\cos m(\lambda_g-\lambda_{lm})$; first term = spherical Earth.
+\item Zonal ($m=0$): latitude only, $l$ parallels (bands); e.g.\ $J_2$.
+\item Sectoral ($l=m$): longitude only (sign), $m$ meridians (sectors); e.g.\ $J_{22}$.
+\item Tesseral ($0<m<l$): latitude and longitude, $l-m$ parallels and $m$ meridians (tiles).
+\item $J_{32}$: tesseral, 1 parallel (equator) + 2 meridians, 8 tiles; sketch.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Expansion of the geopotential.} The potential of the Earth, $U=G\int_{Earth}dm/r$, is written in terms of Legendre polynomials
+(latitude $\phi$, geographical longitude $\lambda_g$):
+\begin{equation}
+U=\underbrace{\frac{\mu_E}{r}}_{U_K}
+-\frac{\mu_E}{r}\sum_{l=2}^{\infty}\left(\frac{R_E}{r}\right)^{l}J_lP_{l0}(s_\phi)
++\frac{\mu_E}{r}\sum_{l=2}^{\infty}\sum_{m=1}^{l}\left(\frac{R_E}{r}\right)^{l}J_{lm}P_{lm}(s_\phi)\cos\!\left[m(\lambda_g-\lambda_{lm})\right].
+\end{equation}
+$U_K=\mu_E/r$ is the potential of a body with spherical symmetry (Keplerian motion); the other terms are the harmonics, with
+coefficients $J_l$, $J_{lm}$, $\lambda_{lm}$ estimated from satellite tracking (WGS-84, EGM-96, JGM-2, EGM2008). The perturbing
+acceleration is $\underline g=\nabla U$.
+
+\paragraph{The three types.}
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Zonal harmonics} ($m=0$, coefficients $J_l$): $P_{l0}(s_\phi)$ \textbf{depends only on latitude}. They vanish at $l$ values of latitude:
+the nodal lines are \textbf{$l$ parallels} and the Earth is divided in latitude bands (zones). Example: $J_2$ vanishes at $\pm35.3^\circ$
+(oblateness).
+\item \textbf{Sectoral harmonics} ($l=m$, coefficients $J_{ll}$): $P_{ll}\propto c_\phi^{\,l}$ does not vanish except at the poles, so the sign of the
+term changes only with longitude: they \textbf{depend (in sign) only on longitude}. Nodal lines: \textbf{$m$ meridians}, which split the Earth
+into $2m$ sectors. Example: $J_{22}$, zero at $\lambda_g=30.1^\circ,120.1^\circ,210.1^\circ,300.1^\circ$ (ellipticity of the equator).
+\item \textbf{Tesseral harmonics} ($0<m<l$, coefficients $J_{lm}$): \textbf{depend on both latitude and longitude}; they vanish at given latitudes
+\emph{and} longitudes, so the nodal lines (\textbf{$l-m$ parallels and $m$ meridians}) divide the Earth into tiles ("tesserae").
+\end{enumerate}
+General rule: \textbf{$J_{lm}$ has $l-m$ parallels and $m$ meridians as equipotential lines} (zonal: $m=0$; sectoral: $l-m=0$).
+
+\paragraph{The $J_{32}$ harmonic.} $l=3$, $m=2$: \textbf{tesseral}. From the definition,
+$P_{32}(x)=\frac{1}{48}(1-x^2)\frac{d^5}{dx^5}(x^2-1)^3=15x(1-x^2)$, so the term is proportional to
+\begin{equation}
+15\,s_\phi c_\phi^2\cos\!\left[2(\lambda_g-\lambda_{32})\right],
+\end{equation}
+which vanishes on
+\begin{itemize}
+\item $l-m=1$ \textbf{parallel}: the \textbf{equator} ($s_\phi=0$);
+\item $m=2$ \textbf{meridians}: $\lambda_g=\lambda_{32}\pm45^\circ$ and $\lambda_{32}\pm135^\circ$ (two great circles through the poles).
+\end{itemize}
+The equipotential lines divide the Earth into $2\times4=8$ tiles of alternating sign. $J_{32}=3.774\cdot10^{-6}$,
+$\lambda_{32}=-0.300$\,rad.
+\begin{center}\includegraphics[width=0.9\linewidth]{harmonics}\end{center}
+
+\begin{center}
+\small
+\begin{tabular}{@{}lllll@{}}
+\toprule
+type & indices & depends on & nodal lines & example\\
+\midrule
+zonal & $m=0$ & latitude & $l$ parallels & $J_2$: $\pm35.3^\circ$\\
+sectoral & $m=l$ & longitude & $m$ meridians & $J_{22}$: 2 meridians\\
+tesseral & $0<m<l$ & both & $l-m$ parallels, $m$ meridians & $J_{32}$: equator + 2 meridians\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{fig2draw}
+Three circles (globes). Zonal: two horizontal lines (parallels) symmetric about the equator, polar caps hatched. Sectoral: two
+"meridian" curves through the poles, alternate sectors hatched. Tesseral $J_{32}$: the equator plus two meridians, checkerboard hatching.
+\end{fig2draw}
+
+\begin{keyf}
+$U=\dfrac{\mu_E}{r}-\dfrac{\mu_E}{r}\displaystyle\sum_l\left(\frac{R_E}{r}\right)^lJ_lP_{l0}+\dfrac{\mu_E}{r}\sum_{l,m}\left(\frac{R_E}{r}\right)^lJ_{lm}P_{lm}\cos m(\lambda_g-\lambda_{lm})$; \
+$J_{lm}$: $l-m$ parallels, $m$ meridians; \ $J_{32}$: 1 parallel (equator) + 2 meridians.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Count meridians as great circles (each meridian gives two zero longitudes $180^\circ$ apart).
+\item "Sectoral depends only on longitude" refers to the sign / nodal lines; the magnitude still decreases towards the poles.
+\end{itemize}
+
+\source{cap08.tex l.728--836 (harmonics, $P_{lm}$, types, nodal-line rule, EGM2008 coefficients). $P_{32}$ computed from the formula of the notes.}
+
+% ---------------------------------------------------------------------
+\question{C6}{Sun-synchronous orbits}
+% source: cap08.tex l.1029-1099
+\begin{qbox}
+Define a Sun-synchronous orbit about Earth and name the natural perturbation used to achieve Sun-synchronism. Specify whether
+Sun-synchronous orbits are prograde or retrograde and justify your answer.
+\qmeta{list by chapter (Ch.\,8).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Definition: the orbit plane rotates with the same angular rate as the Earth around the Sun ($360^\circ$/year) $\Rightarrow$ constant geometry w.r.t.\ the Sun, near-identical lighting.
+\item Perturbation: $J_2$ (oblateness) $\Rightarrow$ nodal precession $\langle\dot\Omega\rangle=-\frac{3R_E^2J_2\sqrt{\mu}}{2a^{7/2}(1-e^2)^2}c_i$.
+\item Condition $\langle\dot\Omega\rangle=2\pi/T_{yr}$; formula for $i$.
+\item Justification: precession must be counter-clockwise (eastward, like the Earth's motion around the Sun) $\Rightarrow$ $c_i<0$ $\Rightarrow$ \textbf{retrograde}, $i>90^\circ$ (about $97$--$99^\circ$ in LEO).
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Definition.} A sun-synchronous orbit is an orbit whose plane \textbf{rotates with the same angular rate as the Earth around the
+Sun}, i.e.\ one revolution per year ($\simeq0.9856^\circ$/day), in the same sense. Then the angle between the orbit plane and the Sun
+direction (precisely: between the projection $\hat h_p$ of $\underline h$ on the ecliptic and the Sun direction) stays constant all year: the
+satellite crosses each latitude at the same local solar time and sees \textbf{near-identical lighting conditions} (Earth observation,
+remote sensing, constant illumination of solar panels, e.g.\ dawn--dusk orbits).
+\begin{center}\includegraphics[width=0.85\linewidth]{sso}\end{center}
+
+\paragraph{Perturbation used.} The \textbf{$J_2$ harmonic (Earth oblateness)}. Averaged over one orbit it produces a secular precession
+of the node,
+\begin{equation}
+\langle\dot{\Omega}\rangle=-\frac{3R_{E}^{2}J_{2}\sqrt{\mu_{E}}}{2a^{7/2}(1-e^{2})^{2}}\,c_{i},\qquad
+T_{prec}=\frac{2\pi}{|\langle\dot\Omega\rangle|}=\frac{4\pi\,a^{7/2}(1-e^2)^2}{3R_E^2J_2\sqrt{\mu_E}\,|c_i|},
+\end{equation}
+whose magnitude can be tuned with $a$, $e$, $i$. Sun-synchronism requires $T_{prec}=1$ year \emph{and} the correct sense of rotation:
+\begin{equation}
+\langle\dot{\Omega}\rangle=+\frac{2\pi}{T_{yr}}\ \Longrightarrow\
+i=\arccos\!\left[-\frac{2\pi}{T_{yr}}\,\frac{2\,a^{7/2}(1-e^{2})^{2}}{3R_{E}^{2}J_{2}\sqrt{\mu_{E}}}\right].
+\end{equation}
+
+\paragraph{Prograde or retrograde?} \textbf{Retrograde.} The Earth moves around the Sun counter-clockwise as seen from the north
+ecliptic pole, so the orbit plane must precess counter-clockwise (eastward): $\langle\dot\Omega\rangle>0$. Since the factor multiplying
+$c_i$ is negative, this requires $c_i<0$, i.e.\ $i>\pi/2$. For direct orbits ($i<90^\circ$) $J_2$ makes the node regress westward,
+the wrong way. Typical values for circular orbits: $i\simeq97.4^\circ$ at 500\,km, $98.2^\circ$ at 700\,km, $98.6^\circ$ at 800\,km
+(near-polar, slightly retrograde); the inclination grows with altitude, and above $a\simeq12\,350$\,km ($c_i=-1$) no sun-synchronous
+circular orbit exists \notinnotes (values computed from the formula above). The notes report the plot of altitude vs inclination for $e=0$.
+
+\begin{keyf}
+$\langle\dot\Omega\rangle=-\dfrac{3R_E^2J_2\sqrt{\mu_E}}{2a^{7/2}(1-e^2)^2}c_i=+\dfrac{2\pi}{T_{yr}}$ \ $\Rightarrow$ \
+$c_i=-\dfrac{2\pi}{T_{yr}}\dfrac{2a^{7/2}(1-e^2)^2}{3R_E^2J_2\sqrt{\mu_E}}<0$ \ $\Rightarrow$ retrograde, $i\approx98^\circ$ in LEO.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item The sense of precession matters (not only the period): this is what forces $i>90^\circ$.
+\item Sun-synchronous is not "geosynchronous" and not "polar": it is slightly retrograde.
+\item The perturbation is $J_2$ (oblateness), not the Sun's gravity.
+\end{itemize}
+
+\source{cap08.tex l.1029--1062 (precession of the plane), l.1064--1099 (sun-synchronous orbits). Formulario: \fml{8-SSO}.}
+
+% ---------------------------------------------------------------------
+\question{C7}{Third-body perturbation: exact acceleration and effect on the angular momentum}
+% source: cap08.tex l.1101-1205 (exact), l.1211-1329 (gravity gradient), l.1331-1453 (average effect)
+\begin{qbox}
+Derive the exact third-body perturbing acceleration and describe how a third-body perturbation affects the angular momentum of
+a spacecraft in a circular Earth orbit.
+\qmeta{list by chapter ("2025's Q"); Jan 2025 ("physical nature of the third-body perturbation and derivation of the exact acceleration formula").}
+\qnote{If only the nature and the exact formula are asked (Jan 2025): write points 1--3 of the outline. Adjacent: \qref{C8}.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Physical nature: the third body (Sun, Moon) attracts both the spacecraft and the Earth; the perturbation is the \emph{difference} (tidal).
+\item Inertial equations for the spacecraft and for the Earth; subtraction $\Rightarrow$ relative motion = Keplerian + $\underline a_{3B}$.
+\item Exact formula $\underline a_{3B}=\mu_2\left[\frac{\underline r_{21}}{r_{21}^3}-\frac{\underline r_{2S}}{r_{2S}^3}\right]=-\mu_2\left\{\frac{\underline r_{12}}{r_{12}^3}+\frac{\underline r_{1S}-\underline r_{12}}{|\underline r_{1S}-\underline r_{12}|^3}\right\}$.
+\item Effect on $\underline h$ (circular orbit): gravity gradient, $\dot{\underline h}=\underline r\times\underline f$, double averaging $\Rightarrow$ $\langle\langle\dot{\underline h}\rangle\rangle=\underline\omega_h\times\underline h$: precession about $\hat h_{3B}$, $|\underline h|$ constant.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Physical nature.} A spacecraft orbiting the Earth (body 1) is also attracted by other celestial bodies, mainly the Moon
+and the Sun (body 2). The Earth itself is accelerated by body 2. What perturbs the motion \emph{relative to the Earth} is the
+\textbf{difference} between the attraction of body 2 on the spacecraft and on the Earth (a tidal, differential effect). It is a
+conservative, gravitational perturbation; it is small in LEO ($\simeq10^{-7}a_0$ at 1000\,km) and becomes a main perturbation
+at high altitude (GEO and above).
+\begin{center}\includegraphics[width=0.48\linewidth]{thirdbody}\end{center}
+
+\paragraph{Derivation of the exact acceleration.} Notation: $\underline r_S$, $\underline r_1$, $\underline r_2$ inertial positions of spacecraft,
+Earth and third body; $\underline r_{jS}=\underline r_S-\underline r_j$; $\underline r_{21}=\underline r_1-\underline r_2=-\underline r_{12}$;
+$\mu_j$ gravitational parameters. In an inertial frame:
+\begin{equation}
+\frac{d^{2}\underline{r}_{S}}{dt^{2}}=-\frac{\mu_{1}}{r_{1S}^{3}}\underline{r}_{1S}-\frac{\mu_{2}}{r_{2S}^{3}}\underline{r}_{2S},
+\qquad
+\frac{d^{2}\underline{r}_{1}}{dt^{2}}=-\frac{\mu_{2}}{r_{21}^{3}}\underline{r}_{21}
+\end{equation}
+(the spacecraft exerts negligible gravity on the Earth). Subtracting, the motion relative to the Earth, $\underline r_{1S}=\underline r_S-\underline r_1$, obeys
+\begin{equation}
+\frac{d^{2}\underline{r}_{1S}}{dt^{2}}=-\frac{\mu_{1}}{r_{1S}^{3}}\underline{r}_{1S}
++\underbrace{\left[\frac{\mu_{2}}{r_{21}^{3}}\underline{r}_{21}-\frac{\mu_{2}}{r_{2S}^{3}}\underline{r}_{2S}\right]}_{\underline a_{3B}} .
+\end{equation}
+With $\underline r_{2S}=\underline r_{21}+\underline r_{1S}=\underline r_{1S}-\underline r_{12}$:
+\begin{equation}
+\boxed{\;\underline{a}_{3B}=-\mu_{2}\left\{\frac{\underline{r}_{12}}{r_{12}^{3}}
++\frac{\underline{r}_{1S}-\underline{r}_{12}}{\left[(\underline{r}_{1S}-\underline{r}_{12})\cdot(\underline{r}_{1S}-\underline{r}_{12})\right]^{3/2}}\right\}\;}
+\end{equation}
+The first term is the (indirect) acceleration of the Earth towards body 2, the second the (direct) attraction of body 2 on the
+spacecraft. The formula is exact; to use it in the Gauss equations, $\underline r_{12}$ (Moon or Sun position w.r.t.\ the Earth) and
+$\underline r_{1S}=\frac{p}{1+ec_{\theta_*}}\hat r$ are projected on $(\hat r,\hat\theta,\hat h)$.
+
+\paragraph{Effect on the angular momentum of a circular orbit.}
+\begin{enumerate}
+\item Since $r=r_{1S}\ll r_{12}$, the acceleration is approximated by the \textbf{gravity gradient} (\qref{C8}):
+$\underline f_{3B}\simeq\frac{\mu_2}{r_{12}^5}\left[3\underline r_{12}\underline r_{12}^T-r_{12}^2\underrightarrow{1}\right]\cdot\underline r$.
+\item $\dot{\underline h}=\underline r\times\underline f_{3B}$; the term in $\underrightarrow{1}$ gives $\underline r\times\underline r=\underline 0$:
+\begin{equation}
+\frac{d\underline h}{dt}=\frac{3\mu_2}{r_{12}^5}(\underline r\times\underline r_{12})(\underline r_{12}\cdot\underline r)=-\frac{3\mu_2}{r_{12}^5}\,\underline r_{12}\times\left(\underline r\,\underline r^T\right)\underline r_{12}.
+\end{equation}
+\item \textbf{First averaging} over one spacecraft period ($r_{12}$ frozen, $\hat r=\hat Nc_{\theta_t}+\hat Ms_{\theta_t}$ in the orbit plane, $r=R$):
+$\langle c^2_{\theta_t}\rangle=\langle s^2_{\theta_t}\rangle=\frac12$, $\langle c_{\theta_t}s_{\theta_t}\rangle=0$ $\Rightarrow$
+$\langle\underline r\,\underline r^T\rangle=R^2\left[\frac12\underrightarrow{1}-\frac12\hat h\hat h^T\right]$, hence
+$\left\langle\dot{\underline h}\right\rangle=\frac{3\mu_2R^2}{2r_{12}^5}(\underline r_{12}\times\hat h)(\hat h\cdot\underline r_{12})$.
+\item \textbf{Second averaging} over one period of the perturbing body (circular relative orbit with normal $\hat h_{3B}$):
+$\langle\underline r_{12}\underline r_{12}^T\rangle=r_{12}^2\left[\frac12\underrightarrow{1}-\frac12\hat h_{3B}\hat h_{3B}^T\right]$, which gives
+\begin{equation}
+\left\langle\!\left\langle\frac{d\underline{h}}{dt}\right\rangle\!\right\rangle=\underline\omega_h\times\underline h,\qquad
+\underline{\omega}_{h}=-\frac{3}{4}\frac{\mu_{2}R^{2}}{r_{12}^{3}\,h}\left(\hat{h}\cdot\hat{h}_{3B}\right)\hat{h}_{3B},\qquad h=\sqrt{\mu_1R}.
+\end{equation}
+\end{enumerate}
+\textbf{Result}: on average $\underline h$ only \textbf{rotates} about $\hat h_{3B}$ (normal to the orbit of the third body: ecliptic pole for the Sun),
+\textbf{its magnitude does not change} (orbit size unchanged, $\dot{\underline h}\perp\underline h$), while the orbit plane precesses with
+period $T_{prec}=2\pi/|\underline\omega_h|$; clockwise if $\hat h\cdot\hat h_{3B}>0$, counter-clockwise if $<0$. The inclination with respect to
+the third body's orbit plane stays constant on average.
+Example: the Moon, regarded as an Earth satellite perturbed by the Sun ($\hat h_{3B}$ = ecliptic pole): its node regresses with
+$T_{prec}\simeq18$ years.
+
+\begin{keyf}
+$\underline a_{3B}=\mu_2\left[\dfrac{\underline r_{21}}{r_{21}^3}-\dfrac{\underline r_{2S}}{r_{2S}^3}\right]$, $\underline r_{2S}=\underline r_{21}+\underline r_{1S}$; \
+$\dot{\underline h}=\underline r\times\underline f$; \ $\langle\langle\dot{\underline h}\rangle\rangle=\underline\omega_h\times\underline h$, \
+$\underline\omega_h=-\dfrac34\dfrac{\mu_2R^2}{r_{12}^3h}(\hat h\cdot\hat h_{3B})\hat h_{3B}$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item The perturbation is the \emph{difference} of the two attractions (spacecraft minus Earth), not the attraction on the spacecraft alone.
+\item Write the inertial equations for both bodies and subtract; keep track of $\underline r_{21}=-\underline r_{12}$.
+\item The average effect is a precession of $\underline h$ at constant magnitude.
+\end{itemize}
+
+\source{cap08.tex l.1101--1205 (exact acceleration), l.1211--1329 (gravity gradient), l.1331--1453 (average effect on circular orbits;
+errata \#14--15), l.1455--1470 (Moon). Formulario: \fml{8-3BA}, \fml{8-MOO}.}
+
+% ---------------------------------------------------------------------
+\question{C8}{Gravity-gradient dyadic from the third-body acceleration}
+% source: cap08.tex l.1211-1329
+\begin{qbox}
+Prove the gravity-gradient dyadic starting from the third-body perturbing-force formula
+\[
+\underline f_{3B}=-\frac{\mu_S}{r_{2S}^3}\left(\underline r_{21}+\underline r_{1S}\right)+\frac{\mu_S}{r_{21}^3}\,\underline r_{21},
+\]
+while specifying the fundamental condition needed to obtain it.
+\qmeta{$\times$2 in the list (2025); Feb 2025; Sep 2025.}
+\qnote{Here body 2 is the Sun ($\mu_2=\mu_S$). Adjacent: \qref{C7}.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Write $\underline f_{3B}=\underline g(\underline r_{21}+\underline r_{1S})-\underline g(\underline r_{21})$ with $\underline g(\underline x)=-\mu_2\underline x/x^3$.
+\item Fundamental condition: $|\underline r_{1S}|\ll|\underline r_{21}|$ (spacecraft much closer to the Earth than the third body).
+\item First-order Taylor expansion about $\underline r_{21}$: $\underline f_{3B}\simeq\left.\frac{\partial\underline g}{\partial\underline x}\right|_{\underline r_{21}}\cdot\underline r_{1S}$ (a dyad).
+\item Components: $\partial_j(-\mu_2x_i/x^3)=-\mu_2\delta_{ij}/x^3+3\mu_2x_ix_j/x^5$ (show (1,1) and (1,2)).
+\item Compact form $\frac{\mu_2}{r_{12}^5}\left[3\underline r_{12}\underline r_{12}-r_{12}^2\underrightarrow{1}\right]$; final $\underline f_{3B}$; interpretation (tidal stretching).
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Starting point.} With $\underline r_{2S}=\underline r_{21}+\underline r_{1S}$ the third-body acceleration is the difference of the
+gravitational field of body 2,
+\begin{equation}
+\underline g(\underline x):=-\frac{\mu_2}{x^3}\underline x,\qquad
+\underline f_{3B}=-\frac{\mu_2}{r_{2S}^3}\underline r_{2S}-\left(-\frac{\mu_2}{r_{21}^3}\underline r_{21}\right)
+=\underline g(\underline r_{21}+\underline r_{1S})-\underline g(\underline r_{21}),
+\end{equation}
+evaluated at the spacecraft ($\underline x=\underline r_{2S}$) and at the Earth ($\underline x=\underline r_{21}$).
+
+\paragraph{Fundamental condition.}
+\begin{equation}
+\boxed{\;|\underline r_{1S}|\ll|\underline r_{21}|\;}
+\end{equation}
+the distance of the spacecraft from the Earth is much smaller than the distance of the third body from the Earth (usually satisfied:
+LEO--GEO radii $\ll$ 384\,400\,km or 1\,AU). Then $\underline r_{1S}$ is a small displacement from $\underline r_{21}$ and a first-order Taylor
+expansion is accurate:
+\begin{equation}
+\underline f_{3B}\simeq\left.\frac{\partial}{\partial\underline r_{2j}}\left[-\frac{\mu_2}{r_{2j}^3}\underline r_{2j}\right]\right|_{\underline r_{21}}\!\cdot\underline r_{1S}.
+\end{equation}
+
+\paragraph{The gravity-gradient dyad.} The gradient of a vector field with respect to a position vector is a dyad (second-order tensor),
+which acting on a vector gives a vector. In an orthonormal basis $\{\hat c_1,\hat c_2,\hat c_3\}$, with $\underline r_{2j}=x\hat c_1+y\hat c_2+z\hat c_3$:
+\begin{equation}
+\underrightarrow{D}=[\hat c_1\ \hat c_2\ \hat c_3]
+\begin{bmatrix}
+\partial_x\!\left(-\frac{\mu_2x}{r_{2j}^3}\right)&\partial_y\!\left(-\frac{\mu_2x}{r_{2j}^3}\right)&\partial_z\!\left(-\frac{\mu_2x}{r_{2j}^3}\right)\\[3pt]
+\partial_x\!\left(-\frac{\mu_2y}{r_{2j}^3}\right)&\partial_y\!\left(-\frac{\mu_2y}{r_{2j}^3}\right)&\partial_z\!\left(-\frac{\mu_2y}{r_{2j}^3}\right)\\[3pt]
+\partial_x\!\left(-\frac{\mu_2z}{r_{2j}^3}\right)&\partial_y\!\left(-\frac{\mu_2z}{r_{2j}^3}\right)&\partial_z\!\left(-\frac{\mu_2z}{r_{2j}^3}\right)
+\end{bmatrix}
+\begin{bmatrix}\hat c_1\\ \hat c_2\\ \hat c_3\end{bmatrix},\qquad r_{2j}=\sqrt{x^2+y^2+z^2}.
+\end{equation}
+Using $\partial r_{2j}/\partial x=x/r_{2j}$:
+\begin{equation}
+D_{11}=\frac{\partial}{\partial x}\left(-\frac{\mu_2x}{(x^2+y^2+z^2)^{3/2}}\right)=-\frac{\mu_2}{r_{12}^3}+\frac{3\mu_2x^2}{r_{12}^5},\qquad
+D_{12}=\frac{\partial}{\partial y}\left(-\frac{\mu_2x}{(x^2+y^2+z^2)^{3/2}}\right)=\frac{3\mu_2xy}{r_{12}^5},
+\end{equation}
+and in general
+\begin{equation}
+D_{ij}=-\frac{\mu_2}{r_{12}^3}\,\delta_{ij}+\frac{3\mu_2\,x_ix_j}{r_{12}^5}.
+\end{equation}
+The derivatives are evaluated at $\underline r_{21}$; since each $D_{ij}$ is even in the coordinates and $r_{21}=r_{12}$, the result is the same
+at $\underline r_{21}=-\underline r_{12}$. In coordinate-free form:
+\begin{equation}
+\boxed{\;\underrightarrow{D}=\left.\frac{\partial}{\partial\underline r_{2j}}\left[-\frac{\mu_2}{r_{2j}^3}\underline r_{2j}\right]\right|_{\underline r_{21}}
+=\frac{\mu_{2}}{r_{12}^{5}}\left[3\,\underline{r}_{12}\underline{r}_{12}-r_{12}^{2}\,\underrightarrow{1}\right]\;}
+\qquad \underrightarrow{1}=\hat c_1\hat c_1+\hat c_2\hat c_2+\hat c_3\hat c_3 ,
+\end{equation}
+where $\underline r_{12}\underline r_{12}$ ($=\underline r_{12}\underline r_{12}^T$) is the outer product. Therefore
+\begin{equation}
+\underline f_{3B}\simeq\frac{\mu_2}{r_{12}^5}\left[3\,\underline r_{12}\,(\underline r_{12}\cdot\underline r_{1S})-r_{12}^2\,\underline r_{1S}\right]
+=\frac{\mu_2}{r_{12}^3}\left[3\,\hat r_{12}(\hat r_{12}\cdot\underline r_{1S})-\underline r_{1S}\right].
+\end{equation}
+
+\paragraph{Interpretation.} The perturbation is linear in $r_{1S}$ and proportional to $\mu_2/r_{12}^3$ (tidal acceleration). In a frame with
+the first axis along $\hat r_{12}$ the dyad is $\frac{\mu_2}{r_{12}^3}\mathrm{diag}(2,-1,-1)$: the spacecraft is pulled away from the Earth along
+the Earth--third-body line (stretching, $+2$) and pushed towards it in the transverse directions (compression, $-1$). Because of
+the $1/r_{12}^3$ factor the Moon, though much less massive, has a tidal effect about twice that of the Sun \notinnotes. This form is
+used to compute the average effect on $\underline h$ (\qref{C7}).
+
+\begin{keyf}
+Condition $r_{1S}\ll r_{21}$; \ $\underline f_{3B}\simeq\dfrac{\partial\underline g}{\partial\underline x}\Big|_{\underline r_{21}}\!\cdot\underline r_{1S}$; \
+$D_{ij}=-\dfrac{\mu_2}{r^3}\delta_{ij}+\dfrac{3\mu_2x_ix_j}{r^5}$; \ $\underrightarrow{D}=\dfrac{\mu_2}{r_{12}^5}\left[3\underline r_{12}\underline r_{12}-r_{12}^2\underrightarrow{1}\right]$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item State the condition $|\underline r_{1S}|\ll|\underline r_{21}|$ before expanding: it is what the question asks explicitly.
+\item The zero-order term $\underline g(\underline r_{21})$ cancels with the second term of $\underline f_{3B}$: only the gradient survives.
+\item Show at least one diagonal and one off-diagonal derivative, then the compact form with the unit dyad.
+\end{itemize}
+
+\source{cap08.tex l.1211--1329 (approximate perturbing acceleration using the gravity gradient; the dyad and its compact form).}
+
+% ---------------------------------------------------------------------
+\question{C9}{Aerodynamic drag: acceleration and effect on the orbit elements}
+% source: cap08.tex l.398-559
+\begin{qbox}
+Report the expression of the drag acceleration and describe its effect on two specific orbit elements.
+\qmeta{Jul 2025; Mar 2025 ("aerodynamic drag").}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Where it matters (100--1000\,km), exponential atmosphere $\rho(\tilde h)$.
+\item $\underline a_D=-\frac12C_D\frac{S}{m}\rho v_R^2\hat v_R$, meaning of each term; $\underline v_R=\underline v-\underline\omega_E\times\underline r$; ballistic coefficient $C_DS/m$.
+\item Effect: dissipative, along $-\hat v$ ($f_\theta<0$, $f_h\simeq0$) $\Rightarrow$ $a\downarrow$ and $e\downarrow$ (Gauss equations).
+\item Elliptic orbit: drag concentrated at perigee $\Rightarrow$ apogee decreases, circularisation; circular orbit: slow spiral.
+\item Near-circular: $\dot a=-C_D\frac Sm\rho\sqrt{\mu a}$, $\sqrt{a_f}-\sqrt{a_i}=-\frac{C_DS}{2m}\rho\sqrt\mu\,\Delta t$. Plane nearly unchanged.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{When drag matters.} By convention space begins at 100\,km (over 99.9999\% of the atmosphere is below it), but up to about
+1000\,km the residual atmosphere still perturbs the orbit, and the effect grows rapidly as the altitude decreases. The density is
+modelled with a piecewise exponential law (data from USSA76):
+\begin{equation}
+\rho(\tilde{h})=\rho_{R,i}\exp\!\left[-\frac{\tilde{h}-\tilde{h}_{R,i}}{H_{R,i}}\right],
+\end{equation}
+$\tilde h_{R,i}$ reference altitude with density $\rho_{R,i}$, $H_{R,i}$ scale height.
+
+\paragraph{Drag acceleration.}
+\begin{equation}
+\boxed{\;\underline{a}_{D}=\frac{\underline{D}}{m}=-\frac{1}{2}\,C_{D}\,\frac{S}{m}\,\rho\,v_{R}^{2}\,\hat{v}_{R}\;}
+\end{equation}
+\begin{itemize}
+\item $S$ = aerodynamic reference surface (depends on geometry and attitude); $m$ = spacecraft mass (varies if propulsion is used);
+\item $C_D$ = drag coefficient: in the rarefied (free-molecular) regime $C_D\simeq2.2$ (minimum 2 for a sphere);
+\item $\rho$ = atmospheric density at the current altitude;
+\item $\underline v_R=\underline v-\underline v_a$ = velocity relative to the atmosphere, which is assumed to rotate with the Earth:
+$\underline v_a=\underline\omega_E\times\underline r=\omega_Er\cos\phi\,\hat E$ (small compared with the orbital speed).
+\end{itemize}
+$C_D\,S/m$ is the \textbf{ballistic coefficient}: the larger it is, the stronger the action of drag. Drag is \textbf{dissipative}
+(non-conservative, a surface perturbation) and opposite to the relative velocity: essentially $f_\theta<0$, small $f_r$, and
+$f_h\simeq0$.
+
+\paragraph{Effect on the elements: $a$ and $e$ decrease.} From the Gauss equations
+$\dot a=\frac{2a^2}{h}\left(e\,s_{\theta_*}f_r+\frac pr f_\theta\right)$ and
+$\dot e=\sqrt{p/\mu}\left[f_rs_{\theta_*}+f_\theta\frac{e+ec_{\theta_*}^2+2c_{\theta_*}}{1+ec_{\theta_*}}\right]$: with $f_\theta<0$ we get
+$\dot a<0$; near perigee ($\theta_*\simeq0$) $\dot e\simeq2\sqrt{p/\mu}\,f_\theta<0$.
+\begin{itemize}
+\item \textbf{Elliptic orbit}: the density is much higher at perigee, so the drag action is \textbf{concentrated at perigee}. Like a small
+retro-burn at perigee, it lowers the \textbf{apogee} altitude, while the perigee altitude is only marginally reduced. Hence
+\textbf{$a\downarrow$ (semi-major axis) and $e\downarrow$ (eccentricity)}: the orbit is progressively circularised.
+\item \textbf{Circular LEO}: the long-term effect is a \textbf{spiral trajectory slowly decreasing in altitude}, until re-entry.
+\item The orbit plane is practically unaffected: $f_h^{(D)}$ is very small, so $\dot i\simeq0$, $\dot\Omega\simeq0$.
+\end{itemize}
+\begin{center}\includegraphics[width=0.45\linewidth]{drag}\end{center}
+
+\paragraph{Approximate analysis for near-circular orbits.} With $a\simeq R$, $v\simeq\sqrt{\mu/a}\,\hat\theta$ and $\underline v_R\simeq\underline v$:
+$f_\theta^{(D)}=-\frac12C_D\frac Sm\rho\frac\mu a$, $f_r=f_h=0$, hence
+\begin{equation}
+\dot{a}=\frac{2a^{3/2}}{\sqrt{\mu}}f_{\theta}^{(D)}=-C_{D}\frac{S}{m}\rho\sqrt{\mu a}
+\;\xrightarrow{\ \rho\simeq\text{const}\ }\;
+a_{\text{fin}}^{1/2}-a_{\text{ini}}^{1/2}=-\frac{C_{D}S}{2m}\rho\sqrt{\mu}\,(t_{\text{fin}}-t_{\text{ini}}),
+\end{equation}
+valid for small variations of $a$ (otherwise $\rho$ changes). Note that as $a$ decreases the orbital speed $\sqrt{\mu/a}$ \emph{increases}:
+drag removes energy but the satellite speeds up while spiralling down \notinnotes.
+
+\begin{keyf}
+$\underline a_D=-\frac12C_D\dfrac Sm\rho v_R^2\hat v_R$, \ $\underline v_R=\underline v-\underline\omega_E\times\underline r$, \ ballistic coeff.\ $C_DS/m$, \
+$a\downarrow$, $e\downarrow$; \ $\dot a=-C_D\dfrac Sm\rho\sqrt{\mu a}$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Use the velocity \emph{relative to the atmosphere} and the square of its magnitude.
+\item The two elements are $a$ and $e$: explain the perigee mechanism (apogee lowers $\Rightarrow$ circularisation).
+\item Drag hardly changes $i$ and $\Omega$.
+\end{itemize}
+
+\source{cap08.tex l.398--426 (atmosphere model), l.428--499 (drag acceleration), l.501--519 (effect on elements), l.521--559
+(near-circular orbits; errata \#11); Gauss equations l.338--372. Formulario: \fml{8-DRG}, \fml{8-DRC}.}

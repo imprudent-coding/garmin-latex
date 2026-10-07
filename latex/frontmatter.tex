@@ -1,0 +1,108 @@
+% Front page, how to use, contents, summary table
+\begin{titlepage}
+\centering
+\vspace*{2.5cm}
+{\Huge\bfseries Spaceflight Mechanics\par}
+\vspace{0.6cm}
+{\LARGE Answers to the theory questions\par}
+\vspace{0.4cm}
+{\large Sapienza University of Rome -- Prof.\ M.\ Pontani, A.\ Zavoli\par}
+\vspace{1.5cm}
+\begin{minipage}{0.82\linewidth}
+\small
+\textbf{Exam format (theory part).} 4 questions in 1.5\,h, no notes: three on orbital mechanics (one on Chapter 5, one on
+Chapter 8, one on the other chapters 2--8) and one on attitude dynamics (Chapters 9--11). About 20 minutes per question.
+
+\medskip
+\textbf{Sources.} Questions: \texttt{Theory\_Questions\_SFM.pdf} and \texttt{domande teoria mech.pdf} (sessions Jan 2023 -- Sep 2025).
+Content: the lecture notes in \texttt{latex\_notes/} only; anything added from outside is marked \textit{(not in notes)}.
+Notation as in the notes ($\underline r$ vectors, $\underline{\underline R}$ matrices, $\underrightarrow I$ dyads, $s_x=\sin x$, $c_x=\cos x$).
+
+\medskip
+\textbf{Structure of each answer.}
+\begin{itemize}
+\item \textbf{Question} -- text as asked, sessions and frequency, notes on variants ("Difference from Q.x", "If only X is asked").
+\item \textbf{Outline} -- the skeleton to reproduce at the exam, in order.
+\item \textbf{Answer} -- what to write (about 20 minutes by hand): definitions, derivations step by step, meaning, figures.
+\item \textbf{What to draw} -- the simplified sketch to reproduce in 1--2 minutes.
+\item \textbf{Key formulas}, \textbf{Common pitfalls}, optional \textbf{Going further}, and the \textbf{Source} lines in the notes.
+\end{itemize}
+Codes in square brackets, e.g.\ \fml{2-HEV}, refer to the formulas of the \emph{formulario} (numerical part).
+
+\medskip
+\textbf{Groups.} A: Chapters 2, 3, 6 -- B: Chapter 5 -- C: Chapter 8 -- D: attitude (Chapters 9, 11) -- E: possible further questions
+(T topics never asked so far).
+
+\medskip
+\textbf{Figures.} The quantitative figures (zero-velocity curves, libration points, ground tracks, Hohmann/bielliptic costs,
+polhodes, harmonics, conics) are computed from the formulas of the notes with \texttt{figures/src/make\_figures.py}.
+\end{minipage}
+\vfill
+{\small Errors found in the notes are listed in \texttt{docs/errata\_sorgente.md}.}
+\end{titlepage}
+
+\hypertarget{toc}{}
+\tableofcontents
+\clearpage
+
+\phantomsection
+\hypertarget{summary}{}
+\addcontentsline{toc}{section}{Summary table}
+\section*{Summary table: questions, frequency, sessions}
+{\small
+\renewcommand{\arraystretch}{1.08}
+\begin{longtable}{@{}l p{8.6cm} p{4.6cm} r@{}}
+\toprule
+Q & Question & Asked & Page\\
+\midrule
+\endhead
+\multicolumn{4}{@{}l}{\textbf{A. Orbital mechanics -- Chapters 2, 3, 6}}\\
+\ref{q:A1} & First integral of angular momentum, applications & Feb 2025 & \pageref{q:A1}\\
+\ref{q:A2} & Classification of Keplerian orbits ($a$, $e$) & list & \pageref{q:A2}\\
+\ref{q:A3} & Horizontal velocity at given altitude: trajectories & list & \pageref{q:A3}\\
+\ref{q:A4} & Geosynchronous/geostationary orbits, ground tracks & Jan 2023 & \pageref{q:A4}\\
+\ref{q:A5} & Impulsive-thrust approximation & list & \pageref{q:A5}\\
+\ref{q:A6} & Hohmann vs bielliptic transfer & list $\times$2, Jan 2025, Jun 2025 & \pageref{q:A6}\\
+\ref{q:A7} & Ellipse $\to$ hyperbola: two optimal strategies & list & \pageref{q:A7}\\
+\ref{q:A8} & $\Delta V$-loss integrals and their meaning & list $\times$2, Sep 2024 & \pageref{q:A8}\\
+\ref{q:A9} & Propulsive velocity; losses vs trajectory and vehicle & Jul 2025 & \pageref{q:A9}\\
+\ref{q:A10} & Staging: mass parameters, why staging & list & \pageref{q:A10}\\
+\ref{q:A11} & Tsiolkovsky; multistage $\Delta V$; $\epsilon_s$ and $I_{sp}$ & Sep 2025 & \pageref{q:A11}\\
+\midrule
+\multicolumn{4}{@{}l}{\textbf{B. Chapter 5 -- Multibody environments, CR3BP}}\\
+\ref{q:B1} & Jacobi interval for Earth--Moon transfers without escape, ZVC & list $\times$2, Jan 2023, Jul 2025 & \pageref{q:B1}\\
+\ref{q:B2} & Synodic frame, libration points, ZVC with/without escape & list $\times$2, Feb 2025 & \pageref{q:B2}\\
+\ref{q:B3} & Collinear libration points: equation & list & \pageref{q:B3}\\
+\ref{q:B4} & Proof of the Jacobi integral & list $\times$2, Sep 2024, Jan 2025, Mar 2025 & \pageref{q:B4}\\
+\ref{q:B5} & Synodic frame: primaries and $\mu$ & list & \pageref{q:B5}\\
+\ref{q:B6} & $N$-body integrals, Laplace plane & list $\times$2, Jun 2025, Sep 2025 & \pageref{q:B6}\\
+\midrule
+\multicolumn{4}{@{}l}{\textbf{C. Chapter 8 -- Orbit perturbations}}\\
+\ref{q:C1} & Solar radiation pressure & list $\times$3, Jan 2023 & \pageref{q:C1}\\
+\ref{q:C2} & SRP and geometry of eclipses & Jun 2025 & \pageref{q:C2}\\
+\ref{q:C3} & $J_2$: nature, averaged effects, lat/long & list (Sep 2024?) & \pageref{q:C3}\\
+\ref{q:C4} & $J_2$ and $J_{22}$: meridians, parallels & list, Sep 2024 & \pageref{q:C4}\\
+\ref{q:C5} & Three types of harmonics; $J_{32}$ & list, Sep 2024 & \pageref{q:C5}\\
+\ref{q:C6} & Sun-synchronous orbits & list & \pageref{q:C6}\\
+\ref{q:C7} & Third body: exact acceleration, effect on $\underline h$ & list, Jan 2025 & \pageref{q:C7}\\
+\ref{q:C8} & Gravity-gradient dyadic & list $\times$2, Feb 2025, Sep 2025 & \pageref{q:C8}\\
+\ref{q:C9} & Drag: acceleration, effect on $a$ and $e$ & Jul 2025, Mar 2025 & \pageref{q:C9}\\
+\midrule
+\multicolumn{4}{@{}l}{\textbf{D. Attitude dynamics -- Chapters 9, 11}}\\
+\ref{q:D1} & Bryant angles & Jan 2023 & \pageref{q:D1}\\
+\ref{q:D2} & Euler angles, illustration & list, Mar 2025 & \pageref{q:D2}\\
+\ref{q:D3} & Angle sequences vs quaternions & list & \pageref{q:D3}\\
+\ref{q:D4} & Quaternions: definition, properties & list $\times$2, Sep 2025 & \pageref{q:D4}\\
+\ref{q:D5} & Quaternions: definition, advantages & list & \pageref{q:D5}\\
+\ref{q:D6} & Parallel axis theorem & Jul 2025 & \pageref{q:D6}\\
+\ref{q:D7} & Inertia dyad, matrix in two frames & list $\times$2, Jan 2025, Sep 2024 & \pageref{q:D7}\\
+\ref{q:D8} & Torque-free equilibria, no dissipation & list $\times$2, Feb 2025 & \pageref{q:D8}\\
+\ref{q:D9} & Torque-free equilibria, with dissipation & Jun 2025 & \pageref{q:D9}\\
+\midrule
+\multicolumn{4}{@{}l}{\textbf{E. Possible further questions} (never asked): \ref{q:E1}--\ref{q:E19}, from p.\,\pageref{q:E1}}\\
+\bottomrule
+\end{longtable}
+}
+{\footnotesize "list" = present in the list by chapter of \texttt{Theory\_Questions\_SFM.pdf}, with its frequency marker
+($\times2$, $\times3$); the marker may already include some of the sessions listed after it. Sub-questions (e.g.\ Sep 2025 for B6,
+Jan 2025 for C7, Sep 2024 for D7) are listed with the larger question.}

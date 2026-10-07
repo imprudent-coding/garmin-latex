@@ -1,0 +1,783 @@
+% =====================================================================
+% Group D -- Fundamentals of attitude dynamics, chapters 9-11 (one question per exam)
+% Source: latex_notes/SFM_09_*/cap09.tex, SFM_11_*/cap11.tex
+% =====================================================================
+\qgroup{D}{Attitude dynamics -- Chapters 9 and 11}
+
+One question per exam is on attitude (25\% of the course). Notation of the notes: inertial axes $(\hat E_1,\hat E_2,\hat E_3)$,
+body axes $(\hat e_1,\hat e_2,\hat e_3)$, rotation matrix $\underset{B\leftarrow N}{\underline{\underline R}}$ such that
+$[\hat e_1\ \hat e_2\ \hat e_3]^T=\underset{B\leftarrow N}{\underline{\underline R}}\,[\hat E_1\ \hat E_2\ \hat E_3]^T$. Elementary rotations:
+\begin{equation*}
+\underline{\underline R}_1(\alpha)=\begin{bmatrix}1&0&0\\0&c_\alpha&s_\alpha\\0&-s_\alpha&c_\alpha\end{bmatrix},\quad
+\underline{\underline R}_2(\alpha)=\begin{bmatrix}c_\alpha&0&-s_\alpha\\0&1&0\\s_\alpha&0&c_\alpha\end{bmatrix},\quad
+\underline{\underline R}_3(\alpha)=\begin{bmatrix}c_\alpha&s_\alpha&0\\-s_\alpha&c_\alpha&0\\0&0&1\end{bmatrix}.
+\end{equation*}
+For the singularities of the angle sequences the explicit full rotation matrices are not requested (course program).
+
+\begin{center}
+\small
+\begin{tabular}{@{}lllr@{}}
+\toprule
+Q & Topic & Asked & Page\\
+\midrule
+\ref{q:D1} & Bryant angles (3-2-1) & Jan 2023 & \pageref{q:D1}\\
+\ref{q:D2} & Euler angles (3-1-3), illustration & list, Mar 2025 & \pageref{q:D2}\\
+\ref{q:D3} & Angle sequences vs Euler parameters: pros and cons & list & \pageref{q:D3}\\
+\ref{q:D4} & Euler parameters: definition and properties & $\times$2, Sep 2025 & \pageref{q:D4}\\
+\ref{q:D5} & Euler parameters: definition and advantages & list & \pageref{q:D5}\\
+\ref{q:D6} & Parallel axis theorem & Jul 2025 & \pageref{q:D6}\\
+\ref{q:D7} & Inertia dyad, inertia matrix in two frames & $\times$2, Jan 2025, Sep 2024 & \pageref{q:D7}\\
+\ref{q:D8} & Torque-free equilibria, no dissipation & $\times$2, Feb 2025 & \pageref{q:D8}\\
+\ref{q:D9} & Torque-free equilibria, with dissipation & Jun 2025 & \pageref{q:D9}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ---------------------------------------------------------------------
+\question{D1}{Bryant angles}
+% source: cap09.tex l.207-212, l.258-305, l.390-424 (kinematics)
+\begin{qbox}
+List the Bryant angles, give their names, the intervals of definition, and the associated sequence of elementary rotations
+(inertial $\to$ body frame).
+\qmeta{Jan 2023.}
+\qnote{Adjacent: \qref{D2} (Euler angles, 3-1-3).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Attitude = orientation of body axes w.r.t.\ inertial axes; only 3 of the 9 elements of $\underline{\underline R}$ are independent $\Rightarrow$ 3 angles.
+\item Bryant (3-2-1): $\underset{B\leftarrow N}{\underline{\underline R}}=\underline{\underline R}_1(\phi)\underline{\underline R}_2(\theta)\underline{\underline R}_3(\psi)$.
+\item Names and intervals: $\psi$ yaw $[-\pi,\pi[$, $\theta$ pitch $[-\pi/2,\pi/2]$, $\phi$ roll $[-\pi,\pi[$.
+\item Sequence: yaw about $\hat E_3$, pitch about the new axis 2, roll about the final axis 1 (sketch).
+\item Aircraft meaning of the axes; singularity $\theta=\pm\pi/2$.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Why three angles.} The attitude of the body axes $(\hat e_1,\hat e_2,\hat e_3)$ with respect to the inertial axes $(\hat E_1,\hat E_2,\hat E_3)$
+is described by the rotation matrix $\underset{B\leftarrow N}{\underline{\underline R}}$, with 9 elements linked by 6 orthonormality relations:
+only 3 are independent. Three angles, associated with three distinct and subsequent elementary rotations, are therefore a minimal
+representation (in each sequence the order of the rotations matters).
+
+\paragraph{Bryant angles (sequence 3-2-1).}
+\begin{equation}
+\underset{B\leftarrow N}{\underline{\underline{R}}}=\underline{\underline{R}}_{1}(\phi)\,\underline{\underline{R}}_{2}(\theta)\,\underline{\underline{R}}_{3}(\psi)
+\end{equation}
+\begin{center}
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+angle & name & rotation about & interval\\
+\midrule
+$\psi$ & yaw & axis 3 of the inertial frame, $\hat E_3$ & $[-\pi,\pi[$\\
+$\theta$ & pitch & intermediate axis 2, $\hat\jmath$ & $[-\pi/2,\pi/2]$\\
+$\phi$ & roll & body axis 1, $\hat e_1$ & $[-\pi,\pi[$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Sequence of elementary rotations (inertial $\to$ body).}
+\begin{enumerate}
+\item \textbf{Yaw}: rotation by $\psi$ about $\hat E_3$: $(\hat E_1,\hat E_2,\hat E_3)\to(\hat\imath,\hat\jmath,\hat E_3)$, with
+$\hat\jmath=-s_\psi\hat E_1+c_\psi\hat E_2$;
+\item \textbf{Pitch}: rotation by $\theta$ about the new axis 2, $\hat\jmath$: $(\hat\imath,\hat\jmath,\hat E_3)\to(\hat e_1,\hat\jmath,\hat k'')$;
+\item \textbf{Roll}: rotation by $\phi$ about the new axis 1, $\hat e_1$: $(\hat e_1,\hat\jmath,\hat k'')\to(\hat e_1,\hat e_2,\hat e_3)$.
+\end{enumerate}
+The matrices are multiplied right to left: the first rotation ($\underline{\underline R}_3(\psi)$) is the rightmost.
+\begin{center}\includegraphics[width=0.95\linewidth]{bryant321}\\
+{\footnotesize Grey dashed: frame before each rotation; black: frame after. Computed with $\psi=40^\circ$, $\theta=\phi=35^\circ$.}\end{center}
+
+\paragraph{Use and meaning.} Widely used in atmospheric flight, especially for aircraft: $\hat e_1$ = longitudinal axis, $\hat e_2$ = right wing,
+$\hat e_3$ = downward direction (in usual flight). A natural choice of reference is $\hat E_1=\hat N_L$ (local North), $\hat E_2=\hat E_L$ (East),
+$\hat E_3=-\hat r_L$ (local downward): for small angles the body axes are close to the reference ones, and yaw, pitch, roll have
+the familiar meaning of heading, nose up/down and bank.
+
+\paragraph{Uniqueness and singularity.} With these intervals every orientation corresponds to a unique set $(\psi,\theta,\phi)$, \emph{except}
+for $\theta=\pm\pi/2$: then the first and third rotation axes coincide and only $\psi-\phi$ (or $\psi+\phi$) is defined ("gimbal lock").
+The kinematic equations $\dot\psi=(s_\phi\omega_2+c_\phi\omega_3)/c_\theta$, $\dot\phi=\omega_1+\tan\theta(s_\phi\omega_2+c_\phi\omega_3)$ are
+singular at the same values. The angles are recovered from the matrix as $\theta=-\arcsin(r_{13})$,
+$\phi=\mathrm{atan2}(r_{23},r_{33})$, $\psi=\mathrm{atan2}(r_{12},r_{11})$.
+
+\begin{fig2draw}
+Three small triads. (1) $\hat E_1,\hat E_2,\hat E_3$ dashed, rotate the first two by $\psi$ around $\hat E_3$. (2) Around the new $\hat\jmath$
+tilt axis 1 by $\theta$ (pitch). (3) Around the new axis $\hat e_1$ rotate axes 2--3 by $\phi$ (roll). Write the intervals under each angle.
+\end{fig2draw}
+
+\begin{keyf}
+$\underset{B\leftarrow N}{\underline{\underline R}}=\underline{\underline R}_1(\phi)\underline{\underline R}_2(\theta)\underline{\underline R}_3(\psi)$; \
+yaw $\psi\in[-\pi,\pi[$, pitch $\theta\in[-\frac\pi2,\frac\pi2]$, roll $\phi\in[-\pi,\pi[$; \ singular at $\theta=\pm\pi/2$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Order: 3 (yaw) first, then 2 (pitch), then 1 (roll); in the product the first rotation is on the right.
+\item Pitch is limited to $[-\pi/2,\pi/2]$ (not $[0,\pi]$ like the Euler nutation angle).
+\item Each rotation is about an axis of the \emph{current} (intermediate) frame.
+\end{itemize}
+
+\source{cap09.tex l.207--212 (sequences of angles), l.258--305 (Bryant angles, singularity, angles from $\underline{\underline R}$), l.390--424 (kinematics). Formulario: \fml{9-321}, \fml{9-K21}.}
+
+% ---------------------------------------------------------------------
+\question{D2}{Euler angles (3-1-3)}
+% source: cap09.tex l.207-256, l.319-388
+\begin{qbox}
+Define the Euler angles (names and rotation sequence) and specify their ranges of definition. Provide a geometric illustration.
+\qmeta{list by chapter (Ch.\,9); Mar 2025 ("Euler angles").}
+\qnote{Adjacent: \qref{D1} (Bryant angles, 3-2-1).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item 3 independent parameters in $\underline{\underline R}$ $\Rightarrow$ 3 elementary rotations.
+\item $\underset{B\leftarrow N}{\underline{\underline R}}=\underline{\underline R}_3(\phi)\underline{\underline R}_1(\theta)\underline{\underline R}_3(\psi)$.
+\item $\psi$ precession $[-\pi,\pi[$, $\theta$ nutation $[0,\pi]$, $\phi$ spin $[-\pi,\pi[$.
+\item Sequence with the line of nodes $\hat\imath$; illustration.
+\item Singularity $\theta=0,\pi$ (only $\psi\pm\phi$ defined); kinematic equations singular; typical use (spinning bodies).
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Definition.} Since only 3 of the 9 direction cosines are independent, the attitude can be described by three angles,
+associated with three subsequent elementary rotations. The Euler angles use the sequence \textbf{3-1-3}:
+\begin{equation}
+\underset{B\leftarrow N}{\underline{\underline{R}}}=\underline{\underline{R}}_{3}(\phi)\,\underline{\underline{R}}_{1}(\theta)\,\underline{\underline{R}}_{3}(\psi)
+\end{equation}
+\begin{center}
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+angle & name & rotation about & range\\
+\midrule
+$\psi$ & precession & $\hat E_3$ & $[-\pi,\pi[$\\
+$\theta$ & nutation & line of nodes $\hat\imath$ (new axis 1) & $[0,\pi]$\\
+$\phi$ & spin & body axis $\hat e_3$ & $[-\pi,\pi[$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Sequence (inertial $\to$ body).}
+\begin{enumerate}
+\item rotation $\psi$ about $\hat E_3$: $\hat E_1\to\hat\imath=c_\psi\hat E_1+s_\psi\hat E_2$ (the \emph{line of nodes}, intersection of the planes
+$\hat E_1\hat E_2$ and $\hat e_1\hat e_2$);
+\item rotation $\theta$ about $\hat\imath$: $\hat E_3$ tilts to $\hat e_3$; $\theta$ is the angle between $\hat E_3$ and $\hat e_3$;
+\item rotation $\phi$ about $\hat e_3$: the axes $\hat e_1$, $\hat e_2$ are obtained; $\phi$ is measured from the line of nodes to $\hat e_1$.
+\end{enumerate}
+\begin{center}\includegraphics[width=0.95\linewidth]{euler313}\\
+{\footnotesize Geometric illustration, one rotation per panel (grey dashed: before; black: after); $\psi=40^\circ$, $\theta=\phi=35^\circ$.}\end{center}
+Geometric meaning: $\psi$ and $\theta$ fix the direction of the body axis $\hat e_3$ (like longitude of the node and inclination), $\phi$ the
+rotation of the body about it. The same sequence relates the ECI frame to the orbital frame with $(\Omega,i,\theta_t)$
+($\underline{\underline R}_3(\theta_t)\underline{\underline R}_1(i)\underline{\underline R}_3(\Omega)$).
+
+\paragraph{Uniqueness and singularities.} With these ranges every orientation corresponds to a unique $(\psi,\theta,\phi)$, except for
+$\theta=0$ and $\theta=\pi$: then $\hat e_3=\pm\hat E_3$, the two rotations about axis 3 are about the same axis and only $\psi+\phi$
+(or $\psi-\phi$) is meaningful; e.g.\ for $\theta=0$, $\underline{\underline R}=\underline{\underline R}_3(\psi+\phi)$. The kinematic equations
+\begin{equation}
+\dot\psi=\frac{s_\phi\omega_1+c_\phi\omega_2}{s_\theta},\qquad \dot\theta=c_\phi\omega_1-s_\phi\omega_2,\qquad
+\dot\phi=\omega_3-\frac{s_\phi\omega_1+c_\phi\omega_2}{\tan\theta}
+\end{equation}
+are nonlinear and singular at the same values. Angles from the matrix: $\theta=\arccos r_{33}$, $\phi=\mathrm{atan2}(r_{13},r_{23})$,
+$\psi=\mathrm{atan2}(r_{31},-r_{32})$. Euler angles are natural for spinning, axisymmetric spacecraft (torque-free motion:
+precession and spin rates).
+
+\begin{fig2draw}
+Inertial triad; the line of nodes $\hat\imath$ in the $\hat E_1\hat E_2$ plane at angle $\psi$ from $\hat E_1$; the body axis $\hat e_3$ tilted by $\theta$
+from $\hat E_3$ (rotation about $\hat\imath$); $\hat e_1$ in the body plane at angle $\phi$ from $\hat\imath$.
+\end{fig2draw}
+
+\begin{keyf}
+$\underset{B\leftarrow N}{\underline{\underline R}}=\underline{\underline R}_3(\phi)\underline{\underline R}_1(\theta)\underline{\underline R}_3(\psi)$; \
+precession $\psi\in[-\pi,\pi[$, nutation $\theta\in[0,\pi]$, spin $\phi\in[-\pi,\pi[$; \ singular at $\theta=0,\pi$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item The middle rotation is about axis 1 (line of nodes), and the first and third are both about "axis 3" (of different frames).
+\item Nutation in $[0,\pi]$, not $[-\pi/2,\pi/2]$.
+\end{itemize}
+
+\source{cap09.tex l.207--256 (Euler angles, singularities, angles from $\underline{\underline R}$), l.319--388 (kinematics). Formulario: \fml{9-313}, \fml{9-K13}.}
+
+% ---------------------------------------------------------------------
+\question{D3}{Angle sequences vs Euler parameters (quaternions): pros and cons}
+% source: cap09.tex l.207-212, 319-424, 681-892
+\begin{qbox}
+In attitude kinematics, list and describe the main pros and cons of using angle sequences versus Euler parameters (quaternions).
+\qmeta{list by chapter (Ch.\,9).}
+\qnote{Adjacent: \qref{D4}, \qref{D5} (definition of quaternions).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item The two representations: three angles (e.g.\ 3-1-3, 3-2-1) vs $\{q_0,\underline q\}$ from principal axis and angle.
+\item Number of parameters and redundancy (3, 0 vs 4, 1).
+\item Intuitiveness.
+\item Singularities (representation and kinematic equations) vs none.
+\item Kinematic equations: nonlinear (trigonometric) vs bilinear; computational cost.
+\item Relative attitude/misalignment: simple error quaternion $\{q_{0,e},\underline q_e\}$. Summary table.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{The two representations.}
+\begin{itemize}
+\item \textbf{Sequences of angles}: three elementary rotations, e.g.\ Euler 3-1-3 $\underline{\underline R}_3(\phi)\underline{\underline R}_1(\theta)\underline{\underline R}_3(\psi)$ or
+Bryant 3-2-1 $\underline{\underline R}_1(\phi)\underline{\underline R}_2(\theta)\underline{\underline R}_3(\psi)$.
+\item \textbf{Euler parameters (quaternions)}: from Euler's theorem (single rotation $\Phi$ about the eigen-axis $\hat a$):
+$q_0=\cos\frac\Phi2$, $\underline q=\hat a\sin\frac\Phi2$, with $q_0^2+q_1^2+q_2^2+q_3^2=1$.
+\end{itemize}
+
+\paragraph{Comparison.}
+\begin{center}
+\small
+\begin{tabular}{@{}p{3.0cm}p{5.8cm}p{5.8cm}@{}}
+\toprule
+ & Sequences of angles & Quaternions (Euler parameters)\\
+\midrule
+number of parameters & 3 (minimal), redundancy 0 & 4, one constraint $\Rightarrow$ redundancy 1\\
+intuitiveness & intuitive (yaw, pitch, roll; precession, nutation, spin) & less intuitive (axis and half-angle)\\
+singularities & 2 values of the intermediate angle ($\theta=0,\pi$ for 3-1-3, $\pm\pi/2$ for 3-2-1) & singularity-free\\
+kinematic equations & singular at the same values; nonlinear (trigonometric, divisions by $s_\theta$ or $c_\theta$): expensive & no singularity; bilinear in $(q,\underline\omega)$: $\dot q_0=-\frac12\underline\omega^T\underline q$, $\dot{\underline q}=\frac12(q_0\underline\omega-\tilde\omega\underline q)$: cheap\\
+rotation matrix & products of sines and cosines & quadratic polynomial in $q_i$ (no trigonometric functions)\\
+relative attitude / misalignment & not clearly measurable & simple: error quaternion $\{q_{0,e},\underline q_e\}$ by quaternion algebra\\
+uniqueness & unique within the intervals (except singularities) & two quaternions $\pm q$ for each attitude\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Discussion.}
+\begin{itemize}
+\item \textbf{Pros of angles}: minimal set (no constraint to enforce), clear physical meaning, convenient for small-angle analyses, for
+pointing requirements and for torque-free spinning bodies.
+\item \textbf{Cons of angles}: any three-parameter set has singular orientations (with 3 angles singularities always occur); near them the
+kinematic equations blow up ($1/s_\theta$, $1/c_\theta$), so they are unsuitable for large-angle or all-attitude manoeuvres; the
+equations are nonlinear and computationally expensive to integrate.
+\item \textbf{Pros of quaternions}: globally non-singular; bilinear kinematics, ideal for numerical integration and on-board
+software; rotation matrix without trigonometric functions; composition of rotations and attitude error by simple products
+($Q_{N\to B}=Q_{N\to A}\otimes Q_{A\to B}$, $Q_{A\to B}=Q^*_{N\to A}\otimes Q_{N\to B}$), which is what an attitude controller needs.
+\item \textbf{Cons of quaternions}: one redundant parameter (the unit-norm constraint must be preserved during integration, e.g.\ by
+re-normalisation \notinnotes); not intuitive; $q$ and $-q$ give the same attitude (double covering).
+\end{itemize}
+
+\begin{keyf}
+Angles: 3 parameters, intuitive, singular at 2 values, nonlinear kinematics. Quaternions: 4 parameters ($\sum q_i^2=1$), not intuitive,
+no singularity, bilinear kinematics $\dot q=\frac12\Omega(\underline\omega)q$, easy error quaternion.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Mention both the singularity of the \emph{representation} and that of the \emph{kinematic equations}.
+\item Quaternion kinematics is bilinear (linear in $q$ for given $\underline\omega$), not "linear".
+\end{itemize}
+
+\source{cap09.tex l.207--212, l.319--424 (kinematics with angles), l.681--877 (quaternions), l.879--892 (comparison table).}
+
+% ---------------------------------------------------------------------
+\question{D4}{Euler parameters (quaternions): definition and fundamental properties}
+% source: cap09.tex l.426-466, 621-680, 681-877
+\begin{qbox}
+Define Euler parameters (quaternions) in terms of principal axis and angle; state their fundamental properties.
+\qmeta{$\times$2 in the list (2025); Sep 2025 ("state at least two fundamental properties of quaternions").}
+\qnote{Difference from \qref{D5}: here the properties; D5 asks for the advantages over angle sequences.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Euler's principal rotation theorem: single rotation $\Phi$ about the eigen-axis $\hat a$ ($\underline{\underline R}\underline a=\underline a$).
+\item Definition $q_0=\cos\frac\Phi2$, $q_i=a_i\sin\frac\Phi2$; constraint $\sum q_i^2=1$, redundancy 1.
+\item Properties (a)--(g): $q_0\ge0$ for $\Phi\in[0,\pi]$; $\pm q$ same attitude; identity; conjugate quaternion.
+\item Rotation matrix as quadratic form in $q$; inverse relations.
+\item Kinematics (bilinear) and composition / relative quaternion.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Principal axis and angle.} \textbf{Euler's principal rotation theorem}: a rigid body (or frame) can be brought from an arbitrary
+initial orientation to an arbitrary final orientation by a \emph{single} rigid rotation through a principal angle $\Phi$ about a principal
+axis $\hat a$. The axis is fixed in both orientations, so it has the same components $(a_1,a_2,a_3)$ in the inertial and body frames:
+$\underline a$ is the eigenvector of $\underset{B\leftarrow N}{\underline{\underline R}}$ associated with the eigenvalue 1 (eigen-axis). In terms of
+$(\hat a,\Phi)$: $\underset{B\leftarrow N}{\underline{\underline R}}=c_\Phi\underline{\underline I}+(1-c_\Phi)\underline a\underline a^T-s_\Phi\tilde a$. This uses 4 numbers with 1
+constraint ($|\underline a|=1$).
+
+\paragraph{Definition of the Euler parameters.}
+\begin{equation}
+q_{0}=\cos\frac{\Phi}{2},\qquad q_{1}=a_{1}\sin\frac{\Phi}{2},\qquad q_{2}=a_{2}\sin\frac{\Phi}{2},\qquad q_{3}=a_{3}\sin\frac{\Phi}{2},
+\end{equation}
+in compact form $\{q_0,\underline q\}$ with $\underline q=\hat a\sin\frac\Phi2$. They satisfy
+\begin{equation}
+q_{0}^{2}+q_{1}^{2}+q_{2}^{2}+q_{3}^{2}=1
+\end{equation}
+(4 parameters, 1 relation: redundancy 1). They can be seen as the hypercomplex number (quaternion) $Q=q_0+q_1i+q_2j+q_3k$ with
+$i^2=j^2=k^2=ijk=-1$.
+
+\paragraph{Fundamental properties.}
+\begin{enumerate}[label=(\alph*)]
+\item $q_0\ge0$ if $0\le\Phi\le\pi$.
+\item The same quaternion corresponds to two choices of axis and angle, $(\underline a,\Phi)$ and $(-\underline a,-\Phi)$.
+\item The same attitude corresponds to \textbf{two distinct quaternions}, $\{q_0,\underline q\}$ and $\{-q_0,-\underline q\}$ (associated with
+$(\underline a_1,\Phi_1)$ and $(-\underline a_1,2\pi-\Phi_1)$).
+\item $\Phi=4k\pi$: $q_0=1$, $\underline q=\underline 0$ (no rotation, eigen-axis undefined); (e) $\Phi=2\pi+4k\pi$: $q_0=-1$, $\underline q=\underline 0$ (again the identity).
+\item $\{q_0,\underline q\}$ and $\{q_0,-\underline q\}$ (\textbf{conjugate} quaternions) represent opposite rotations: opposite angles about the same axis, or the
+same angle about opposite axes.
+\item One can always choose the quaternion with $q_0\ge0$ ($0\le\Phi\le\pi$).
+\end{enumerate}
+
+\paragraph{Rotation matrix.} The elements of $\underline{\underline R}$ are quadratic in the $q_i$ (no trigonometric functions), e.g.\
+$r_{11}=a_1^2(1-c_\Phi)+c_\Phi=q_0^2+q_1^2-q_2^2-q_3^2$; in compact form
+\begin{equation}
+\underset{B\leftarrow N}{\underline{\underline R}}=\left(q_0^2-\underline q^T\underline q\right)\underline{\underline I}+2\,\underline q\,\underline q^T-2q_0\tilde q,
+\end{equation}
+and conversely $q_0=\pm\frac12\sqrt{1+r_{11}+r_{22}+r_{33}}$, $q_1=\frac{r_{23}-r_{32}}{4q_0}$, $q_2=\frac{r_{31}-r_{13}}{4q_0}$,
+$q_3=\frac{r_{12}-r_{21}}{4q_0}$ (if $q_0=0$, use the diagonal terms and the normalisation).
+
+\paragraph{Kinematics and composition.} The kinematic equations are \textbf{bilinear} and free of singularities:
+\begin{equation}
+\dot q_0=-\frac12\underline\omega^T\underline q,\qquad \dot{\underline q}=\frac12\left[q_0\underline\omega-\tilde\omega\,\underline q\right].
+\end{equation}
+Successive rotations compose by quaternion multiplication, $Q_{N\to B}=Q_{N\to A}\otimes Q_{A\to B}$, and the relative attitude is
+$Q_{A\to B}=Q^*_{N\to A}\otimes Q_{N\to B}$ (error quaternion $\{q_{0,e},\underline q_e\}$), useful to measure misalignment.
+
+\begin{keyf}
+$q_0=\cos\frac\Phi2$, $\underline q=\hat a\sin\frac\Phi2$, $q_0^2+|\underline q|^2=1$; \ $\pm q$ same attitude; \ $\{q_0,-\underline q\}$ = inverse rotation; \
+$\underline{\underline R}=(q_0^2-\underline q^T\underline q)\underline{\underline I}+2\underline q\underline q^T-2q_0\tilde q$; \ $\dot q_0=-\frac12\underline\omega^T\underline q$, $\dot{\underline q}=\frac12(q_0\underline\omega-\tilde\omega\underline q)$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Half-angle $\Phi/2$ in the definition (not $\Phi$).
+\item The eigen-axis has the same components in both frames (it is the axis that does not move).
+\item "Two properties" minimum: unit norm and double covering ($\pm q$) are the safest to state first.
+\end{itemize}
+
+\source{cap09.tex l.426--466 (Euler's theorem), l.621--680 ($\Phi$, $\underline a$ from $\underline{\underline R}$, remarks), l.681--701 (definition and properties),
+l.703--774 (rotation matrix), l.776--846 (kinematics), l.848--877 (relative quaternion). Formulario: \fml{9-QDF}, \fml{9-Q2R}, \fml{9-QKN}.}
+
+% ---------------------------------------------------------------------
+\question{D5}{Euler parameters: definition and advantages over three-angle sequences}
+% source: cap09.tex l.426-466, 681-701, 776-892
+\begin{qbox}
+Give the definition of Euler parameters relative to principal axis and angle, and list the main advantages of quaternions over
+3-angle sequences.
+\qmeta{list by chapter (Ch.\,9).}
+\qnote{Difference from \qref{D4}: here the advantages (comparison with \qref{D3}) instead of the list of properties.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Euler's theorem: rotation $\Phi$ about the eigen-axis $\hat a$.
+\item Definition $q_0=\cos\frac\Phi2$, $\underline q=\hat a\sin\frac\Phi2$, unit norm, redundancy 1.
+\item Advantages: no singularities; non-singular, bilinear kinematic equations (cheap integration); algebraic rotation matrix;
+easy composition and attitude error.
+\item Price: 4 parameters with a constraint, less intuitive, $\pm q$.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Definition.} By Euler's principal rotation theorem any change of orientation is a single rotation by an angle $\Phi$ about an
+axis $\hat a=[a_1\ a_2\ a_3]$ (eigen-axis: eigenvector of $\underline{\underline R}$ with eigenvalue 1, same components in the two frames). The
+Euler parameters are
+\begin{equation}
+q_0=\cos\frac\Phi2,\qquad \underline q=[q_1\ q_2\ q_3]^T=\hat a\,\sin\frac\Phi2,\qquad q_0^2+q_1^2+q_2^2+q_3^2=1,
+\end{equation}
+four quantities with one constraint (redundancy 1). The same attitude is given by $\{q_0,\underline q\}$ and $\{-q_0,-\underline q\}$; one can
+always choose $q_0\ge0$ ($0\le\Phi\le\pi$).
+
+\paragraph{Main advantages over three-angle sequences.}
+\begin{enumerate}
+\item \textbf{No singularities.} Every three-angle sequence has two singular values of the intermediate angle ($\theta=0,\pi$ for 3-1-3,
+$\theta=\pm\pi/2$ for 3-2-1) where the first and third axes coincide and the angles are not unique. Quaternions represent every
+attitude without singularity.
+\item \textbf{Non-singular kinematic equations.} The angle kinematics contain $1/s_\theta$ or $1/c_\theta$ and diverge near the singularity.
+The quaternion kinematics
+\begin{equation}
+\begin{bmatrix}\dot q_0\\ \dot q_1\\ \dot q_2\\ \dot q_3\end{bmatrix}=\frac12
+\begin{bmatrix}0&-\omega_1&-\omega_2&-\omega_3\\ \omega_1&0&\omega_3&-\omega_2\\ \omega_2&-\omega_3&0&\omega_1\\ \omega_3&\omega_2&-\omega_1&0\end{bmatrix}
+\begin{bmatrix}q_0\\ q_1\\ q_2\\ q_3\end{bmatrix}
+\end{equation}
+are valid for any attitude.
+\item \textbf{Bilinear, cheap equations.} No trigonometric functions: numerical integration is less computationally expensive and more
+robust (on-board attitude determination and control).
+\item \textbf{Algebraic rotation matrix}: $\underline{\underline R}=(q_0^2-\underline q^T\underline q)\underline{\underline I}+2\underline q\underline q^T-2q_0\tilde q$, quadratic in $q_i$.
+\item \textbf{Easy composition and misalignment}: rotations compose by quaternion products, and the relative attitude (error) between a
+current and a desired frame is the error quaternion $Q_{A\to B}=Q^*_{N\to A}\otimes Q_{N\to B}$, a simple measure of misalignment
+(for small errors $\underline q_e\simeq$ half the error angles \notinnotes).
+\end{enumerate}
+The price is one redundant parameter (unit-norm constraint), less intuitive meaning, and the double covering $\pm q$.
+
+\begin{keyf}
+$q_0=\cos\frac\Phi2$, $\underline q=\hat a\sin\frac\Phi2$, $\sum q_i^2=1$; \ advantages: singularity-free, bilinear kinematics
+$\dot q_0=-\frac12\underline\omega^T\underline q$, $\dot{\underline q}=\frac12(q_0\underline\omega-\tilde\omega\underline q)$, algebraic $\underline{\underline R}(q)$, error quaternion.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Give the definition with the half-angle and the unit-norm constraint before the advantages.
+\item Do not claim quaternions are "minimal": they use 4 parameters.
+\end{itemize}
+
+\source{cap09.tex l.426--466 (Euler's theorem), l.681--701 (definition), l.776--846 (kinematics), l.848--877 (relative quaternion),
+l.879--892 (comparison).}
+
+% ---------------------------------------------------------------------
+\question{D6}{Parallel axis theorem}
+% source: cap11.tex l.60-176 (inertia dyad), l.289-327 (parallel axis theorem)
+\begin{qbox}
+State and prove the parallel axis theorem.
+\qmeta{Jul 2025 (listed as a 2025 question).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Inertia dyad about a point: $\underrightarrow I_P=\int_{\mathcal B}[\sigma^2\underrightarrow1-\underline\sigma\,\underline\sigma]dm$; $C$ = centre of mass.
+\item Statement: $\underrightarrow I_P=\underrightarrow I_C+M\left(R_C^2\underrightarrow1-\underline R_C\underline R_C\right)$ (dyadic) and matrix form.
+\item Proof: $\underline\sigma=\underline R_C+\underline r$; expand; the cross terms contain $\int\underline r\,dm=\underline 0$.
+\item Matrix form in components $x_C,y_C,z_C$; scalar form $I_{P,\hat a}=I_{C,\hat a}+Md^2$; remarks.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Definitions.} For a rigid body $\mathcal B$ of mass $M$, the inertia dyad about a point $P$ is
+\begin{equation}
+\underrightarrow{I}_{P}=\int_{\mathcal{B}}\left[\sigma^{2}\,\underrightarrow{1}-\underline{\sigma}\,\underline{\sigma}^T\right]dm,
+\end{equation}
+where $\underline\sigma$ is the position of $dm$ from $P$ and $\underrightarrow1$ the unit dyad. $C$ is the centre of mass,
+$\underline r$ the position of $dm$ from $C$ (so $\int_{\mathcal B}\underline r\,dm=\underline 0$), and $\underline R_C$ the position of $C$ from $P$:
+$\underline\sigma=\underline R_C+\underline r$.
+\begin{center}\includegraphics[width=0.36\linewidth]{parallel_axis}\end{center}
+
+\paragraph{Statement.} If the inertia dyad about the centre of mass $\underrightarrow I_C$ is known, the dyad about any point $P$ is
+\begin{equation}
+\boxed{\;\underrightarrow{I}_{P}=\underrightarrow{I}_{C}+M\left(R_{C}^{2}\,\underrightarrow{1}-\underline{R}_{C}\,\underline{R}_{C}^T\right)\;}
+\end{equation}
+i.e.\ the inertia about $P$ equals the inertia about $C$ plus the inertia of a point mass $M$ placed at $C$.
+
+\paragraph{Proof.} Substituting $\underline\sigma=\underline R_C+\underline r$:
+\begin{equation}
+\begin{aligned}
+\underrightarrow{I}_{P}&=\int_{\mathcal{B}}\left[\left(\underline{R}_{C}+\underline{r}\right)\cdot\left(\underline{R}_{C}+\underline{r}\right)\underrightarrow{1}-\left(\underline{R}_{C}+\underline{r}\right)\left(\underline{R}_{C}+\underline{r}\right)^T\right]dm\\
+&=MR_{C}^{2}\,\underrightarrow{1}+2\,\underline{R}_{C}\cdot\left(\int_{\mathcal{B}}\underline{r}\,dm\right)\underrightarrow{1}+\int_{\mathcal{B}}r^{2}\,\underrightarrow{1}\,dm
+-M\underline{R}_{C}\underline{R}_{C}^T\\
+&\quad-\int_{\mathcal{B}}\underline{r}\,\underline{r}^T dm
+-\underline{R}_{C}\int_{\mathcal{B}}\underline{r}^T dm-\int_{\mathcal{B}}\underline{r}\,dm\,\underline{R}_{C}^T .
+\end{aligned}
+\end{equation}
+$\underline R_C$ is the same for all $dm$ and can be taken out of the integrals. Since $\underline r$ is measured from the centre of mass,
+$\int_{\mathcal B}\underline r\,dm=\underline 0$: the three mixed terms vanish. What remains is
+\begin{equation}
+\underrightarrow{I}_{P}=M\left(R_{C}^{2}\,\underrightarrow{1}-\underline{R}_{C}\underline{R}_{C}^T\right)+\int_{\mathcal{B}}\left(r^{2}\,\underrightarrow{1}-\underline{r}\,\underline{r}^T\right)dm
+=\underrightarrow{I}_{C}+M\left(R_{C}^{2}\,\underrightarrow{1}-\underline{R}_{C}\underline{R}_{C}^T\right).\qquad\blacksquare
+\end{equation}
+
+\paragraph{Matrix form.} Projecting on body axes $(\hat b_1,\hat b_2,\hat b_3)$ (pre- and post-multiplying by the basis), with
+$\underline R_C=x_C\hat b_1+y_C\hat b_2+z_C\hat b_3$:
+\begin{equation}
+\underline{\underline{I}}_P^{(B)}=\underline{\underline{I}}_{C}^{(B)}+M\begin{bmatrix}y_{C}^{2}+z_{C}^{2}&-x_{C}y_{C}&-x_{C}z_{C}\\-y_{C}x_{C}&x_{C}^{2}+z_{C}^{2}&-y_{C}z_{C}\\-z_{C}x_{C}&-z_{C}y_{C}&x_{C}^{2}+y_{C}^{2}\end{bmatrix}.
+\end{equation}
+For a single axis $\hat a$ through $P$ (parallel to an axis through $C$ at distance $d$): $I_{P,\hat a}=\hat a\cdot\underrightarrow I_P\cdot\hat a=I_{C,\hat a}+Md^2$,
+since $R_C^2-(\hat a\cdot\underline R_C)^2=d^2$ (classical Huygens--Steiner form).
+
+\paragraph{Remarks.} The theorem holds only between the centre of mass and another point (not between two generic points); moments of
+inertia are minimum about axes through $C$; it is used to compute the inertia of a spacecraft from its components (bus, panels, booms).
+
+\begin{keyf}
+$\underrightarrow I_P=\int(\sigma^2\underrightarrow1-\underline\sigma\underline\sigma^T)dm$, \ $\underline\sigma=\underline R_C+\underline r$, \ $\int\underline r\,dm=\underline 0$ $\Rightarrow$
+$\underrightarrow I_P=\underrightarrow I_C+M(R_C^2\underrightarrow1-\underline R_C\underline R_C^T)$; \ $I_{P,\hat a}=I_{C,\hat a}+Md^2$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Say explicitly that the mixed terms vanish \emph{because $C$ is the centre of mass}.
+\item Products of inertia also change: $-Mx_Cy_C$ etc.\ (with the minus sign, consistent with the definition of $\underline{\underline I}$).
+\end{itemize}
+
+\source{cap11.tex l.60--176 (inertia dyad and matrix), l.289--327 (parallel axis theorem, dyadic and matrix form). Formulario: \fml{11-PAT}.}
+
+% ---------------------------------------------------------------------
+\question{D7}{Inertia dyad, inertia matrix and its expression in two frames}
+% source: cap11.tex l.32-58 (H), l.60-176 (dyad), l.178-227 (properties), l.229-287 (frames, principal axes)
+\begin{qbox}
+Define the inertia dyad (no derivation) and relate it to the inertia matrix. Derive the rotation matrix that expresses the inertia
+matrix in two reference frames.
+\qmeta{$\times$2 in the list (2025); Jan 2025; Sep 2024 (only: define the inertia dyad and relate it to the inertia matrix).}
+\qnote{If only the first part is asked (Sep 2024): write points 1--2 of the outline and the properties.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Angular momentum about $C$: $\underline H_C=\int\underline r\times(\underline\omega\times\underline r)dm=\underrightarrow I_C\cdot\underline\omega$; dyad $\underrightarrow I_C=\int(r^2\underrightarrow1-\underline r\,\underline r)dm$.
+\item Inertia matrix = components of the dyad in a basis: $\underrightarrow I_C=[\hat b]\,\underline{\underline I}_C^{(B)}\,[\hat b]^T$; explicit matrix; $\underline H^{(B)}=\underline{\underline I}^{(B)}\underline\omega^{(B)}$.
+\item Change of frame: $[\hat b]^T=\underline{\underline R}_{B\leftarrow A}[\hat a]^T$ $\Rightarrow$ $\underline{\underline I}_C^{(A)}=\underline{\underline R}_{B\leftarrow A}^T\underline{\underline I}_C^{(B)}\underline{\underline R}_{B\leftarrow A}$ (similar matrices).
+\item Properties: symmetric, positive (semi)definite, triangular inequalities; principal axes diagonalise it.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Inertia dyad.} For a rigid body with centre of mass $C$, $\underline r$ = position of $dm$ from $C$ (fixed in the body frame, so
+$\dot{\underline r}=\underline\omega\times\underline r$), the angular momentum about $C$ is
+\begin{equation}
+\underline H_C=\int_{\mathcal B}\underline r\times(\underline\omega\times\underline r)\,dm=\left(\int_{\mathcal B}\left[r^2\underrightarrow{1}-\underline r\,\underline r^T\right]dm\right)\cdot\underline\omega
+=\underrightarrow{I}_C\cdot\underline\omega,
+\end{equation}
+\begin{equation}
+\boxed{\;\underrightarrow{I}_C=\int_{\mathcal B}\left[r^2\,\underrightarrow{1}-\underline r\,\underline r^T\right]dm\;}\qquad
+\underrightarrow1=\hat b_1\hat b_1+\hat b_2\hat b_2+\hat b_3\hat b_3 .
+\end{equation}
+The inertia dyad is a second-order tensor, independent of any frame, that depends only on the mass distribution; acting on
+$\underline\omega$ it gives $\underline H_C$.
+
+\paragraph{Relation with the inertia matrix.} Writing $\underline r=x\hat b_1+y\hat b_2+z\hat b_3$ in a frame $B$:
+\begin{equation}
+\underrightarrow{I}_C=[\hat b_1\ \hat b_2\ \hat b_3]\;\underline{\underline I}_C^{(B)}\;[\hat b_1\ \hat b_2\ \hat b_3]^T,\qquad
+\underline{\underline{I}}_{C}^{(B)}=\int_{\mathcal{B}}\begin{bmatrix}y^{2}+z^{2}&-xy&-xz\\-yx&x^{2}+z^{2}&-yz\\-zx&-zy&x^{2}+y^{2}\end{bmatrix}dm .
+\end{equation}
+The \textbf{inertia matrix} is the projection (matrix of components) of the dyad on the basis $B$:
+$\underline{\underline I}_C^{(B)}=[\hat b]^T\cdot\underrightarrow I_C\cdot[\hat b]$, since $[\hat b]^T\cdot[\hat b]=\underline{\underline I}_{3\times3}$. Diagonal terms: moments
+of inertia; off-diagonal terms: products of inertia. In components, $\underline H_C^{(B)}=\underline{\underline I}_C^{(B)}\underline\omega^{(B)}$. The
+same dyad has different matrices in different frames.
+
+\paragraph{Inertia matrix in two frames (derivation).} Let $\underline{\underline I}_C^{(B)}$ be known and $A$ another frame, with
+\begin{equation}
+\begin{bmatrix}\hat b_1\\ \hat b_2\\ \hat b_3\end{bmatrix}=\underset{B\leftarrow A}{\underline{\underline{R}}}\begin{bmatrix}\hat a_1\\ \hat a_2\\ \hat a_3\end{bmatrix}
+\iff [\hat b_1\ \hat b_2\ \hat b_3]=[\hat a_1\ \hat a_2\ \hat a_3]\,\underset{B\leftarrow A}{\underline{\underline{R}}}^{T}.
+\end{equation}
+Inserting in the expression of the dyad:
+\begin{equation}
+\underrightarrow{I}_C=[\hat b]\,\underline{\underline I}_C^{(B)}[\hat b]^T
+=[\hat a_1\ \hat a_2\ \hat a_3]\;\underbrace{\underset{B\leftarrow A}{\underline{\underline{R}}}^{T}\underline{\underline I}_C^{(B)}\underset{B\leftarrow A}{\underline{\underline{R}}}}_{\underline{\underline I}_C^{(A)}}\;
+\begin{bmatrix}\hat a_1\\ \hat a_2\\ \hat a_3\end{bmatrix},
+\end{equation}
+and since the dyad is unique, the matrix in brackets is its component matrix in $A$:
+\begin{equation}
+\boxed{\;\underline{\underline{I}}_{C}^{(A)}=\underset{B\leftarrow A}{\underline{\underline{R}}}^{T}\,\underline{\underline{I}}_{C}^{(B)}\,\underset{B\leftarrow A}{\underline{\underline{R}}}
+=\underset{A\leftarrow B}{\underline{\underline{R}}}\,\underline{\underline{I}}_{C}^{(B)}\,\underset{B\leftarrow A}{\underline{\underline{R}}}\;}
+\end{equation}
+The two matrices are \textbf{similar} ($\underline{\underline R}^T=\underline{\underline R}^{-1}$): same eigenvalues (principal moments), same trace and
+determinant. Check: $\underline H^{(A)}=\underline{\underline R}^T\underline H^{(B)}=\underline{\underline R}^T\underline{\underline I}^{(B)}\underline{\underline R}\,\underline\omega^{(A)}$.
+
+\paragraph{Properties and principal axes.}
+\begin{itemize}
+\item \textbf{Symmetric}: real eigenvalues and real, orthogonal eigenvectors.
+\item \textbf{Triangular inequalities}: $I_{11}\le I_{22}+I_{33}$ (and cyclic).
+\item \textbf{Positive (semi)definite}: $\underline v^T\underline{\underline I}\underline v=\int v^2r^2(1-\cos^2\phi)dm\ge0$.
+\item With $\underline{\underline T}$ = matrix of the eigenvectors ($\det\underline{\underline T}=1$, a rotation matrix), the similarity transformation gives a diagonal matrix:
+$\underline{\underline I}_C^{(E)}=\underline{\underline T}^{-1}\underline{\underline I}_C^{(B)}\underline{\underline T}=\mathrm{diag}(\lambda_1,\lambda_2,\lambda_3)$: the eigenvectors are the
+\textbf{principal axes of inertia}, $\underset{E\leftarrow B}{\underline{\underline R}}=\underline{\underline T}^T$.
+\end{itemize}
+
+\begin{keyf}
+$\underrightarrow I_C=\int(r^2\underrightarrow1-\underline r\underline r^T)dm$, \ $\underline H_C=\underrightarrow I_C\cdot\underline\omega$, \ $\underrightarrow I_C=[\hat b]\underline{\underline I}^{(B)}[\hat b]^T$, \
+$\underline{\underline I}^{(A)}=\underline{\underline R}_{B\leftarrow A}^T\underline{\underline I}^{(B)}\underline{\underline R}_{B\leftarrow A}$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Distinguish the dyad (frame-independent tensor) from the matrix (its components in a basis).
+\item Order of the product: with $[\hat b]^T=\underline{\underline R}_{B\leftarrow A}[\hat a]^T$, it is $\underline{\underline R}^T\underline{\underline I}^{(B)}\underline{\underline R}$, not $\underline{\underline R}\,\underline{\underline I}^{(B)}\underline{\underline R}^T$.
+\item Off-diagonal elements have a minus sign ($-\int xy\,dm$).
+\end{itemize}
+
+\source{cap11.tex l.32--58 (angular momentum), l.60--176 (inertia dyad and matrix), l.178--227 (properties), l.229--274 (different
+frames), l.276--287 (principal axes). Formulario: \fml{11-HIN}, \fml{11-IRF}.}
+
+% ---------------------------------------------------------------------
+\question{D8}{Torque-free equilibria and their stability without energy dissipation}
+% source: cap11.tex l.386-446 (Euler eqs), l.709-751 (equilibria), l.753-816 (stability), l.818-905 (integrals)
+\begin{qbox}
+List the equilibrium conditions for torque-free attitude motion and comment on their stability in the absence of internal energy
+dissipation. Sketch the intersection of the angular-momentum sphere with the energy ellipsoid.
+\qmeta{$\times$2 in the list (2025); Feb 2025.}
+\qnote{Difference from \qref{D9}: no dissipation (rigid body, $T_{rot}$ constant).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Euler's equations in principal axes with $\underline L=\underline 0$.
+\item Equilibrium: $\underline\omega$ fixed in the body; cases (a) $\omega=0$, (b) spherical: any axis, (c) axisymmetric: symmetry axis or any transverse axis, (d) general: pure spin about a principal axis.
+\item Linear stability of pure spin: $\lambda=\pm\omega_{30}\sqrt{(I_2-I_3)(I_3-I_1)/(I_1I_2)}$: max/min axis imaginary, intermediate axis real $\Rightarrow$ unstable.
+\item Integrals: momentum sphere $\sum H_i^2=H^2$, energy ellipsoid $\sum H_i^2/I_i=2T$; polhodes = intersections; $H^2/2I_1\le T\le H^2/2I_3$.
+\item Sketch: closed curves around max and min axes (neutrally stable), separatrices through the intermediate axis (unstable).
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Euler's equations without torque.} In principal axes ($\underline{\underline I}=\mathrm{diag}(I_1,I_2,I_3)$) and with $\underline L=\underline 0$:
+\begin{equation}
+I_{1}\dot{\omega}_{1}=\left(I_{2}-I_{3}\right)\omega_{2}\omega_{3},\qquad
+I_{2}\dot{\omega}_{2}=\left(I_{3}-I_{1}\right)\omega_{1}\omega_{3},\qquad
+I_{3}\dot{\omega}_{3}=\left(I_{1}-I_{2}\right)\omega_{1}\omega_{2}.
+\end{equation}
+
+\paragraph{Equilibrium solutions.} Look for motions with $\underline\omega$ aligned with a direction $\hat a$ fixed in the body,
+$\underline\omega=\omega(t)[a_1\ a_2\ a_3][\hat e_1\ \hat e_2\ \hat e_3]^T$. Substituting:
+$\dot\omega=\frac{I_2-I_3}{I_1}\frac{a_2a_3}{a_1}\omega^2=\frac{I_3-I_1}{I_2}\frac{a_1a_3}{a_2}\omega^2=\frac{I_1-I_2}{I_3}\frac{a_1a_2}{a_3}\omega^2$, i.e.
+$\omega^{2}a_{2}^{2}a_{3}^{2}(I_{2}-I_{3})I_{2}I_{3}=\omega^{2}a_{1}^{2}a_{3}^{2}(I_{3}-I_{1})I_{1}I_{3}=\omega^{2}a_{1}^{2}a_{2}^{2}(I_{1}-I_{2})I_{1}I_{2}$. These hold if:
+\begin{enumerate}[label=(\alph*)]
+\item $\omega=0$: no rotation;
+\item $I_1=I_2=I_3$ (spherical mass distribution): satisfied for any $(a_1,a_2,a_3)$: \textbf{rotation about any axis};
+\item $I_1=I_2\neq I_3$ (axisymmetric about $\hat e_3$): $a_3=0$ or $a_1=a_2=0$: rotation \textbf{about the symmetry axis or about any axis perpendicular to it};
+\item $I_1<I_2<I_3$ (general body): two components of $\hat a$ must vanish: \textbf{pure spin about one of the principal axes of inertia}.
+\end{enumerate}
+In general, pure spin about a principal axis of inertia is an equilibrium solution (then $\dot\omega=0$: constant angular velocity).
+
+\paragraph{Linear stability of pure spin.} Perturb a spin about $\hat e_3$: $\omega_1=\delta\omega_1$, $\omega_2=\delta\omega_2$,
+$\omega_3=\omega_{30}+\delta\omega_3$. To first order $\delta\dot\omega_3\simeq0$ and
+\begin{equation}
+\begin{bmatrix}\delta\dot\omega_1\\ \delta\dot\omega_2\end{bmatrix}=\omega_{30}\begin{bmatrix}0&\frac{I_2-I_3}{I_1}\\ \frac{I_3-I_1}{I_2}&0\end{bmatrix}\begin{bmatrix}\delta\omega_1\\ \delta\omega_2\end{bmatrix}
+\ \Rightarrow\ \lambda_{1,2}=\pm\omega_{30}\sqrt{\frac{(I_2-I_3)(I_3-I_1)}{I_1I_2}} .
+\end{equation}
+If $I_3$ is the \textbf{maximum or minimum} moment, $(I_2-I_3)(I_3-I_1)<0$: imaginary eigenvalues, bounded oscillations (simply stable in
+the linear sense). If $I_3$ is the \textbf{intermediate} one, one eigenvalue is real and positive: the perturbation grows exponentially
+\textbf{(unstable)}. Linearisation is inconclusive for imaginary eigenvalues, so the conservation laws are used.
+
+\paragraph{Momentum sphere and energy ellipsoid.} Without torques $\underline H_C$ is constant, and the rotational kinetic energy is constant too
+($\dot T_{rot}=\underline\omega\cdot\underline L_C=0$ for a rigid body). With $H_i=I_i\omega_i$:
+\begin{equation}
+H_1^2+H_2^2+H_3^2=H^2\quad\text{(momentum sphere, radius $H$)},\qquad
+\frac{H_1^2}{I_1}+\frac{H_2^2}{I_2}+\frac{H_3^2}{I_3}=2T_{rot}\quad\text{(energy ellipsoid)},
+\end{equation}
+the ellipsoid having semi-axes $a_i=\sqrt{2I_iT_{rot}}$. The motion must lie on both: the possible trajectories (polhodes) are their
+\textbf{intersections}. For given $H$ only a range of energy is feasible (with $I_1>I_2>I_3$):
+$T_{\min}=\frac{H^2}{2I_1}\le T_{rot}\le T_{\max}=\frac{H^2}{2I_3}$.
+\begin{itemize}
+\item $T=T_{\max}$: two intersection points $(0,0,\pm H)$: pure spin about the \textbf{minimum}-inertia axis $\hat e_3$;
+\item $T=T_{\min}$: two points $(\pm H,0,0)$: pure spin about the \textbf{maximum}-inertia axis $\hat e_1$;
+\item $T=H^2/2I_2$: two circles (the \textbf{separatrices}) crossing at $(0,\pm H,0)$: spin about the intermediate axis.
+\end{itemize}
+\begin{center}\includegraphics[width=0.48\linewidth]{polhodes}\hfill
+\begin{minipage}[b]{0.46\linewidth}\small
+Polhodes on the momentum sphere for $I_1:I_2:I_3=3:2:1$ (computed). Near $\hat e_1$ and $\hat e_3$ the curves are small closed loops:
+a small perturbation keeps $\underline\omega$ close to the axis (\textbf{neutral stability}). Through $\hat e_2$ pass the separatrices (thick):
+a small perturbation moves the state far away along them (\textbf{instability}).
+\end{minipage}
+\end{center}
+
+\paragraph{Result (no dissipation).}
+\begin{center}
+\small
+\begin{tabular}{@{}lc@{}}
+\toprule
+spin about & stability, rigid body\\
+\midrule
+maximum-inertia axis & (neutrally) stable\\
+intermediate-inertia axis & unstable\\
+minimum-inertia axis & (neutrally) stable\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{fig2draw}
+A circle (sphere) with three axes $H_1$ (max $I$), $H_2$, $H_3$ (min $I$). Small closed ovals around the $H_1$ and $H_3$ points; two
+great circles (X shape) crossing at the $H_2$ points; label $T_{\min}$, $T_{\max}$ and the separatrix $T=H^2/2I_2$.
+\end{fig2draw}
+
+\begin{keyf}
+Equilibria: pure spin about a principal axis (any axis if spherical; symmetry or transverse axis if axisymmetric); \
+$\lambda=\pm\omega_{30}\sqrt{\frac{(I_2-I_3)(I_3-I_1)}{I_1I_2}}$; \ $\sum H_i^2=H^2$, $\sum H_i^2/I_i=2T$; \ $H^2/2I_{\max}\le T\le H^2/2I_{\min}$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Without dissipation \emph{both} the maximum and the minimum axis are (neutrally) stable; only the intermediate one is unstable.
+\item Explain why linearisation is not conclusive and how the sphere/ellipsoid argument completes it.
+\item With $I_1>I_2>I_3$: maximum energy $\leftrightarrow$ minimum-inertia axis.
+\end{itemize}
+
+\source{cap11.tex l.386--446 (Euler's equations), l.448--473 (kinetic energy), l.709--751 (equilibrium solutions; errata \#17),
+l.753--816 (stability of pure spin), l.818--905 (energy and momentum integrals, polhodes). Formulario: \fml{11-EQS}, \fml{11-MAX}.}
+
+% ---------------------------------------------------------------------
+\question{D9}{Torque-free equilibria and their stability with internal energy dissipation}
+% source: cap11.tex l.709-905 (equilibria, integrals, dissipation), l.909-977 (nutation of axisymmetric bodies)
+\begin{qbox}
+List the equilibrium conditions for torque-free attitude motion and comment on their stability in the presence of internal energy
+dissipation. Define the momentum sphere and the energy ellipsoid. Provide a sketch of a curve that represents the intersection of the
+momentum sphere and the energy ellipsoid while energy reduces.
+\qmeta{Jun 2025 (listed as a 2025 question).}
+\qnote{Difference from \qref{D8}: internal dissipation ($\dot T_{rot}<0$, $\underline H$ constant) changes the stability of the minimum axis.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Euler's equations without torque; equilibria: pure spin about a principal axis (+ spherical, axisymmetric cases).
+\item Momentum sphere $\sum H_i^2=H^2$ and energy ellipsoid $\sum H_i^2/I_i=2T_{rot}$ (definitions, semi-axes); polhodes.
+\item Dissipation: internal $\Rightarrow$ $\underline H$ constant, $T_{rot}$ decreases towards $T_{\min}=H^2/2I_{\max}$.
+\item Sketch: path spiralling away from the min axis, crossing the separatrix, converging to the max axis.
+\item Table: max axis asymptotically stable, min and intermediate unstable; examples (Explorer 1, Earth); axisymmetric bodies (oblate/prolate).
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Equilibria.} In principal axes and without external torque, $I_1\dot\omega_1=(I_2-I_3)\omega_2\omega_3$ and cyclic. Steady rotations
+with $\underline\omega$ fixed in the body exist if: (a) $\omega=0$; (b) spherical body ($I_1=I_2=I_3$): about any axis; (c) axisymmetric
+body ($I_1=I_2\neq I_3$): about the symmetry axis or any transverse axis; (d) general body: \textbf{pure spin about one of the principal axes}.
+Linearising about a spin $\omega_{30}$: $\lambda=\pm\omega_{30}\sqrt{(I_2-I_3)(I_3-I_1)/(I_1I_2)}$: real (unstable) if the spin axis is the
+intermediate one, imaginary if it is the maximum or minimum one (inconclusive): the energy and momentum integrals decide.
+
+\paragraph{Momentum sphere and energy ellipsoid.} With components $H_i=I_i\omega_i$ along the principal axes:
+\begin{itemize}
+\item \textbf{momentum sphere}: $H_1^2+H_2^2+H_3^2=H^2$ -- locus of the states with the given angular momentum magnitude (sphere of radius $H$);
+without external torque $\underline H_C$ is constant, so the state always lies on it;
+\item \textbf{energy ellipsoid} (Poinsot): $\frac{H_1^2}{I_1}+\frac{H_2^2}{I_2}+\frac{H_3^2}{I_3}=2T_{rot}$, i.e.\
+$\frac{H_1^2}{a_1^2}+\frac{H_2^2}{a_2^2}+\frac{H_3^2}{a_3^2}=1$ with $a_i=\sqrt{2I_iT_{rot}}$ (largest axis along the maximum-inertia axis).
+\end{itemize}
+The actual motion is on their intersection (polhode). For given $H$, $\frac{H^2}{2I_{\max}}\le T_{rot}\le\frac{H^2}{2I_{\min}}$: maximum energy
+= spin about the minimum-inertia axis, minimum energy = spin about the maximum-inertia axis; the separatrices ($T=H^2/2I_{int}$) pass
+through the intermediate axis.
+
+\paragraph{Effect of internal energy dissipation.} A real spacecraft is not perfectly rigid: flexible parts, fuel sloshing, nutation dampers
+dissipate energy. These are \emph{internal} effects: they produce no external torque, so \textbf{$\underline H$ (and $|\underline H|$) stays constant}
+while \textbf{$T_{rot}$ decreases}. The state remains on the same momentum sphere but moves to ellipsoids of lower and lower energy: the
+polhode is no longer closed but slowly drifts, \textbf{crossing the separatrix}, until $T_{rot}$ reaches its minimum $T_{\min}=H^2/2I_{\max}$,
+which corresponds to pure spin about the \textbf{maximum-inertia axis}.
+\begin{center}\includegraphics[width=0.48\linewidth]{polhodes_diss}\hfill
+\begin{minipage}[b]{0.46\linewidth}\small
+Path computed by integrating Euler's equations with a small dissipative term that keeps $|\underline H|$ constant and lowers $T_{rot}$
+($I_1:I_2:I_3=3:2:1$). Starting near the minimum-inertia axis ($T\simeq T_{\max}$), the state spirals outwards (growing nutation),
+crosses the separatrix (thick) and converges to the maximum-inertia axis: flat spin about $\hat e_1$.
+\end{minipage}
+\end{center}
+
+\paragraph{Stability with dissipation.}
+\begin{center}
+\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+spin about & no dissipation & with dissipation\\
+\midrule
+minimum-inertia axis & (neutrally) stable & \textbf{unstable}\\
+intermediate-inertia axis & unstable & unstable\\
+maximum-inertia axis & (neutrally) stable & \textbf{(asymptotically) stable}\\
+\bottomrule
+\end{tabular}
+\end{center}
+Pure spin about the maximal inertia axis is the \textbf{only stable configuration} when dissipation is considered (major-axis rule). This
+explains why celestial bodies (like the Earth) rotate about their maximal inertia axis, and why \textbf{Explorer 1}, launched spinning about
+its axis of least inertia (a prolate body with flexible antennas), began to tumble.
+
+\paragraph{Axisymmetric bodies ($I_1=I_2=I_T$).} $2I_3T_{rot}-H^2=I_T(I_3-I_T)(\omega_1^2+\omega_2^2)$; with $H$ constant and $\dot T_{rot}<0$:
+\begin{itemize}
+\item \textbf{oblate} ($I_3>I_T$): $\omega_1^2+\omega_2^2\to0$, the nutation is damped and the body tends to pure spin about $\hat e_3$,
+with $\omega_{3f}=H/I_3$;
+\item \textbf{prolate} ($I_3<I_T$): $\omega_1^2+\omega_2^2$ grows to the maximum compatible with $H$: \textbf{flat spin} about a transverse axis,
+$\sqrt{\omega_{1f}^2+\omega_{2f}^2}=H/I_T$ (nutation angle $\theta\to\pi/2$).
+\end{itemize}
+Hence spin-stabilised satellites must spin about the axis of maximum inertia (or use active control).
+
+\begin{fig2draw}
+Sphere with axes $H_1$ (max $I$), $H_2$, $H_3$ (min $I$); the X-shaped separatrices through $H_2$; a spiral starting as a tiny loop around
+$H_3$, widening, crossing a separatrix and tightening around $H_1$. Arrow: "$T_{rot}\downarrow$, $|\underline H|$ const".
+\end{fig2draw}
+
+\begin{keyf}
+$\sum H_i^2=H^2$ (sphere), $\sum\frac{H_i^2}{I_i}=2T_{rot}$ (ellipsoid, $a_i=\sqrt{2I_iT}$); dissipation: $|\underline H|$ const, $T\downarrow\to\frac{H^2}{2I_{\max}}$;
+only spin about the max-inertia axis stable; $\omega_f=H/I_{\max}$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Internal dissipation does not change $\underline H$ (no external torque): only $T_{rot}$ decreases.
+\item The minimum-inertia axis is stable for a rigid body but \emph{unstable} with dissipation.
+\item In the sketch the curve must cross the separatrix and end at the maximum-inertia axis (minimum energy).
+\end{itemize}
+
+\source{cap11.tex l.709--751 (equilibria), l.753--816 (stability), l.818--905 (sphere, ellipsoid, dissipation, table, Explorer 1),
+l.909--977 (nutation of axisymmetric bodies). Formulario: \fml{11-MAX}.}

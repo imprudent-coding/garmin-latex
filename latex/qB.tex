@@ -1,0 +1,590 @@
+% =====================================================================
+% Group B -- Chapter 5: orbital motion in multibody environments (one question per exam)
+% Source: latex_notes/SFM_05_Orbital Motion in Multibody Environments/cap05.tex
+% =====================================================================
+\qgroup{B}{Chapter 5 -- Multibody environments and the CR3BP}
+
+One of the three orbital-mechanics questions is always on Chapter 5. Notation of the notes: primaries $m_1>m_2$, mass
+parameter $\mu=m_2/(m_1+m_2)$, synodic coordinates $(x,y,z)$, angular velocity $\omega$ of the primaries ($\omega=1$\,TU$^{-1}$
+in canonical units, as in the exam texts). Earth--Moon: $\mu=1/82.27=0.01216$.
+
+\begin{center}
+\small
+\begin{tabular}{@{}lllr@{}}
+\toprule
+Q & Topic & Asked & Page\\
+\midrule
+\ref{q:B1} & Jacobi interval, Earth--Moon transfers without escape & $\times$2, Jan 2023, Jul 2025 & \pageref{q:B1}\\
+\ref{q:B2} & Synodic frame, 5 libration points, ZVC with/without escape & $\times$2, Feb 2025 & \pageref{q:B2}\\
+\ref{q:B3} & Collinear libration points: equation for their position & list & \pageref{q:B3}\\
+\ref{q:B4} & Proof of the Jacobi integral & $\times$2, Sep 2024, Jan 2025, Mar 2025 & \pageref{q:B4}\\
+\ref{q:B5} & Synodic frame: primaries and their $\mu$-dependence & list & \pageref{q:B5}\\
+\ref{q:B6} & $N$-body integrals, Laplace plane, $\underline H_c$ conserved & $\times$2, Jun 2025, Sep 2025 & \pageref{q:B6}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Common data used in this group (computed from $\Omega$ with $\mu=1/82.27$, $\omega=1$):
+\begin{center}
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+ & $L_1$ & $L_2$ & $L_3$ & $L_{4,5}$\\
+\midrule
+$x$ [DU] & $0.8369$ & $1.1557$ & $-1.0051$ & $0.5-\mu$, $y=\pm\sqrt3/2$\\
+$C_i=2\Omega(L_i)$ & $3.18838$ & $3.17220$ & $3.01215$ & $2.98799$\\
+\bottomrule
+\end{tabular}
+\end{center}
+{\footnotesize ($C_1$ in the notes reads 3.18338: typo corrected, errata \#20.) DU $=R=384400$\,km, TU $=1/\omega\simeq4.34$\,days.}
+
+% ---------------------------------------------------------------------
+\question{B1}{Earth--Moon CR3BP: Jacobi interval for transfers without escape}
+% source: cap05.tex l.379-467 (Jacobi integral, ZVS), l.469-571 (libration points, Omega at Li), l.573-613 (special values of C)
+\begin{qbox}
+In the circular restricted three-body problem (CR3BP) with Earth and Moon as primaries, identify the Jacobi-integral
+interval that allows Earth--Moon transfers without any possible escape toward the outer space, referencing the
+zero-velocity curves. Depict the curve geometry.
+\qmeta{$\times$2 in the list (2025); Jan 2023; Jul 2025 ("provide the definition of the Jacobi integral").}
+\qnote{Difference from \qref{B2}: B2 also asks for the synodic frame, the five libration points and the case \emph{with} an
+escape route.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item CR3BP hypotheses; synodic frame; potential $\Omega$; equations $\ddot x-2\omega\dot y=\Omega_x$, \dots
+\item Jacobi integral $C=2\Omega-(\dot x^2+\dot y^2+\dot z^2)$ (one-line proof); $C$ decreases as energy increases.
+\item Zero-velocity surfaces/curves: $v^2=2\Omega-C\ge0$ defines the Hill region; shape (spheres near primaries, cylinder far away).
+\item Libration points and $C_i=2\Omega(L_i)$: $C_1>C_2>C_3>C_{4,5}$; Earth--Moon values.
+\item Answer: $C_2<C<C_1$: the neck at $L_1$ is open (Earth--Moon transfer), the neck at $L_2$ closed (no escape). Sketch.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Model.} The CR3BP studies a third body (spacecraft) of negligible mass, $m\ll m_2<m_1$, attracted by two
+\emph{primaries} (Earth and Moon) that move on circular orbits about their centre of mass with angular velocity
+$\omega=\sqrt{G(m_1+m_2)/R^3}$; the spacecraft does not affect the primaries. In the \textbf{synodic frame} (origin at the centre of
+mass, $\hat\imath$ from $m_1$ towards $m_2$, $\hat k$ along the angular momentum of the primaries, rotating with $\omega$) the primaries are
+fixed at $x_1=-\mu$, $x_2=1-\mu$ (DU $=R$, TU $=1/\omega$), and the motion obeys
+\begin{equation}
+\ddot{x}-2\omega\dot{y}=\frac{\partial\Omega}{\partial x},\qquad
+\ddot{y}+2\omega\dot{x}=\frac{\partial\Omega}{\partial y},\qquad
+\ddot{z}=\frac{\partial\Omega}{\partial z},
+\end{equation}
+\begin{equation}
+\Omega=\frac{\omega^{2}}{2}(x^{2}+y^{2})+\frac{1-\mu}{r_1}+\frac{\mu}{r_2},\qquad
+r_1=\sqrt{(x+\mu)^{2}+y^{2}+z^{2}},\ \ r_2=\sqrt{(x+\mu-1)^{2}+y^{2}+z^{2}} .
+\end{equation}
+
+\paragraph{Jacobi integral (definition).} Multiplying the three equations by $\dot x$, $\dot y$, $\dot z$ and adding, the Coriolis terms
+cancel and, since $\Omega$ depends only on the position, $\frac12\frac{d}{dt}(\dot x^2+\dot y^2+\dot z^2)=\frac{d\Omega}{dt}$. Hence
+\begin{equation}
+C:=2\Omega(x,y,z)-\left(\dot{x}^{2}+\dot{y}^{2}+\dot{z}^{2}\right)=\text{const}
+\end{equation}
+is an integral of motion of the CR3BP, fixed by the initial conditions. It is related to the energy: \textbf{$C$ decreases as the
+mechanical energy increases} (a $\Delta v$ that increases the speed lowers $C$).
+
+\paragraph{Zero-velocity surfaces and curves.} Since $v^2=2\Omega(x,y,z)-C\ge0$, motion is possible only where $2\Omega\ge C$
+(\emph{Hill's region}). The boundary $2\Omega=C$, where the velocity would be zero, is the zero-velocity surface (curve in the
+$x$--$y$ plane). For large $x,y$ the term $\omega^2(x^2+y^2)$ dominates (near-cylinder about $z$); close to a primary the
+corresponding $1/r_i$ term dominates (near-sphere around $m_1$ or $m_2$). For large $C$ (low energy) motion is confined
+inside the spheres or outside the cylinder; as $C$ decreases the regions grow and \textbf{merge through "necks" located at the
+libration points}.
+
+\paragraph{Critical values of $C$.} At a libration point $L_i$ (equilibrium in the synodic frame) the velocity is zero, so $L_i$
+lies on the zero-velocity curve with $C_i=2\Omega(L_i)$. For Earth--Moon:
+$C_1=3.18838>C_2=3.17220>C_3=3.01215>C_{4,5}=2.98799$ (canonical units). The topology changes exactly at these values:
+\begin{itemize}
+\item $C>C_1$: three separate regions (around the Earth, around the Moon, outside): no transfer possible;
+\item $C_2<C<C_1$: the neck at $L_1$ opens;
+\item $C_3<C<C_2$: also the neck at $L_2$ opens (escape);
+\item $C_{4,5}<C<C_3$: forbidden only near $L_4$, $L_5$; \quad $C<C_{4,5}$: motion allowed everywhere.
+\end{itemize}
+
+\paragraph{Answer: Earth--Moon transfers without escape.}
+\begin{equation}
+\boxed{\;C_2<C<C_1\qquad(3.17220<C<3.18838\ \text{for Earth--Moon})\;}
+\end{equation}
+The inner zero-velocity curve has an opening at $L_1$, between Earth and Moon: an \emph{interior transfer} from the region around
+the Earth to the region around the Moon is feasible, passing close to $L_1$. The opening at $L_2$ (behind the Moon) is still closed:
+the inner region (Earth + Moon) is separated by a forbidden ring from the exterior region, so \textbf{no escape} toward outer space is
+possible. Motion outside the outer curve is also allowed, but it cannot be reached from the inner region.
+
+\begin{center}
+\includegraphics[width=0.48\linewidth]{zvc_noescape}\hfill
+\begin{minipage}[b]{0.48\linewidth}\small
+Computed with $\mu=1/82.27$ and $C=(C_1+C_2)/2$. Hatched: forbidden region ($2\Omega<C$).
+The white region around E and M is connected through the $L_1$ neck;
+the hatched ring is closed at $L_2$, so the exterior (white, outside) is unreachable.\\[4pt]
+Lowering $C$ (more energy, e.g.\ a larger injection $\Delta v$) widens the $L_1$ neck; at $C=C_2$ the $L_2$ neck opens and escape
+becomes possible.
+\end{minipage}
+\end{center}
+
+\begin{fig2draw}
+E (big dot) and M (small dot) on the $x$-axis. Draw a closed curve around the Earth and a small one around the Moon touching
+it at $L_1$ (between them, slightly open: a "peanut" with a neck), and a large closed oval outside both, closed near $L_2$.
+Hatch the ring between the inner peanut and the outer oval. Write $C_2<C<C_1$.
+\end{fig2draw}
+
+\begin{keyf}
+$C=2\Omega-(\dot x^2+\dot y^2+\dot z^2)$, \ $\Omega=\frac{\omega^2}{2}(x^2+y^2)+\frac{1-\mu}{r_1}+\frac{\mu}{r_2}$, \
+Hill region $2\Omega\ge C$, \ $C_i=2\Omega(L_i)$, \ $C_1>C_2>C_3>C_{4,5}$, \ no-escape transfer: $C_2<C<C_1$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item Higher $C$ means \emph{lower} energy: the order of the intervals is reversed with respect to the energy.
+\item "Without escape" requires the $L_2$ neck closed (lower bound $C_2$) and "transfer" requires the $L_1$ neck open (upper bound $C_1$).
+\item The forbidden region is where $2\Omega<C$; hatch it clearly and mark $L_1$, $L_2$.
+\end{itemize}
+
+\source{cap05.tex l.244--305 (CR3BP, synodic frame), l.307--413 (equations, Jacobi integral), l.415--467 (zero-velocity surfaces),
+l.573--613 (special values of $C$, Earth--Moon values). Figure computed in \texttt{figures/src/make\_figures.py}.}
+
+% ---------------------------------------------------------------------
+\question{B2}{Synodic frame, the five libration points, zero-velocity curves with and without escape}
+% source: cap05.tex l.259-305, 469-535, 573-613
+\begin{qbox}
+In the CR3BP, plot the five libration points in the synodic frame and define that frame. Then, for Earth--Moon primaries,
+draw the zero-velocity curves that allow Earth-to-Moon transfers without escape; also show the case where an escape route
+exists, and state the corresponding Jacobi-constant interval.
+\qmeta{$\times$2 in the list (2025); Feb 2025 ("draw the case with a single escape route outward and define the interval of $C$").}
+\qnote{Difference from \qref{B1}: adds the synodic frame, the libration points and the escape case.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Synodic frame: origin at the centre of mass, $\hat\imath$ towards $m_2$, $\hat k\parallel\underline H$, rotating with $\omega$; canonical units; primaries at $-\mu$, $1-\mu$.
+\item Libration points: equilibria with zero velocity, $\Omega_x=\Omega_y=0$; three collinear ($L_3<x_1<L_1<x_2<L_2$) and two triangular ($r_1=r_2=1$). Sketch.
+\item Jacobi integral and Hill region $2\Omega\ge C$; $C_i=2\Omega(L_i)$, $C_1>C_2>C_3>C_{4,5}$.
+\item No escape: $C_2<C<C_1$ (sketch). Single escape route: $C_3<C<C_2$, exit through $L_2$ (sketch).
+\item Complete list of the five regimes.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Synodic frame.} Two primaries $m_1>m_2$ move on circular orbits about their centre of mass $O'$ with constant
+distance $R$ and angular velocity $\omega=\sqrt{G(m_1+m_2)/R^3}$. The synodic frame $\{\hat\imath,\hat\jmath,\hat k\}$ has origin in
+$O'$, $\hat\imath$ along the line of the primaries (from $m_1$ to $m_2$), $\hat k$ parallel to their angular momentum
+$\underline H$, $\hat\jmath=\hat k\times\hat\imath$, and \textbf{rotates with the primaries}: with respect to the inertial axes
+$\{\hat c_1,\hat c_2,\hat c_3\}$ (coincident at $t=0$)
+\begin{equation}
+\begin{bmatrix}\hat\imath\\ \hat\jmath\\ \hat k\end{bmatrix}=
+\begin{bmatrix}\cos\omega t&\sin\omega t&0\\-\sin\omega t&\cos\omega t&0\\0&0&1\end{bmatrix}
+\begin{bmatrix}\hat c_1\\ \hat c_2\\ \hat c_3\end{bmatrix}.
+\end{equation}
+In canonical units (DU $=R$, TU $=1/\omega$, so $G(m_1+m_2)=1$) the primaries are \emph{fixed} at $x_1=-\mu$, $x_2=1-\mu$,
+with $\mu=m_2/(m_1+m_2)<1/2$. The spacecraft position is $\underline r=x\hat\imath+y\hat\jmath+z\hat k$ and its equations of motion
+are $\ddot x-2\omega\dot y=\Omega_x$, $\ddot y+2\omega\dot x=\Omega_y$, $\ddot z=\Omega_z$ with
+$\Omega=\frac{\omega^2}{2}(x^2+y^2)+\frac{1-\mu}{r_1}+\frac{\mu}{r_2}$.
+
+\paragraph{Libration (Lagrange) points.} Equilibrium points in the synodic frame, where the spacecraft can stay indefinitely if
+placed with zero velocity. They lie in the $x$--$y$ plane and require $\dot x=\dot y=\ddot x=\ddot y=0$, i.e.\ $\Omega_x=\Omega_y=0$:
+\begin{itemize}
+\item \textbf{collinear points} ($y=0$): one root of a quintic in each interval: $L_3$ ($x<-\mu$, beyond $m_1$), $L_1$ (between the
+primaries), $L_2$ (beyond $m_2$) -- see \qref{B3};
+\item \textbf{triangular points} ($y\neq0$): $r_1=r_2=1$ DU, i.e.\ $L_4$, $L_5$ form \textbf{equilateral triangles} with the primaries
+($x=\frac12-\mu$, $y=\pm\frac{\sqrt3}{2}$), above and below the $x$-axis, for any $\mu$.
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.5\linewidth]{lagrange}\hfill
+\includegraphics[width=0.36\linewidth]{synodic}
+\end{center}
+$\Omega$ is stationary at every $L_i$: only stationary (saddle) at $L_{1,2,3}$, a minimum at $L_{4,5}$ with
+$2\Omega_{\min}=3-\mu(1-\mu)$.
+
+\paragraph{Zero-velocity curves.} The Jacobi integral $C=2\Omega-v^2$ is constant; motion is allowed only where $2\Omega\ge C$.
+At $L_i$ the velocity is zero, so the curve through $L_i$ corresponds to $C_i=2\Omega(L_i)$, with
+$C_1>C_2>C_3>C_{4,5}$ (Earth--Moon: 3.18838, 3.17220, 3.01215, 2.98799).
+
+\paragraph{The two requested cases.}
+\begin{center}
+\includegraphics[width=0.46\linewidth]{zvc_noescape}\hfill
+\includegraphics[width=0.46\linewidth]{zvc_escape}
+\end{center}
+\begin{itemize}
+\item \textbf{Earth--Moon transfer, no escape}: $\boxed{C_2<C<C_1}$. The neck at $L_1$ is open (interior transfer Earth $\leftrightarrow$
+Moon close to $L_1$), the neck at $L_2$ is closed: the forbidden ring separates the Earth--Moon region from outer space.
+\item \textbf{Single escape route}: $\boxed{C_3<C<C_2}$. Both necks $L_1$ and $L_2$ are open: interior transfers (through $L_1$) and
+exterior transfers (through $L_2$) are feasible, and a spacecraft can leave the Earth--Moon system \emph{only} through the opening
+behind the Moon at $L_2$; the forbidden region becomes a horseshoe, still closed at $L_3$.
+\end{itemize}
+
+\paragraph{All regimes} (as $C$ decreases, i.e.\ energy increases):
+\begin{enumerate}[label=(\arabic*)]
+\item $C<C_{4,5}$: motion allowed in the entire space (no zero-velocity curve);
+\item $C_{4,5}<C<C_3$: motion forbidden only near $L_4$ and $L_5$;
+\item $C_3<C<C_2$: interior (via $L_1$) and exterior (via $L_2$) transfers;
+\item $C_2<C<C_1$: interior transfers only; outside motion feasible but not reachable;
+\item $C>C_1$: no transfer: confined near $m_1$, near $m_2$, or outside.
+\end{enumerate}
+\begin{center}
+\includegraphics[width=0.95\linewidth]{zvc_cases}
+\end{center}
+
+\begin{fig2draw}
+Axes $x,y$; E at $-\mu$ (left of $O'$, almost on it), M at $1-\mu$; $L_1$ between them close to the Moon, $L_2$ just beyond the Moon,
+$L_3$ at $x\approx-1$, $L_4$/$L_5$ at the vertices of the equilateral triangles. Then two sketches: hatched ring closed at
+$L_2$ ($C_2<C<C_1$) and hatched horseshoe open at $L_2$ ($C_3<C<C_2$).
+\end{fig2draw}
+
+\begin{keyf}
+Synodic: origin c.m., $\hat\imath$ $m_1\!\to\! m_2$, $\hat k\parallel\underline H$, rotation $\omega t$; $x_1=-\mu$, $x_2=1-\mu$; \
+$L_{4,5}$: $r_1=r_2=1$; \ $C=2\Omega-v^2$; \ no escape $C_2<C<C_1$; escape through $L_2$: $C_3<C<C_2$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item $L_1$ is between the primaries, $L_2$ beyond the smaller one, $L_3$ beyond the larger one (on the opposite side).
+\item The frame rotates: libration points are equilibria \emph{in the synodic frame} (in inertial space they rotate with the primaries).
+\item "Single escape route" = only $L_2$ open (not $L_3$): lower bound $C_3$.
+\end{itemize}
+
+\source{cap05.tex l.259--305 (synodic frame), l.469--535 (libration points), l.537--571 ($\Omega$ at $L_i$), l.573--613 (special
+values of $C$; errata \#20). Figures computed in \texttt{figures/src/make\_figures.py}.}
+
+% ---------------------------------------------------------------------
+\question{B3}{Collinear libration points: conditions and equation for their position}
+% source: cap05.tex l.469-508 (+ l.510-535 triangular)
+\begin{qbox}
+In the CR3BP, draw the libration points in the synodic frame. Starting from the equations of motion
+$\ddot x-2\dot y=\Omega_x$, $\ddot y+2\dot x=\Omega_y$, $\ddot z=\Omega_z$, $\Omega=\frac{x^2+y^2}{2}+\frac{1-\mu}{r_1}+\frac{\mu}{r_2}$,
+define the conditions of the collinear libration points and derive the equation for their position ($r_1$ and $r_2$ are the
+distances to the primaries).
+\qmeta{list by chapter (Ch.\,5).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Sketch of $L_1\dots L_5$ in the synodic frame.
+\item Equilibrium: $\dot x=\dot y=\dot z=0$ and $\ddot x=\ddot y=\ddot z=0$ $\Rightarrow$ $\Omega_x=\Omega_y=\Omega_z=0$; $z=0$.
+\item Explicit $\Omega_x$, $\Omega_y$; collinear: $y=0$ $\Rightarrow$ $\Omega_y=0$ automatically.
+\item Equation $x-\frac{(1-\mu)(x+\mu)}{r_1^3}-\frac{\mu(x+\mu-1)}{r_2^3}=0$ with $r_1=|x+\mu|$, $r_2=|x+\mu-1|$.
+\item Three intervals $\Rightarrow$ three quintics, one real root each: $L_3$, $L_1$, $L_2$; Earth--Moon values.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Libration points.} With canonical units ($\omega=1$), primaries at $x_1=-\mu$ (mass $1-\mu$) and $x_2=1-\mu$ (mass $\mu$).
+Libration points are equilibrium points in the synodic frame: a spacecraft placed there with zero velocity remains there.
+\begin{center}\includegraphics[width=0.5\linewidth]{lagrange}\end{center}
+
+\paragraph{Equilibrium conditions.} Equilibrium requires zero velocity and zero acceleration in the synodic frame:
+\begin{equation}
+\dot x=\dot y=\dot z=0,\qquad \ddot x=\ddot y=\ddot z=0\;\Longrightarrow\;
+\frac{\partial\Omega}{\partial x}=\frac{\partial\Omega}{\partial y}=\frac{\partial\Omega}{\partial z}=0,
+\end{equation}
+i.e.\ libration points are the stationary points of $\Omega$ (the Coriolis terms vanish because the velocity is zero).
+$\Omega_z=-z\left[\frac{1-\mu}{r_1^3}+\frac{\mu}{r_2^3}\right]=0$ gives $z=0$: the points lie in the plane of the primaries. With
+$r_1=\sqrt{(x+\mu)^2+y^2}$, $r_2=\sqrt{(x+\mu-1)^2+y^2}$:
+\begin{equation}
+\sys{\text{(A)}\quad&\Omega_x=x-\frac{(1-\mu)(x+\mu)}{r_1^{3}}-\frac{\mu(x+\mu-1)}{r_2^{3}}=0\\
+\text{(B)}\quad&\Omega_y=y-\frac{(1-\mu)\,y}{r_1^{3}}-\frac{\mu\,y}{r_2^{3}}=0}
+\end{equation}
+
+\paragraph{Collinear points.} They are sought on the $x$-axis, $y=0$: (B) is then satisfied identically, and only (A) remains,
+with $r_1=|x+\mu|$, $r_2=|x+\mu-1|$:
+\begin{equation}
+\boxed{\;x-\frac{(1-\mu)(x+\mu)}{|x+\mu|^{3}}-\frac{\mu\,(x+\mu-1)}{|x+\mu-1|^{3}}=0\;}
+\end{equation}
+Physically: gravity of the two primaries balances the centrifugal term $x$ (the point co-rotates with the primaries). The
+absolute values split the axis into three intervals; in each one the equation becomes a quintic polynomial in $x$ with a single
+admissible real root:
+\begin{itemize}
+\item[(a)] $x<-\mu$ (beyond $m_1$): $r_1=-(x+\mu)$, $r_2=1-\mu-x$ $\Rightarrow$ \textbf{$L_3$}, left exterior point;
+\item[(b)] $-\mu<x<1-\mu$ (between the primaries): $r_1=x+\mu$, $r_2=1-\mu-x$ $\Rightarrow$ \textbf{$L_1$}, interior point;
+\item[(c)] $x>1-\mu$ (beyond $m_2$): $r_1=x+\mu$, $r_2=x+\mu-1$ $\Rightarrow$ \textbf{$L_2$}, right exterior point.
+\end{itemize}
+For example, for $L_1$ with $\gamma=r_2$ (distance from $m_2$), $x=1-\mu-\gamma$, $r_1=1-\gamma$:
+\begin{equation}
+1-\mu-\gamma-\frac{1-\mu}{(1-\gamma)^2}+\frac{\mu}{\gamma^2}=0,
+\end{equation}
+which, multiplied by $\gamma^2(1-\gamma)^2$, is a quintic in $\gamma$ \notinnotes. For small $\mu$, $\gamma\approx(\mu/3)^{1/3}$ for both
+$L_1$ and $L_2$ (Hill sphere) \notinnotes. Earth--Moon ($\mu=0.01216$): $x_{L_1}=0.8369$, $x_{L_2}=1.1557$, $x_{L_3}=-1.0051$ DU,
+i.e.\ $L_1$ about 58\,000\,km and $L_2$ about 64\,500\,km from the Moon.
+
+\paragraph{For completeness: triangular points.} If $y\neq0$, (B) divided by $y$ gives $1-\frac{1-\mu}{r_1^3}-\frac{\mu}{r_2^3}=0$, satisfied by
+$r_1=r_2=1$; inserted in (A): $x-(1-\mu)(x+\mu)-\mu(x+\mu-1)=0$ identically. Hence $L_4$, $L_5$ at the vertices of the two
+equilateral triangles built on the primaries.
+
+\begin{keyf}
+Equilibrium $\Leftrightarrow\nabla\Omega=\underline 0$ ($z=0$); collinear ($y=0$): $x-\dfrac{(1-\mu)(x+\mu)}{r_1^3}-\dfrac{\mu(x+\mu-1)}{r_2^3}=0$,
+$r_1=|x+\mu|$, $r_2=|x+\mu-1|$; intervals $x<-\mu$ ($L_3$), $-\mu<x<1-\mu$ ($L_1$), $x>1-\mu$ ($L_2$).
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item The condition is on $\nabla\Omega$, not on the gravitational force alone: the centrifugal term $x$ is essential.
+\item Keep the absolute values (or the signs of $x+\mu$ and $x+\mu-1$) in each interval.
+\item Naming: $L_1$ between the primaries, $L_2$ beyond $m_2$, $L_3$ beyond $m_1$.
+\end{itemize}
+
+\further
+Stability (commented section of the notes): $\Omega$ is a saddle at $L_{1,2,3}$, which are \emph{unstable}; $L_{4,5}$ are minima of
+$\Omega$ and, according to the linear analysis, neutrally stable if $\mu<\frac12-\frac{\sqrt{69}}{18}\simeq0.0385$ (Earth--Moon
+satisfies it).
+
+\source{cap05.tex l.469--508 (collinear points), l.510--535 (triangular points), l.537--571 ($\Omega$ at $L_i$); numerical roots
+from \texttt{figures/src/make\_figures.py}.}
+
+% ---------------------------------------------------------------------
+\question{B4}{Synodic frame and proof of the Jacobi integral}
+% source: cap05.tex l.259-413
+\begin{qbox}
+In the CR3BP, define the synodic frame and its coordinates $(x,y,z)$. Starting from
+$\ddot x-2\dot y=\frac{\partial\Omega}{\partial x}$, $\ddot y+2\dot x=\frac{\partial\Omega}{\partial y}$, $\ddot z=\frac{\partial\Omega}{\partial z}$,
+$\Omega=\frac{x^2+y^2}{2}+\frac{1-\mu}{r_1}+\frac{\mu}{r_2}$, prove (and give) the Jacobi integral.
+\qmeta{$\times$2 in the list (2025); Sep 2024 ("Jacobi integral"); Jan 2025 ("from the equations with the derivatives of $\Omega$ to the
+Jacobi integral"); Mar 2025 ("Jacobi integral").}
+\qnote{Sep 2024 Q3 mentions "the same question as January about $\Omega$": if $\Omega$ is the CR3BP potential it is this question;
+if it is the RAAN, see \qref{C3}.}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item CR3BP hypotheses; synodic frame (origin, axes, rotation), canonical units, $\mu$, positions of the primaries; coordinates $(x,y,z)$.
+\item (Optional) origin of the equations: acceleration in the rotating frame (Coriolis $2\omega$, centrifugal $\omega^2$).
+\item Multiply by $\dot x,\dot y,\dot z$ and add: Coriolis terms cancel.
+\item $\Omega=\Omega(x,y,z)$ only $\Rightarrow$ RHS $=d\Omega/dt$; LHS $=\frac12 dv^2/dt$ $\Rightarrow$ $C=2\Omega-v^2$ constant.
+\item Meaning: integral of motion, related to energy ($C\downarrow$ when $\mathcal E\uparrow$); zero-velocity surfaces.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Problem and synodic frame.} CR3BP: a spacecraft of negligible mass moves under the attraction of two primaries
+$m_1>m_2$ that describe circular orbits about their centre of mass with constant distance $R$ and angular velocity
+$\omega=\sqrt{G(m_1+m_2)/R^3}$. The \textbf{synodic frame} $\{\hat\imath,\hat\jmath,\hat k\}$ has
+\begin{itemize}
+\item origin $O'$ at the centre of mass of the primaries;
+\item $\hat\imath$ along the line joining the primaries, pointing from $m_1$ to $m_2$; $\hat k$ parallel to the angular momentum of the
+primaries (normal to their orbit plane); $\hat\jmath=\hat k\times\hat\imath$;
+\item it \textbf{rotates} with angular velocity $\underline\omega=\omega\hat k$ with respect to the inertial frame, so the primaries are fixed.
+\end{itemize}
+Canonical units: DU $=R$, TU $=1/\omega$ (so $\omega=1$ and $G(m_1+m_2)=1$); $\mu=m_2/(m_1+m_2)$, $m_1$ at $x=-\mu$, $m_2$ at
+$x=1-\mu$. The coordinates $(x,y,z)$ are the components of $\underline r=x\hat\imath+y\hat\jmath+z\hat k$ in this rotating frame, and
+$r_1=\sqrt{(x+\mu)^2+y^2+z^2}$, $r_2=\sqrt{(x+\mu-1)^2+y^2+z^2}$ are the distances from the primaries.
+
+\paragraph{Where the equations come from.} Differentiating $\underline r=x\hat\imath+y\hat\jmath+z\hat k$ twice with
+$\dot{\hat\imath}=\omega\hat\jmath$, $\dot{\hat\jmath}=-\omega\hat\imath$:
+$\ddot{\underline r}=(\ddot x-2\omega\dot y-\omega^2x)\hat\imath+(\ddot y+2\omega\dot x-\omega^2y)\hat\jmath+\ddot z\hat k$
+(Coriolis and centrifugal terms). Equating to the gravitational acceleration of the two primaries and moving the centrifugal terms
+to the right-hand side gives the given equations with the pseudo-potential $\Omega$ (centrifugal + gravitational).
+
+\paragraph{Proof.} Multiply the three equations by $\dot x$, $\dot y$, $\dot z$ respectively and add:
+\begin{equation}
+\dot x\ddot x-2\dot x\dot y+\dot y\ddot y+2\dot y\dot x+\dot z\ddot z
+=\dot x\frac{\partial\Omega}{\partial x}+\dot y\frac{\partial\Omega}{\partial y}+\dot z\frac{\partial\Omega}{\partial z}.
+\end{equation}
+\begin{itemize}
+\item The Coriolis terms cancel: $-2\dot x\dot y+2\dot y\dot x=0$ (the Coriolis acceleration is orthogonal to the relative velocity
+and does no work).
+\item Left-hand side: $\dot x\ddot x+\dot y\ddot y+\dot z\ddot z=\frac12\frac{d}{dt}\left(\dot x^2+\dot y^2+\dot z^2\right)$.
+\item Right-hand side: $\Omega$ depends only on $(x,y,z)$, \emph{not explicitly on time} (the primaries are fixed in the synodic frame),
+so the chain rule gives $\Omega_x\dot x+\Omega_y\dot y+\Omega_z\dot z=\frac{d\Omega}{dt}$.
+\end{itemize}
+Therefore
+\begin{equation}
+\frac12\frac{d}{dt}\left(\dot{x}^{2}+\dot{y}^{2}+\dot{z}^{2}\right)=\frac{d\Omega}{dt}
+\;\Longrightarrow\;
+\frac{d}{dt}\left[\Omega-\tfrac12\left(\dot{x}^{2}+\dot{y}^{2}+\dot{z}^{2}\right)\right]=0,
+\end{equation}
+\begin{equation}
+\boxed{\;C:=2\Omega(x,y,z)-\left(\dot{x}^{2}+\dot{y}^{2}+\dot{z}^{2}\right)=\text{const}\;}\qquad
+2\Omega=x^2+y^2+\frac{2(1-\mu)}{r_1}+\frac{2\mu}{r_2}.
+\end{equation}
+
+\paragraph{Meaning.} $C$ (Jacobi constant) is the only known integral of motion of the CR3BP; it is fixed by the initial conditions,
+$C=2\Omega(\underline r_0)-v_0^2$ with $v_0$ the velocity \emph{relative to the synodic frame}. It plays the role of an energy:
+$C$ \textbf{decreases as the mechanical energy increases} (e.g.\ after a $\Delta v$ that increases the speed). It is not the
+inertial energy, which is not conserved because the primaries move. Since $v^2=2\Omega-C\ge0$, it defines the
+\textbf{zero-velocity surfaces} $2\Omega=C$, which bound the regions of possible motion (Hill's regions); see \qref{B1}.
+
+\begin{keyf}
+$\ddot x-2\dot y=\Omega_x$, $\ddot y+2\dot x=\Omega_y$, $\ddot z=\Omega_z$; \ $\times(\dot x,\dot y,\dot z)$ and sum $\Rightarrow$
+$\frac12\frac{d}{dt}v^2=\frac{d\Omega}{dt}$; \ $C=2\Omega-(\dot x^2+\dot y^2+\dot z^2)$, $\Omega=\frac{x^2+y^2}{2}+\frac{1-\mu}{r_1}+\frac{\mu}{r_2}$.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item The key step is that $\Omega$ is time-independent in the synodic frame; say it explicitly.
+\item Show the cancellation of the Coriolis terms.
+\item $v$ is the velocity relative to the rotating frame; $C$ is not the energy (it decreases when the energy increases).
+\item With dimensional units the equations contain $\omega$ ($\ddot x-2\omega\dot y$, $\frac{\omega^2}{2}(x^2+y^2)$); the proof is identical.
+\end{itemize}
+
+\further
+In terms of inertial quantities, $C=-2(\mathcal E-\omega H_z)$, where $\mathcal E$ and $H_z$ are the inertial specific energy and angular
+momentum component of the spacecraft: neither is conserved separately, but this combination is \notinnotes.
+
+\source{cap05.tex l.244--305 (CR3BP and synodic frame), l.307--378 (equations of motion), l.379--413 (Jacobi integral),
+l.415--467 (zero-velocity surfaces). Formulario: not included (theory only).}
+
+% ---------------------------------------------------------------------
+\question{B5}{Synodic frame: origin, positions and gravitational parameters of the primaries}
+% source: cap05.tex l.111-236 (two-body problem, omega), l.244-305 (synodic frame)
+\begin{qbox}
+In the CR3BP, define the synodic frame and locate its origin. Show analytically how to obtain the positions of the two primaries in
+terms of the mass ratio $\mu$ and give their gravitational parameters in terms of $\mu$.
+\qmeta{list by chapter (Ch.\,5).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Hypotheses of the CR3BP; the primaries move on circles about their centre of mass $O'$ (two-body problem).
+\item Synodic frame: origin $O'$, $\hat\imath$ towards $m_2$, $\hat k\parallel\underline H$, rotating with $\omega=\sqrt{GM/R^3}$; rotation matrix.
+\item Positions: $x_2-x_1=R$ and $m_1x_1+m_2x_2=0$ $\Rightarrow$ $x_1=-\frac{m_2}{M}R$, $x_2=\frac{m_1}{M}R$.
+\item Canonical units DU $=R$, TU $=1/\omega$ $\Rightarrow$ $GM=$ DU$^3$/TU$^2$; $\mu=m_2/M$: $x_1=-\mu$, $x_2=1-\mu$; $Gm_1=1-\mu$, $Gm_2=\mu$.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Motion of the primaries.} In the two-body problem the centre of mass $O'$ of $m_1$ and $m_2$ moves uniformly and can be
+taken as origin of an inertial frame; then $m_1\underline R_1+m_2\underline R_2=\underline 0$ and each primary moves on a conic about
+$O'$, the two conics having the same eccentricity, with $a_1/a_2=m_2/m_1$ and mean motion $\omega^2=G M/(a_1+a_2)^3$,
+$M=m_1+m_2$. In the CR3BP the primaries move on \textbf{circles} ($e=0$) at constant distance $R=a_1+a_2$, hence
+\begin{equation}
+\omega=\sqrt{\frac{G(m_1+m_2)}{R^{3}}}=\text{const}.
+\end{equation}
+
+\paragraph{Synodic frame.} Origin at $O'$ (centre of mass of the primaries); $\hat\imath$ along the line of the primaries pointing towards
+$m_2$; $\hat k$ parallel to the angular momentum $\underline H$ of the primaries; $\hat\jmath$ completes the right-handed triad. It
+rotates with them: if it coincides with the inertial frame $\{\hat c_i\}$ at $t=0$, $[\hat\imath\ \hat\jmath\ \hat k]^T=R_3(\omega t)[\hat c_1\ \hat c_2\ \hat c_3]^T$.
+In this frame the primaries are at rest on the $x$-axis.
+
+\paragraph{Positions of the primaries.} With $x_1<0<x_2$ the abscissas of $m_1$ and $m_2$:
+\begin{equation}
+\sys{&x_2-x_1=R\\ &m_1x_1+m_2x_2=0\ \text{(origin at the centre of mass)}}
+\;\Longrightarrow\;
+\sys{&x_1=-\frac{m_2}{m_1+m_2}\,R\\ &x_2=\frac{m_1}{m_1+m_2}\,R}
+\end{equation}
+(from the second equation $x_2=-\frac{m_1}{m_2}x_1$; substituting in the first: $-x_1\frac{m_1+m_2}{m_2}=R$).
+
+\paragraph{Mass parameter and canonical units.} Define
+\begin{equation}
+\mu:=\frac{m_2}{m_1+m_2}\in\left(0,\tfrac12\right)\quad(m_1>m_2),\qquad \text{DU}=R,\qquad \text{TU}=\omega^{-1}.
+\end{equation}
+Then $\omega=1$ TU$^{-1}$ and, from $\omega^2=G(m_1+m_2)/R^3$, $G(m_1+m_2)=\dfrac{\text{DU}^3}{\text{TU}^2}$. Therefore
+\begin{equation}
+\boxed{\;x_1=-\mu\ \text{DU},\quad x_2=(1-\mu)\ \text{DU};\qquad
+Gm_1=(1-\mu)\,\frac{\text{DU}^3}{\text{TU}^2},\quad Gm_2=\mu\,\frac{\text{DU}^3}{\text{TU}^2}\;}
+\end{equation}
+and the distance between the primaries is $x_2-x_1=1$ DU. This is why the equations of motion contain $(1-\mu)$ and $\mu$ as
+gravitational parameters and $(x+\mu)$, $(x+\mu-1)$ in the distances. Since $\mu<\frac12$ the origin is closer to $m_1$.
+Earth--Moon: $\mu=1/82.27=0.01216$, so the barycentre is at $\mu R\approx4670$\,km from the Earth's centre, i.e.\ inside the Earth
+\notinnotes.
+
+\begin{center}\includegraphics[width=0.36\linewidth]{synodic}\end{center}
+
+\begin{keyf}
+$\omega=\sqrt{G(m_1+m_2)/R^3}$; \ $x_1=-\dfrac{m_2}{M}R=-\mu$, \ $x_2=\dfrac{m_1}{M}R=1-\mu$; \ $\mu=\dfrac{m_2}{m_1+m_2}$; \
+$Gm_1=1-\mu$, $Gm_2=\mu$ (DU$^3$/TU$^2$).
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item The origin is the centre of mass, \emph{not} the centre of $m_1$.
+\item $\mu$ is the mass fraction of the \emph{smaller} primary; $m_1$ is at $-\mu$, $m_2$ at $1-\mu$.
+\item Show the two equations (distance and centre of mass) and the step $G(m_1+m_2)=1$ in canonical units.
+\end{itemize}
+
+\source{cap05.tex l.111--236 (problem of two bodies, $\omega^2=GM/(a_1+a_2)^3$), l.244--305 (CR3BP, synodic frame, positions and
+gravitational parameters).}
+
+% ---------------------------------------------------------------------
+\question{B6}{Integrals of motion of the $N$-body problem; the Laplace plane}
+% source: cap05.tex l.28-109
+\begin{qbox}
+Identify the integrals of motion in the problem of $N$ bodies ($\underline R_i$ and $\dot{\underline R}_i$ are the position and velocity of
+each point mass $m_i$ in a generic inertial frame) and provide their expressions. Prove that the angular momentum is constant.
+Define the invariant Laplace plane and provide the expression of the remarkable vector orthogonal to this plane.
+\qmeta{$\times$2 in the list (2025); Jun 2025; Sep 2025 (only: Laplace plane and the vector orthogonal to it).}
+\qnote{If only the Laplace plane is asked (Sep 2025): write the equations of motion, the definition of $\underline H_c$, the proof
+that it is constant and the definition of the plane (points 1, 4, 5 of the outline).}
+\end{qbox}
+
+\begin{outline}
+\begin{enumerate}
+\item Equations: $m_i\ddot{\underline R}_i=\sum_{j\neq i}Gm_im_j\underline r_{ij}/r_{ij}^3$; internal forces sum to zero.
+\item Linear momentum $\sum m_i\dot{\underline R}_i=\underline a$ and centre of mass $\sum m_i\underline R_i=\underline at+\underline b$ (6 integrals).
+\item Energy $\mathcal E=T+U$ constant (1 integral).
+\item Angular momentum about $C$: $\underline H_c=\sum\underline r_i\times m_i\dot{\underline R}_i$; proof $\dot{\underline H}_c=\underline 0$ (3 integrals).
+\item Laplace (invariant) plane: through $C$, orthogonal to $\underline H_c$. Total: 10 integrals.
+\end{enumerate}
+\end{outline}
+
+\answer
+\paragraph{Equations of motion.} $N$ point masses $m_i$, positions $\underline R_i$ in an inertial frame centred in $O$; only mutual
+gravitational attraction:
+\begin{equation}
+m_{i}\,\ddot{\underline R}_{i}=G\sum_{j=1,\,j\neq i}^{N}\frac{m_{i}m_{j}}{r_{ij}^{3}}\,\underline{r}_{ij},\qquad
+\underline r_{ij}=\underline R_j-\underline R_i,\ \ r_{ij}=|\underline r_{ij}|.
+\end{equation}
+The gravitational forces are \emph{internal} and act in equal and opposite pairs ($\underline r_{ji}=-\underline r_{ij}$), so their vector
+sum is zero.
+
+\paragraph{1. Linear momentum and centre of mass (6 scalar integrals).} Summing over $i$:
+\begin{equation}
+\sum_{i=1}^{N}m_i\ddot{\underline R}_i=\underline 0\;\Longrightarrow\;
+\sum_{i=1}^{N}m_i\dot{\underline R}_i=\underline a,\qquad \sum_{i=1}^{N}m_i\underline R_i=\underline a\,t+\underline b,
+\end{equation}
+with $\underline a$, $\underline b$ constant vectors fixed by the initial conditions. The centre of mass
+$\underline R_c=\frac{1}{M}\sum m_i\underline R_i$ ($M=\sum m_i$) moves in uniform rectilinear motion: $\underline R_c(t)=(\underline at+\underline b)/M$.
+
+\paragraph{2. Energy (1 scalar integral).} Gravity is conservative, so the total energy (kinetic plus potential,
+$U=-\sum_{i<j}Gm_im_j/r_{ij}$) is constant:
+\begin{equation}
+\mathcal E=\frac12\sum_{i=1}^{N}m_i\,\dot{\underline R}_i\cdot\dot{\underline R}_i-\sum_{i<j}G\frac{m_im_j}{r_{ij}}=\text{const}.
+\end{equation}
+
+\paragraph{3. Angular momentum about the centre of mass (3 scalar integrals).}
+\begin{equation}
+\underline H_c=\sum_{i=1}^{N}\underline r_i\times m_i\dot{\underline R}_i,\qquad \underline r_i=\underline R_i-\underline R_c .
+\end{equation}
+\emph{Proof that it is constant}:
+\begin{equation}
+\dot{\underline H}_c=\sum_i(\dot{\underline R}_i-\dot{\underline R}_c)\times m_i\dot{\underline R}_i+\sum_i(\underline R_i-\underline R_c)\times m_i\ddot{\underline R}_i .
+\end{equation}
+\begin{itemize}
+\item First sum: $\sum_i\dot{\underline R}_i\times m_i\dot{\underline R}_i=\underline 0$; the rest is $-\dot{\underline R}_c\times\sum_im_i\dot{\underline R}_i=-\dot{\underline R}_c\times M\dot{\underline R}_c=\underline 0$.
+\item Second sum: $-\underline R_c\times\sum_im_i\ddot{\underline R}_i=\underline 0$ by point 1; the remaining term is
+\begin{equation}
+\sum_i\underline R_i\times m_i\ddot{\underline R}_i=\sum_i\sum_{j\neq i}G\frac{m_im_j}{r_{ij}^3}\,\underline R_i\times(\underline R_j-\underline R_i)
+=\sum_i\sum_{j\neq i}G\frac{m_im_j}{r_{ij}^3}\,\underline R_i\times\underline R_j=\underline 0,
+\end{equation}
+because the coefficient is symmetric in $(i,j)$ while $\underline R_i\times\underline R_j=-\underline R_j\times\underline R_i$: the terms cancel in pairs
+(the mutual forces are central, along the line joining the two masses).
+\end{itemize}
+Hence $\dot{\underline H}_c=\underline 0$: $\underline H_c$ is conserved.
+
+\paragraph{Laplace (invariant) plane.} It is the plane through the centre of mass $C$ \textbf{orthogonal to $\underline H_c$}. Its normal
+\begin{equation}
+\hat n=\frac{\underline H_c}{|\underline H_c|},\qquad
+\underline H_c=\sum_{i=1}^{N}(\underline R_i-\underline R_c)\times m_i\dot{\underline R}_i
+\end{equation}
+is fixed in inertial space whatever the subsequent motion of the bodies: the plane is \emph{invariable}. It is the natural
+reference plane of a planetary system (for the Solar System it is close to the orbit plane of Jupiter \notinnotes).
+\begin{center}\includegraphics[width=0.42\linewidth]{nbody}\end{center}
+
+\paragraph{Count.} $\underline a$ (3) $+$ $\underline b$ (3) $+$ $\mathcal E$ (1) $+$ $\underline H_c$ (3) $=$ \textbf{10 scalar integrals}, fixed
+by the initial conditions and preserved regardless of the evolution of each individual mass. They are not enough to
+integrate the problem for $N\ge3$ (the motion is in general chaotic).
+
+\begin{keyf}
+$\sum m_i\dot{\underline R}_i=\underline a$, \ $\sum m_i\underline R_i=\underline at+\underline b$, \ $\mathcal E=\frac12\sum m_i\dot R_i^2-\sum_{i<j}\frac{Gm_im_j}{r_{ij}}$,
+\ $\underline H_c=\sum(\underline R_i-\underline R_c)\times m_i\dot{\underline R}_i$; Laplace plane $\perp\underline H_c$ through $C$; 10 integrals.
+\end{keyf}
+
+\pitfalls
+\begin{itemize}
+\item In the proof, show \emph{why} the double sum vanishes (symmetric coefficients, antisymmetric cross product).
+\item The Laplace plane is orthogonal to $\underline H_c$ and passes through the centre of mass.
+\item Do not confuse $\underline r_i=\underline R_i-\underline R_c$ (position w.r.t.\ $C$) with $\underline r_{ij}$ (mutual position).
+\end{itemize}
+
+\further
+The angular momentum about the inertial origin, $\underline H_O=\underline H_c+M\underline R_c\times\dot{\underline R}_c$, is also constant, since
+$\underline R_c\times\dot{\underline R}_c=(\underline b\times\underline a)/M^2$ \notinnotes. For $N=2$ these integrals reduce the problem to a
+Keplerian relative motion (\qref{E10}).
+
+\source{cap05.tex l.28--109 (problem of $N$ bodies: integrals, proof, Laplace plane).}

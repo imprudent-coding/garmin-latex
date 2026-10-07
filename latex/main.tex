@@ -1,0 +1,85 @@
+% Spaceflight Mechanics -- answers to the theory questions
+% Build: cd teoria && latexmk      (output: build/main.pdf)
+% Figures: cd teoria/figures/src && python3 make_figures.py
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=2cm,top=2.2cm,bottom=2.2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{cancel}
+\usepackage{graphicx}
+\graphicspath{{figures/}{../latex_notes/images/}}
+\usepackage{booktabs,array,tabularx,longtable}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{needspace}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage[hidelinks,bookmarksnumbered]{hyperref}
+% NOTE: no mathtools (it breaks the aligned blocks copied from latex_notes)
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\setlist{itemsep=1pt,topsep=2pt,parsep=0pt}
+
+% ---------------------------------------------------------------- macros from latex_notes/main.tex
+\newcommand{\sys}[1]{\left\{\begin{aligned}#1\end{aligned}\right.}
+\newcommand{\bo}[1]{\boldsymbol{#1}}
+
+% ---------------------------------------------------------------- page style
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize Spaceflight Mechanics -- theory answers}
+\fancyhead[R]{\footnotesize\hyperlink{toc}{Contents} \,\textbar\, \hyperlink{summary}{Summary table}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+% ---------------------------------------------------------------- boxes (black frame, white background: B/W print)
+\tcbset{qbase/.style={enhanced,breakable,colback=white,colframe=black,boxrule=0.5pt,arc=1pt,
+  left=5pt,right=5pt,top=3pt,bottom=3pt,fonttitle=\bfseries\small,coltitle=black,colbacktitle=white,
+  titlerule=0.4pt,toptitle=1pt,bottomtitle=1pt}}
+\newtcolorbox{qbox}{qbase,title={Question}}
+\newtcolorbox{outline}{qbase,title={Outline -- what to write, in this order}}
+\newtcolorbox{keyf}{qbase,title={Key formulas to memorise}}
+\newtcolorbox{fig2draw}{qbase,boxrule=0.4pt,borderline={0.4pt}{0pt}{black,dashed},title={What to draw (1--2 min)}}
+
+% ---------------------------------------------------------------- question structure
+\makeatletter
+\renewcommand\section{\@startsection{section}{1}{\z@}{-2ex \@plus -.5ex \@minus -.2ex}{1.2ex}{\normalfont\large\bfseries}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}{-1.6ex \@plus -.4ex \@minus -.2ex}{0.6ex}{\normalfont\normalsize\bfseries}}
+\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}{-1.2ex \@plus -.3ex}{0.3ex}{\normalfont\normalsize\itshape}}
+% \question{ID}{short title}
+\newcommand{\question}[2]{%
+  \clearpage\phantomsection
+  \section*{#1\quad #2}%
+  \addcontentsline{toc}{subsection}{#1\quad #2}%
+  \def\@currentlabel{#1}\label{q:#1}%
+  \markright{#1}}
+% \qgroup{letter}{title}
+\newcommand{\qgroup}[2]{%
+  \clearpage\phantomsection
+  \addcontentsline{toc}{section}{#1.\ #2}%
+  \begin{center}\Large\bfseries #1.\ #2\end{center}\vspace{2pt}}
+\makeatother
+% metadata line inside the question box
+\newcommand{\qmeta}[1]{\par\smallskip{\footnotesize\textit{Asked:} #1}}
+\newcommand{\qnote}[1]{\par\smallskip{\footnotesize\textbf{Note:} #1}}
+\newcommand{\answer}{\par\needspace{4\baselineskip}\subsection*{Answer}}
+\newcommand{\pitfalls}{\par\needspace{4\baselineskip}\subsection*{Common pitfalls -- what the examiner looks for}}
+\newcommand{\further}{\par\needspace{4\baselineskip}\subsection*{Going further (optional, for the top mark)}}
+\newcommand{\source}[1]{\par\smallskip{\footnotesize\textbf{Source:} #1}}
+\newcommand{\notinnotes}{\textit{(not in notes)}}
+\newcommand{\fml}[1]{\textup{[#1]}} % code of the formula in the formulario
+\newcommand{\qref}[1]{Q.\,\ref{q:#1} (p.\,\pageref{q:#1})}
+
+\begin{document}
+\input{frontmatter}
+\input{qA}
+\input{qB}
+\input{qC}
+\input{qD}
+\input{qE}
+\end{document}
