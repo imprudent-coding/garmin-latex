@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/garmin-probe.yml"
       - "garmin/tools/embed_probe.py"
+      # nessun altro workflow Garmin in parallelo: il login Garmin non ama le sessioni contemporanee
   workflow_dispatch:
 
 permissions:
@@ -148,7 +149,7 @@ jobs:
           echo "base.resourcePath = resources;$GITHUB_WORKSPACE/shared/font/generated;resources-embed" >> monkey.jungle
           cat monkey.jungle
           set +e
-          monkeyc -f monkey.jungle -d "$DEVICE" -o embed.prg -y "$RUNNER_TEMP/k.der" -r --build-stats 2>&1 | tee build.txt
+          monkeyc -f monkey.jungle -d "$DEVICE" -o embed.prg -y "$RUNNER_TEMP/k.der" -r --build-stats 0 2>&1 | tee build.txt
           echo "exit=$?"
           echo '### Compilazione con appunti incorporati' >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
