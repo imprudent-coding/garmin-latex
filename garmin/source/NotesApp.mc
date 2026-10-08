@@ -16,6 +16,7 @@ class NotesApp extends Application.AppBase {
     var sync as Sync;
     var images as ImageCache;
     var prefetch as Prefetch;
+    var speed as SpeedTest;
     var rich as RichText or Null = null;
     var index as Index or Null = null;
     var showMemory as Boolean = false;
@@ -32,6 +33,7 @@ class NotesApp extends Application.AppBase {
         sync = new Sync(ticker);
         images = new ImageCache(store, sync, ticker);
         prefetch = new Prefetch(store, sync, ticker);
+        speed = new SpeedTest();
         if (Communications has :registerForPhoneAppMessages) {
             Communications.registerForPhoneAppMessages(method(:onPhoneMessage));
         }

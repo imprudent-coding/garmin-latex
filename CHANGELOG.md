@@ -4,6 +4,18 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## 1.0.1
+
+- Orologio: il timeout di una richiesta con più pezzi cresce con i pezzi (+5 s
+  ciascuno) e i nuovi tentativi chiedono un pezzo solo. Prima una risposta da
+  ~7 KB poteva scadere e veniva rispedita, raddoppiando il traffico.
+- Orologio: se il telefono non risponde a download incompleto, nuovo tentativo
+  ogni 30 s (prima il download restava fermo).
+- Android: una richiesta ripetuta mentre la risposta è ancora in invio viene
+  ignorata; la scheda *Orologio* mostra la velocità misurata degli invii.
+- Orologio: voce di menu *Test velocità* (richieste web verso GitHub tramite il
+  telefono), per confrontarle con i messaggi app↔telefono (~0,4 KB/s misurati).
+
 ## 1.0.0 — prima versione stabile (orologio e Android)
 
 Bundle schema 2. Comprende le versioni 0.x qui sotto e in più, sull'orologio:
