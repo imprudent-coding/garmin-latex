@@ -57,6 +57,8 @@ S|<id>|<hash>|<n. pagine>|<pagine iniziali dei pezzi>|<larghezze>|<titolo>
 ```
 H|<larghezza>|<intestazione compatta del gruppo>
 Q|<id>|<tipo>|<id domanda>|<largh. larga>;<largh. stretta>|<riga larga>U+E01E<riga stretta>
+W|<indirizzo dei file web, con / finale>
+F|<id>|<file>;<file>…
 ```
 
 - `C` apre un capitolo; le righe `S` che seguono sono le sue sezioni.
@@ -68,6 +70,8 @@ Q|<id>|<tipo>|<id domanda>|<largh. larga>;<largh. stretta>|<riga larga>U+E01E<ri
   della prima sezione del gruppo) o `section`. Le due righe sono il titolo su una
   riga nel font piccolo, troncato con «…» a 290 px (vicino al centro) e a 230 px
   (verso i bordi del cerchio).
+- `W` (facoltativa, subito dopo `V`) e `F` (facoltativa, dopo la sua `S`):
+  file web della sezione, vedi «File web» sotto.
 - Le app ignorano le righe di tipo sconosciuto: aggiungere tipi di riga non
   richiede di cambiare `schema`.
 - `<pagine iniziali dei pezzi>`: `0;5;11` significa che il pezzo 0 contiene
@@ -125,6 +129,23 @@ L'implementazione di riferimento è `pipeline/gwnotes/preview.py`.
 Palette (indice → colore): 0 testo `#FFFFFF`, 1 titoli `#FFB54A`,
 2 attenuato `#9A9A9A`, 3 enfasi `#7FD4FF`, 4 riquadri `#6FE3B4`,
 5 link `#7FD4FF`, 6 avvisi `#FF6B6B`.
+
+## File web (GitHub Pages)
+
+Oltre al bundle, la pipeline scrive `web/w/<file>.json`, pubblicati dal workflow
+`notes` su GitHub Pages. Per ogni sezione, in ordine di indice: la sezione e le
+immagini che usa **per prime** (un'immagine già in un file precedente non si
+ripete), divise in file con al massimo ~32 KB di dati.
+
+```json
+{"r": [["s:q-a1", "<hash>", ["<pezzo 0>", "<pezzo 1>"]], ["i:3fa…", "<hash>", ["…"]]]}
+```
+
+Ogni voce è `[chiave, hash, pezzi]`, con gli stessi pezzi del bundle. Il nome del
+file è un hash del contenuto (`p` + 12 caratteri esadecimali): un file con lo
+stesso nome non va riscaricato. L'orologio li scarica con `makeWebRequest`
+(JSON), che passa da Garmin Connect ma è molto più veloce dei messaggi tra app;
+per ogni file che non arriva usa l'app del telefono (shared/PROTOCOL.md).
 
 ## Immagine (`i:<hash>`)
 

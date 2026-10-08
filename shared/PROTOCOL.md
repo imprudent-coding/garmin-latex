@@ -48,6 +48,24 @@ orologio                         telefono
                 ◀─────────────── chunk(i:3fa…, 0, of=2, …)
 ```
 
+## Download dal web (prima scelta)
+
+Il download in sottofondo prova prima i file web dell'indice (righe `W`/`F`,
+shared/FORMAT.md) con `Communications.makeWebRequest`: misurati ~8-12 KB/s su un
+vívoactive 5, contro ~0,4 KB/s dei messaggi tra app. I messaggi con il telefono
+restano la riserva:
+
+- un file web che fallisce (errore HTTP o di rete) viene saltato e il suo
+  contenuto arriva dal telefono; dopo due errori di fila il web si spegne fino
+  al giro successivo del download;
+- senza righe `W`/`F` (indice vecchio o Pages non configurato) si usa solo il
+  telefono;
+- se l'app del telefono non risponde ma l'indice è in cache, il download dal web
+  parte lo stesso;
+- la lettura chiede sempre al telefono, perché il pezzo della pagina aperta
+  arriva prima così;
+- `hello`, indice e notifica `update` passano sempre dal telefono.
+
 ## Più pezzi per messaggio
 
 Il tempo di un download completo dipende soprattutto dal numero di scambi

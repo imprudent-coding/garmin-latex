@@ -119,12 +119,69 @@ class BundleBuilder:
 TITLE_SEP = chr(0xE01E)  # separatore delle righe dei titoli (rich.TITLE_BREAK)
 
 
-def build_index(title: str, font_id: str, content_version: str, chapters: list) -> list[str]:
+WEB_PACK_BYTES = 32000
+
+
+def image_keys(pages: list[str]) -> list[str]:
+    """Chiavi delle immagini citate dalle righe "I" delle pagine, in ordine."""
+    out: list[str] = []
+    for page in pages:
+        for line in page.split("\n"):
+            if line.startswith("I"):
+                f = line[1:].split(",", 6)
+                for k in f[5:7]:
+                    if k and k not in out:
+                        out.append(k)
+    return out
+
+
+def build_web_packs(sections: list[tuple[str, str, list[str]]], resources: dict,
+                    limit: int = WEB_PACK_BYTES) -> tuple[dict[str, bytes], dict[str, list[str]]]:
+    """File per il download via web (GitHub Pages): per ogni sezione, la sezione e
+    le immagini che usa per prime, divise in file di al massimo ~`limit` byte di dati.
+
+    sections: [(id sezione, chiave risorsa, chiavi immagini)] in ordine di indice.
+    Ritorna ({nome file: JSON}, {id sezione: [nomi file]}). Il nome è l'hash del
+    contenuto: un file che non cambia nome non va riscaricato."""
+    files: dict[str, bytes] = {}
+    by_section: dict[str, list[str]] = {}
+    seen: set[str] = set()
+
+    def flush(items):
+        body = json.dumps({"r": [[k, resources[k].hash, resources[k].chunks] for k in items]},
+                          ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        name = "p" + short_hash("|".join(f"{k}:{resources[k].hash}" for k in items), 12)
+        files[name] = body
+        return name
+
+    for sid, skey, imgs in sections:
+        names, cur, cur_b = [], [], 0
+        for k in [skey] + imgs:
+            if k in seen or k not in resources:
+                continue
+            seen.add(k)
+            b = resources[k].bytes
+            if cur and cur_b + b > limit:
+                names.append(flush(cur))
+                cur, cur_b = [], 0
+            cur.append(k)
+            cur_b += b
+        if cur:
+            names.append(flush(cur))
+        by_section[sid] = names
+    return files, by_section
+
+
+def build_index(title: str, font_id: str, content_version: str, chapters: list,
+                web_base: str = "", web_packs: dict[str, list[str]] | None = None) -> list[str]:
     """chapters: [(title_lines, header_line, [(SectionPages, Resource, starts)])]
 
-    Le righe "H" e "Q" (titoli compatti per scorrere l'elenco) sono un'aggiunta
-    compatibile: le versioni dell'app che non le conoscono le ignorano."""
+    Le righe "H" e "Q" (titoli compatti per scorrere l'elenco) e "W"/"F" (download
+    via web) sono aggiunte compatibili: le versioni dell'app che non le conoscono
+    le ignorano."""
     lines = [f"V|{SCHEMA}|{content_version}|{font_id}|{title}"]
+    if web_base and web_packs:
+        lines.append(f"W|{web_base}")
     for title_lines, header, secs in chapters:
         ws = ";".join(str(w) for _, w in title_lines)
         lines.append(f"C|{len(secs)}|{ws}|" + TITLE_SEP.join(t for t, _ in title_lines))
@@ -138,6 +195,8 @@ def build_index(title: str, font_id: str, content_version: str, chapters: list) 
             if sp.compact:
                 cw = ";".join(str(w) for _, w in sp.compact)
                 lines.append(f"Q|{sp.id}|{sp.kind}|{sp.qid}|{cw}|" + TITLE_SEP.join(t for t, _ in sp.compact))
+            if web_base and web_packs and web_packs.get(sp.id):
+                lines.append(f"F|{sp.id}|" + ";".join(web_packs[sp.id]))
     return lines
 
 

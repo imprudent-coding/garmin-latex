@@ -1,5 +1,6 @@
 import Toybox.Communications;
 import Toybox.Lang;
+import Toybox.PersistedContent;
 import Toybox.System;
 import Toybox.WatchUi;
 
@@ -18,14 +19,21 @@ class NotifyListener extends Communications.ConnectionListener {
 // Scaricamento in sottofondo di tutti gli appunti nella cache (Store), così la
 // lettura non aspetta il Bluetooth. Prima tutte le sezioni, poi le immagini
 // trovate nelle loro pagine (righe "I", shared/FORMAT.md).
-// Lavora solo quando il collegamento è libero (Sync.idle): le richieste della
-// lettura passano sempre per prime. Si ferma se il telefono non risponde e
-// riparte al prossimo hello riuscito; la chiave "pf" ricorda la versione già
-// scaricata per intero.
+// Fonte principale: i file web dell'indice (righe "W"/"F": sezione + immagini,
+// su GitHub Pages) con makeWebRequest, ~20-30 volte più veloce dei messaggi.
+// Riserva: i messaggi con l'app del telefono, per ogni file web che non arriva
+// (dopo due errori di fila il web si spegne fino al giro successivo).
+// Lavora solo quando il collegamento con il telefono è libero (Sync.idle): le
+// richieste della lettura passano sempre per prime. Si ferma se il telefono non
+// risponde e riparte al prossimo hello riuscito; la chiave "pf" ricorda la
+// versione già scaricata per intero, "wp" i file web già salvati.
 class Prefetch {
     // passi locali (risorse già in cache) per ciclo, per restare sotto il watchdog
     const LOCAL_STEPS = 3;
     const NOTIFY_EVERY = 10;
+    // pezzi di un file web salvati per passo
+    const PACK_PIECES_PER_TICK = 2;
+    const WEB_FAILS_OFF = 2;
 
     var active as Boolean = false;
     var finished as Boolean = false;
@@ -52,6 +60,19 @@ class Prefetch {
     private var _drop as Array<String> = [] as Array<String>;
     private var _sinceNotify as Number = 0;
     private var _listener as NotifyListener;
+
+    // download via web
+    private var _webBase as String or Null = null;
+    private var _webOff as Boolean = false;
+    private var _webFails as Number = 0;
+    private var _webInFlight as Boolean = false;
+    var viaWeb as Boolean = false;                          // l'ultimo file è arrivato dal web
+    private var _wp as Dictionary = {} as Dictionary;      // file web già salvati
+    private var _wpBad as Dictionary = {} as Dictionary;   // file web falliti in questo giro
+    private var _imgSec as Dictionary = {} as Dictionary;  // immagine -> sezione che la cita per prima
+    // file web in salvataggio: [nome, Array di [chiave, hash, pezzi], risorsa, pezzo]
+    private var _pack as Array or Null = null;
+    private var _packName as String = "";
 
     function initialize(store as Store, sync as Sync, ticker as Ticker) {
         _store = store;
@@ -87,6 +108,28 @@ class Prefetch {
         }
         finished = false;
         active = true;
+        _webBase = index.webBase;
+        _webOff = false;
+        _webFails = 0;
+        _wpBad = {} as Dictionary;
+        _imgSec = {} as Dictionary;
+        // file web già salvati, limitati a quelli dell'indice attuale
+        var names = {} as Dictionary;
+        for (var i = 0; i < _secs.size(); i++) {
+            for (var k = 0; k < _secs[i].packs.size(); k++) {
+                names[_secs[i].packs[k]] = true;
+            }
+        }
+        var old = _store.getValue("wp");
+        _wp = {} as Dictionary;
+        if (old instanceof Lang.Dictionary) {
+            var ks = (old as Dictionary).keys();
+            for (var i = 0; i < ks.size(); i++) {
+                if (names[ks[i]] != null) {
+                    _wp[ks[i]] = true;
+                }
+            }
+        }
         _si = 0;
         _ii = 0;
         secDone = 0;
@@ -105,17 +148,23 @@ class Prefetch {
         active = false;
         _waiting = false;
         _pend = null;
+        _pack = null;
         _ticker.cancel("pf");
     }
 
     function onIdle() as Void {
-        if (!active || _waiting || _ticker.isScheduled("pf") || _sync.busy() || _sync.state != ST_OK) {
+        // senza telefono (state != ST_OK) si può ancora scaricare dal web
+        if (!active || _waiting || _webInFlight || _pack != null || _ticker.isScheduled("pf") || _sync.busy()) {
             return;
         }
         step();
     }
 
     function onTick() as Void {
+        if (_pack != null) {
+            storePack();
+            return;
+        }
         if (_pend != null) {
             storeNext();
             return;
@@ -187,6 +236,9 @@ class Prefetch {
         while (_si < _secs.size()) {
             var sec = _secs[_si];
             var key = sec.key();
+            if (!_store.isComplete(key, sec.hash) && fetchPacks(sec)) {
+                return;
+            }
             var total = sec.starts.size();
             var missing = -1;
             for (var n = 0; n < total; n++) {
@@ -233,6 +285,10 @@ class Prefetch {
                     return;
                 }
                 continue;
+            }
+            var si = _imgSec[key];
+            if (si != null && fetchPacks(_secs[si as Number])) {
+                return;
             }
             var n = 0;
             var total = _store.totalOf(key);
@@ -281,7 +337,96 @@ class Prefetch {
         if (key.length() > 2 && _seen[key] == null) {
             _seen[key] = true;
             _images.add(key);
+            if (_si < _secs.size()) {
+                _imgSec[key] = _si;
+            }
         }
+    }
+
+    // ------------------------------------------------------------- web
+    // Avvia il download del primo file web della sezione non ancora salvato;
+    // false se non ce ne sono (o il web è spento): si passa al telefono.
+    private function fetchPacks(sec as Section) as Boolean {
+        if (_webBase == null || _webOff) {
+            return false;
+        }
+        for (var i = 0; i < sec.packs.size(); i++) {
+            var name = sec.packs[i];
+            if (_wp[name] == null && _wpBad[name] == null) {
+                _webInFlight = true;
+                _pack = null;
+                _packName = name;
+                try {
+                    Communications.makeWebRequest((_webBase as String) + name + ".json", null, {
+                        :method => Communications.HTTP_REQUEST_METHOD_GET,
+                        :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON
+                    }, method(:onPack));
+                } catch (e) {
+                    _webInFlight = false;
+                    webFailed(name, -1);
+                    return fetchPacks(sec);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function onPack(code as Number, data as Dictionary or String or PersistedContent.Iterator or Null) as Void {
+        _webInFlight = false;
+        var name = _packName;
+        if (code == 200 && data instanceof Lang.Dictionary && (data as Dictionary)["r"] instanceof Lang.Array) {
+            _webFails = 0;
+            viaWeb = true;
+            _pack = [name, (data as Dictionary)["r"], 0, 0];
+            _ticker.schedule("pf", 50, method(:onTick), false);
+            return;
+        }
+        webFailed(name, code);
+        later();
+    }
+
+    private function webFailed(name as String, code as Number) as Void {
+        System.println("web " + name + ": " + code);
+        _wpBad[name] = true;
+        _webFails += 1;
+        if (_webFails >= WEB_FAILS_OFF) {
+            // web non raggiungibile: il resto di questo giro passa dal telefono
+            _webOff = true;
+            viaWeb = false;
+        }
+    }
+
+    // Salva qualche pezzo del file web in arrivo; a fine file lo segna come salvato.
+    private function storePack() as Void {
+        var p = _pack as Array;
+        var items = p[1] as Array;
+        var done = 0;
+        while (done < PACK_PIECES_PER_TICK && (p[2] as Number) < items.size()) {
+            var it = items[p[2] as Number];
+            var ok = it instanceof Lang.Array && (it as Array).size() == 3 && (it as Array)[2] instanceof Lang.Array;
+            var key = ok ? (it as Array)[0] as String : "";
+            var hash = ok ? (it as Array)[1] as String : "";
+            var chunks = ok ? (it as Array)[2] as Array : [] as Array;
+            var c = p[3] as Number;
+            if (!ok || c >= chunks.size() || (c == 0 && _store.isComplete(key, hash))) {
+                // voce non valida, finita o già in cache: alla prossima
+                p[2] = (p[2] as Number) + 1;
+                p[3] = 0;
+                continue;
+            }
+            _store.put(key, c, chunks.size(), hash, chunks[c] as String);
+            p[3] = c + 1;
+            done += 1;
+        }
+        if ((p[2] as Number) < items.size()) {
+            _ticker.schedule("pf", 50, method(:onTick), false);
+            return;
+        }
+        _wp[p[0]] = true;
+        _store.setValue("wp", _wp);
+        _pack = null;
+        onIdle();
     }
 
     // Callback di Sync per i pezzi richiesti dal prefetch.
@@ -346,9 +491,10 @@ class Prefetch {
         if (!active) {
             return null;
         }
+        var via = viaWeb ? " web" : "";
         if (_si < _secs.size()) {
-            return (WatchUi.loadResource(Rez.Strings.PrefetchSections) as String) + " " + secDone + "/" + secTotal;
+            return (WatchUi.loadResource(Rez.Strings.PrefetchSections) as String) + " " + secDone + "/" + secTotal + via;
         }
-        return (WatchUi.loadResource(Rez.Strings.PrefetchImages) as String) + " " + imgDone + "/" + _images.size();
+        return (WatchUi.loadResource(Rez.Strings.PrefetchImages) as String) + " " + imgDone + "/" + _images.size() + via;
     }
 }

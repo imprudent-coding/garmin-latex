@@ -4,6 +4,16 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Orologio 1.1.0
+
+- Download in sottofondo dai file web su GitHub Pages (~10 KB/s misurati),
+  con il telefono come riserva per ogni file che non arriva: la prima
+  sincronizzazione completa passa da ~50 a pochi minuti.
+- Accanto a «Sezioni …/…» compare «web» quando i file arrivano dal web.
+- Appunti: il workflow `notes` pubblica anche i file web (GitHub Pages, da
+  attivare una volta). Formato del bundle invariato (schema 2): le righe nuove
+  dell'indice sono ignorate dalle versioni precedenti.
+
 ## 1.0.1
 
 - Orologio: il timeout di una richiesta con più pezzi cresce con i pezzi (+5 s

@@ -68,7 +68,19 @@ jobs:
         run: |
           VERSION="$(date -u +%Y%m%d.%H%M%S)"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          python -m gwnotes build --latex ../latex --out ../dist --version "$VERSION" --preview 16
+          # indirizzo dei file web su GitHub Pages (l'orologio li scarica da lì, il
+          # telefono resta la riserva); NOTES_WEB_BASE lo sostituisce (dominio proprio)
+          OWNER="${GITHUB_REPOSITORY_OWNER,,}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          if [ -n "${{ vars.NOTES_WEB_BASE }}" ]; then
+            WEB_BASE="${{ vars.NOTES_WEB_BASE }}"
+          elif [ "${REPO,,}" = "$OWNER.github.io" ]; then
+            WEB_BASE="https://$OWNER.github.io/w/"
+          else
+            WEB_BASE="https://$OWNER.github.io/$REPO/w/"
+          fi
+          python -m gwnotes build --latex ../latex --out ../dist --version "$VERSION" --preview 16 \
+            --web-base "$WEB_BASE"
           cat ../dist/report.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Anteprime, report e bundle (artifact)
@@ -84,6 +96,15 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      # file per GitHub Pages (solo dal branch principale, come la Release)
+      - name: File web per GitHub Pages
+        if: >-
+          success() && (github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+          || inputs.release)
+        uses: actions/upload-pages-artifact@v3.0.1
+        with:
+          path: dist/web
+
       - name: Pubblica la Release
         if: >-
           success() && (github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
@@ -98,3 +119,22 @@ jobs:
             dist/notes-bundle.zip
             dist/notes.pdf
             dist/manifest.json
+
+  # Pubblica i file web su GitHub Pages. Va attivato una volta: Settings → Pages →
+  # Source: GitHub Actions. Se non lo è, questo job fallisce senza bloccare il
+  # resto: l'orologio scarica tutto dal telefono come prima.
+  pages:
+    needs: build
+    if: >-
+      github.ref == format('refs/heads/{0}', github.event.repository.default_branch) || inputs.release
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4.0.5

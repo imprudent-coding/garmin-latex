@@ -69,9 +69,11 @@ Il flusso, dalla modifica alla lettura:
    il bundle solo se è cambiato, verifica gli hash e lo tiene in cache.
 4. Quando apri l'**app sull'orologio**, questa chiede al telefono la versione
    (`hello`). Se è cambiata scarica il nuovo indice; poi, mentre l'app è aperta,
-   scarica in sottofondo **tutti** gli appunti (pezzi da ~1,8 KB) nella sua
-   memoria. Le pagine che apri hanno sempre la precedenza. Una volta finito, la
-   lettura non dipende più dal Bluetooth né dal telefono.
+   scarica in sottofondo **tutti** gli appunti nella sua memoria: prima dai file
+   web pubblicati su **GitHub Pages** (richieste web tramite Garmin Connect,
+   ~10 KB/s), e per ciò che non arriva dal web, dall'app del telefono (messaggi,
+   ~0,4 KB/s). Le pagine che apri hanno sempre la precedenza. Una volta finito,
+   la lettura non dipende più dal Bluetooth né dal telefono.
 
 ### La conversione in breve
 
@@ -227,6 +229,16 @@ del keystore. Con il formato PKCS12, quello predefinito di `keytool`, sono ugual
   → scrivi `android-v1.0.0` → **Publish**. Il workflow allega l'APK alla Release.
 - **App orologio**: come sopra, con un tag `garmin-vX.Y.Z`. Il workflow allega il
   `.prg` (da installare) e il `.iq` (per l'eventuale pubblicazione nello store).
+
+- **File web (GitHub Pages)**, da attivare una volta: **Settings → Pages →
+  Build and deployment → Source: GitHub Actions**. Da quel momento ogni Release
+  degli appunti pubblica anche i file web su
+  `https://<utente>.github.io/<repository>/w/…`; il job `pages` del workflow
+  `notes` mostra l'indirizzo. Senza Pages il job `pages` fallisce (senza bloccare
+  la Release) e l'orologio scarica tutto dal telefono, più lentamente. Nota: i
+  file web sono pubblici come le Release di una repository pubblica. Per un
+  dominio proprio imposta la variabile `NOTES_WEB_BASE` (es.
+  `https://appunti.example.org/w/`).
 
 Le versioni `0.x` (e i tag con `-alpha`/`-beta`) delle app vengono pubblicate come
 *pre-release*. Le Release degli appunti non sono mai pre-release: l'app Android le
@@ -497,6 +509,7 @@ via Bluetooth. Fonte: *Communicating with Mobile Apps* nella documentazione Garm
 | Orologio «Non connesso» | Bluetooth attivo, orologio vicino, Garmin Connect aperto almeno una volta. Prova *Riavvia collegamento*. |
 | «App sull'orologio non installata» | Copia il `.prg` (punto 5). Per le app installate via USB, Garmin Connect a volte non le rileva anche se funzionano: se l'orologio sincronizza, ignora il messaggio. |
 | Orologio: «Telefono non raggiungibile» | App Android aperta o servizio attivo (notifica fissa), batteria senza restrizioni. Poi menu → *Sincronizza ora*. |
+| Download lento, nessun «web» accanto a «Sezioni …/…» | GitHub Pages non attivo o non ancora pubblicato (Settings → Pages, poi rilancia il workflow `notes`), oppure il telefono è senza internet. L'orologio usa il telefono come riserva. |
 | Orologio: «Il telefono non ha ancora appunti» | Nell'app Android premi *Controlla aggiornamenti*. |
 | Orologio: «Aggiorna l'app dell'orologio» | Bundle o font più nuovi dell'app: installa l'ultimo `.prg` (tag `garmin-v…`). |
 | Sincronizzazione bloccata a metà | Menu → *Sincronizza ora*. Se persiste: menu → *Svuota cache*. Nel registro dell'app Android controlla gli errori. |
