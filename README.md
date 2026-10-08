@@ -367,8 +367,8 @@ Quando il formato del bundle cambia in modo incompatibile (`schema` in
 `shared/FORMAT.md`), le Release degli appunti successive richiedono **entrambe**
 le app aggiornate: l'app Android vecchia rifiuta il nuovo bundle e tiene quello
 che ha, l'orologio con l'app vecchia mostra «Aggiorna l'app dell'orologio».
-Lo schema 2 (immagini compresse) richiede almeno `garmin-v0.4.0` e
-`android-v0.3.0`.
+Lo schema 2 (immagini compresse) richiede `garmin-v1.0.0` (la 0.4.0 si blocca
+alla prima sincronizzazione) e almeno `android-v0.3.0`. Elenco delle versioni: [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Aggiornare gli appunti
 

@@ -45,6 +45,11 @@ class Prefetch {
     private var _seen as Dictionary = {} as Dictionary;
     private var _ii as Number = 0;
     private var _waiting as Boolean = false;               // richiesta di prefetch in corso
+    // risposta con più pezzi da salvare, un pezzo per passo (watchdog):
+    // [chiave, primo n, totale, hash, Array<String>, sezione?, prossimo indice]
+    private var _pend as Array or Null = null;
+    // immagini non più usate da eliminare dopo un download completo, poche per passo
+    private var _drop as Array<String> = [] as Array<String>;
     private var _sinceNotify as Number = 0;
     private var _listener as NotifyListener;
 
@@ -91,6 +96,7 @@ class Prefetch {
         _images = [] as Array<String>;
         _seen = {} as Dictionary;
         _waiting = false;
+        _pend = null;
         notify();
         onIdle();
     }
@@ -98,6 +104,7 @@ class Prefetch {
     function stop() as Void {
         active = false;
         _waiting = false;
+        _pend = null;
         _ticker.cancel("pf");
     }
 
@@ -109,7 +116,57 @@ class Prefetch {
     }
 
     function onTick() as Void {
+        if (_pend != null) {
+            storeNext();
+            return;
+        }
         onIdle();
+    }
+
+    function onDrop() as Void {
+        var k = 0;
+        while (_drop.size() > 0 && k < 10) {
+            _store.remove(_drop[_drop.size() - 1]);
+            _drop = _drop.slice(0, _drop.size() - 1) as Array<String>;
+            k += 1;
+        }
+        if (_drop.size() > 0) {
+            _ticker.schedule("drop", 50, method(:onDrop), false);
+        }
+    }
+
+    // Salva (e per le sezioni esamina) un pezzo della risposta in attesa.
+    private function storeNext() as Void {
+        var p = _pend as Array;
+        var d = p[4] as Array;
+        var i = p[6] as Number;
+        if (i >= d.size()) {
+            _pend = null;
+            _waiting = false;
+            onIdle();
+            return;
+        }
+        var n = (p[1] as Number) + i;
+        var c = d[i] as String;
+        _store.put(p[0] as String, n, p[2] as Number, p[3] as String, c);
+        if (p[5] as Boolean) {
+            scan(c);
+            _scanned[n] = true;
+        }
+        if (i + 1 < d.size()) {
+            p[6] = i + 1;
+            _ticker.schedule("pf", 50, method(:onTick), false);
+            return;
+        }
+        _pend = null;
+        _waiting = false;
+        onIdle();
+    }
+
+    private function accept(key, n, total, hash, data, isSection as Boolean) as Void {
+        var d = (data instanceof Lang.Array) ? data : [data];
+        _pend = [key, n, total, hash, d, isSection, 0];
+        _ticker.schedule("pf", 50, method(:onTick), false);
     }
 
     private function later() as Void {
@@ -143,6 +200,11 @@ class Prefetch {
                 }
                 scan(c);
                 _scanned[n] = true;
+                local += 1;
+                if (local >= LOCAL_STEPS) {
+                    later();
+                    return;
+                }
             }
             if (missing >= 0) {
                 _waiting = true;
@@ -188,7 +250,10 @@ class Prefetch {
         finished = failed == 0;
         if (finished) {
             _store.setValue("pf", _ver);
-            _store.dropImagesExcept(_seen);
+            _drop = _store.imagesExcept(_seen);
+            if (_drop.size() > 0) {
+                _ticker.schedule("drop", 50, method(:onDrop), false);
+            }
         }
         Mem.log("prefetch completato");
         notify();
@@ -220,31 +285,23 @@ class Prefetch {
     }
 
     // Callback di Sync per i pezzi richiesti dal prefetch.
+    // _waiting resta vero finché i pezzi non sono tutti salvati (storeNext).
     function onSection(key, n, total, hash, data) as Void {
-        _waiting = false;
         if (data == null) {
+            _waiting = false;
             onFailure();
             return;
         }
-        var d = data as Array;
-        for (var i = 0; i < d.size(); i++) {
-            var c = d[i] as String;
-            _store.put(key as String, (n as Number) + i, total as Number, hash as String, c);
-            scan(c);
-            _scanned[(n as Number) + i] = true;
-        }
+        accept(key, n, total, hash, data, true);
     }
 
     function onImage(key, n, total, hash, data) as Void {
-        _waiting = false;
         if (data == null) {
+            _waiting = false;
             onFailure();
             return;
         }
-        var d = data as Array;
-        for (var i = 0; i < d.size(); i++) {
-            _store.put(key as String, (n as Number) + i, total as Number, hash as String, d[i] as String);
-        }
+        accept(key, n, total, hash, data, false);
     }
 
     // Telefono non raggiungibile o bundle cambiato: si riprende al prossimo hello.

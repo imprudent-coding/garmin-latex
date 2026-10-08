@@ -26,7 +26,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = buildNumber
-        versionName = tagVersion ?: "0.1.0-dev"
+        versionName = tagVersion ?: "1.0.0-dev"
         buildConfigField("String", "WATCH_APP_ID", "\"$watchAppId\"")
         buildConfigField("String", "DEFAULT_REPO", "\"imprudent-coding/garmin-latex\"")
         buildConfigField("int", "BUNDLE_SCHEMA", "2")

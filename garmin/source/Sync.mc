@@ -82,18 +82,19 @@ class Sync {
     // ------------------------------------------------------------- richieste
     // Un pezzo: cb.invoke(chiave, n, totale, hash, dati); dati = String, o null se fallita.
     function request(key as String, n as Number, hash as String, cb as Method, urgent as Boolean) as Void {
-        add(key, n, hash, cb, urgent, 1);
+        add(key, n, hash, cb, urgent, 1, false);
     }
 
     // Fino a `count` pezzi consecutivi da n in un messaggio (op "chunks"):
     // cb.invoke(chiave, n, totale, hash, dati); dati = Array<String> (almeno un pezzo) o null.
     function requestBatch(key as String, n as Number, count as Number, hash as String, cb as Method) as Void {
-        add(key, n, hash, cb, false, count > MAX_BATCH ? MAX_BATCH : count);
+        // anche con count = 1 la callback riceve un Array: dipende da chi chiede, non da quanti pezzi
+        add(key, n, hash, cb, false, count > MAX_BATCH ? MAX_BATCH : (count < 1 ? 1 : count), true);
     }
 
     private function add(key as String, n as Number, hash as String, cb as Method, urgent as Boolean,
-                         count as Number) as Void {
-        var entry = [cb, count > 1];
+                         count as Number, wantsArray as Boolean) as Void {
+        var entry = [cb, wantsArray];
         if (_inflight != null && (_inflight[0] as String).equals(key) && (_inflight[1] as Number) == n
             && (_inflight[3] instanceof Lang.Array)) {
             (_inflight[3] as Array).add(entry);

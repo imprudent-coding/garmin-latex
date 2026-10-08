@@ -23,10 +23,18 @@ class Store {
     private var _used as Number = 0;
     // gruppi di metadati modificati e non ancora salvati
     private var _dirty as Dictionary = {} as Dictionary;
+    // gruppo di ogni chiave (calcolarlo costa: si fa una volta sola)
+    private var _bk as Dictionary = {} as Dictionary;
+    // I metadati si salvano al più una volta al secondo (e alla chiusura), non a
+    // ogni pezzo: con centinaia di risorse un salvataggio per operazione supera
+    // il limite di tempo del watchdog (es. quando un nuovo indice invalida tutto).
+    const SAVE_DELAY_MS = 1000;
+    private var _ticker as Ticker;
     // risorse da non eliminare (indice, sezione aperta)
     var pinned as Array<String> = ["idx"] as Array<String>;
 
-    function initialize() {
+    function initialize(ticker as Ticker) {
+        _ticker = ticker;
         var st = read("stamp");
         _stamp = (st instanceof Lang.Number) ? (st as Number) : 0;
         _meta = {} as Dictionary;
@@ -66,16 +74,27 @@ class Store {
 
     // gruppo dei metadati di una chiave (hash dei byte, stabile tra le esecuzioni)
     private function bucketOf(key as String) as Number {
+        var cached = _bk[key];
+        if (cached != null) {
+            return cached as Number;
+        }
         var b = key.toUtf8Array();
         var h = 0;
         for (var i = 0; i < b.size(); i++) {
             h = (h * 31 + b[i]) % 65521;
         }
+        _bk[key] = h % BUCKETS;
         return h % BUCKETS;
     }
 
     private function markDirty(key as String) as Void {
         _dirty[bucketOf(key)] = true;
+    }
+
+    private function scheduleSave() as Void {
+        if (!_ticker.isScheduled("save")) {
+            _ticker.schedule("save", SAVE_DELAY_MS, method(:save), false);
+        }
     }
 
     private function ck(key as String, n as Number) as String {
@@ -191,7 +210,7 @@ class Store {
         m[4] = (m[4] as Number) + 1;
         _used += bytes;
         touch(key);
-        save();
+        scheduleSave();
         return true;
     }
 
@@ -247,7 +266,7 @@ class Store {
         _used -= (m[2] as Number);
         _meta.remove(key);
         markDirty(key);
-        save();
+        scheduleSave();
     }
 
     // Dopo un nuovo indice: elimina le sezioni il cui hash non è più valido.
@@ -264,28 +283,32 @@ class Store {
         }
     }
 
-    // Dopo un download completo: elimina le immagini che nessuna pagina usa più
-    // (versioni precedenti degli appunti; le chiavi sono hash del contenuto).
-    function dropImagesExcept(keep as Dictionary) as Void {
+    // Immagini in cache che nessuna pagina usa più (versioni precedenti degli
+    // appunti; le chiavi sono hash del contenuto). Le elimina il prefetch, a passi.
+    function imagesExcept(keep as Dictionary) as Array<String> {
+        var out = [] as Array<String>;
         var keys = _meta.keys();
         for (var i = 0; i < keys.size(); i++) {
             var k = keys[i] as String;
             if (k.length() > 2 && k.substring(0, 2).equals("i:") && keep[k] == null) {
-                remove(k);
+                out.add(k);
             }
         }
+        return out;
     }
 
     function clearAll() as Void {
         Storage.clearValues();
         _meta = {} as Dictionary;
         _dirty = {} as Dictionary;
+        _ticker.cancel("save");
         _stamp = 0;
         _used = 0;
     }
 
     // Salva i gruppi di metadati modificati.
     function save() as Void {
+        _ticker.cancel("save");
         var bs = _dirty.keys();
         _dirty = {} as Dictionary;
         if (bs.size() == 0) {
