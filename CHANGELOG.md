@@ -6,9 +6,7 @@ automatiche a ogni push su `main`.
 
 ## 1.0.0 — prima versione stabile (orologio e Android)
 
-Bundle schema 2. Riassume le versioni 0.x qui sotto.
-
-## Orologio 0.4.1
+Bundle schema 2. Comprende le versioni 0.x qui sotto e in più, sull'orologio:
 
 - Corretti due crash della sincronizzazione dopo il passaggio allo schema 2:
   - watchdog: i metadati della cache si salvavano a ogni pezzo e a ogni eliminazione;
