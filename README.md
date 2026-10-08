@@ -187,7 +187,7 @@ la CI si ferma e te lo segnala.
    mano: scheda **Actions** → **garmin** → **Run workflow**.
 2. Il job si ferma al passo *Licenza Connect IQ* e stampa l'indirizzo
    dell'accordo e una riga `Current Hash: 0123…`.
-3. Leggi l'accordo. Se lo accetti, crea la **variabile** `CIQ_AGREEMENT_HASH`
+3. Leggi l'accordo. Se lo accetti, crea la **variabile** (o, in alternativa, il secret) `CIQ_AGREEMENT_HASH`
    con quel valore e rilancia il workflow.
 
 #### 2d. Keystore Android (facoltativo ma consigliato)

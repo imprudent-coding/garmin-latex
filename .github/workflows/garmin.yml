@@ -45,7 +45,7 @@ jobs:
           GARMIN_USERNAME: ${{ secrets.GARMIN_USERNAME }}
           GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
           CIQ_KEY: ${{ secrets.CIQ_DEVELOPER_KEY_BASE64 }}
-          AGREEMENT: ${{ vars.CIQ_AGREEMENT_HASH }}
+          AGREEMENT: ${{ vars.CIQ_AGREEMENT_HASH || secrets.CIQ_AGREEMENT_HASH }}
         run: |
           missing=""
           [ -z "$GARMIN_USERNAME" ] && missing="$missing GARMIN_USERNAME"
@@ -80,11 +80,13 @@ jobs:
       - name: Licenza Connect IQ
         if: steps.check.outputs.ok == 'true'
         env:
-          AGREEMENT: ${{ vars.CIQ_AGREEMENT_HASH }}
+          AGREEMENT: ${{ vars.CIQ_AGREEMENT_HASH || secrets.CIQ_AGREEMENT_HASH }}
         run: |
+          # spazi o a capo incollati per sbaglio
+          AGREEMENT="$(echo "$AGREEMENT" | tr -d '[:space:]')"
           if [ -z "$AGREEMENT" ]; then
             connect-iq-sdk-manager-cli agreement view | tee agreement.txt
-            echo "::error title=Licenza da accettare::Leggi l'accordo all'indirizzo stampato qui sopra e, se lo accetti, salva il valore «Current Hash» nella variabile di repository CIQ_AGREEMENT_HASH (Settings → Secrets and variables → Actions → Variables). Vedi README."
+            echo "::error title=Licenza da accettare::Leggi l'accordo all'indirizzo stampato qui sopra e, se lo accetti, salva il valore «Current Hash» come CIQ_AGREEMENT_HASH in Settings → Secrets and variables → Actions (variabile o secret, a livello di repository, non di environment). Vedi README."
             exit 1
           fi
           connect-iq-sdk-manager-cli agreement accept --agreement-hash="$AGREEMENT" \
