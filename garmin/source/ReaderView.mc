@@ -28,10 +28,33 @@ class ReaderView extends WatchUi.View {
             app.startSync();
         }
         load();
+        armAuto();
     }
 
     function onHide() as Void {
+        getApp().ticker.cancel("auto");
         getApp().savePosition(section.id, page);
+    }
+
+    // ------------------------------------------------------------- scorrimento automatico
+    // Riparte da zero a ogni cambio di pagina, anche manuale; si ferma all'ultima.
+    function armAuto() as Void {
+        var app = getApp();
+        var secs = app.autoSeconds();
+        if (secs > 0 && page < section.pages - 1) {
+            app.ticker.schedule("auto", secs * 1000, method(:onAuto), false);
+        } else {
+            app.ticker.cancel("auto");
+        }
+    }
+
+    function onAuto() as Void {
+        if (_items == null) {
+            // pagina non ancora arrivata: non saltarla
+            getApp().ticker.schedule("auto", 1000, method(:onAuto), false);
+            return;
+        }
+        go(1);
     }
 
     // ------------------------------------------------------------- caricamento
@@ -157,7 +180,13 @@ class ReaderView extends WatchUi.View {
         }
         // numero di pagina e avanzamento
         dc.setColor(Palette.color(2), Graphics.COLOR_TRANSPARENT);
-        dc.drawText(w / 2, 362, rt.small, (page + 1).toString() + "/" + section.pages, Graphics.TEXT_JUSTIFY_CENTER);
+        var label = (page + 1).toString() + "/" + section.pages;
+        dc.drawText(w / 2, 362, rt.small, label, Graphics.TEXT_JUSTIFY_CENTER);
+        if (app.ticker.isScheduled("auto")) {
+            // triangolino: scorrimento automatico attivo
+            var x = w / 2 + dc.getTextWidthInPixels(label, rt.small) / 2 + 6;
+            dc.fillPolygon([[x, 367], [x + 7, 372], [x, 377]]);
+        }
         if (section.pages > 1) {
             var deg = 300 * page / (section.pages - 1);
             dc.setPenWidth(3);
@@ -211,6 +240,7 @@ class ReaderView extends WatchUi.View {
         page = p;
         getApp().savePosition(section.id, page);
         load();
+        armAuto();
         return true;
     }
 
@@ -251,9 +281,13 @@ class ReaderDelegate extends WatchUi.BehaviorDelegate {
         return true;
     }
 
-    // pulsante in alto: pagina successiva
+    // pulsante in alto: orologio (o pagina successiva, se l'orologio è disattivato)
     function onSelect() as Boolean {
-        _view.go(1);
+        if (getApp().clockButton()) {
+            showClock();
+        } else {
+            _view.go(1);
+        }
         return true;
     }
 

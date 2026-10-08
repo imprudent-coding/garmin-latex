@@ -21,6 +21,8 @@ connectiq & monkeydo bin/appunti.prg vivoactive5
 | `RichText.mc` | disegno del testo ricco (pedici, apici, vettori, accenti) con i font custom |
 | `ImageCache.mc` | immagini: RLE a 2 bit → `BufferedBitmap` a palette, decodifica a blocchi (watchdog), al massimo 4 in memoria |
 | `ZoomView.mc` | versione ingrandita con swipe/trascinamento |
+| `ClockView.mc` | schermata orologio sul pulsante in alto; si chiude con una pressione prolungata |
+| `Ticker.mc` | un solo `Timer` per tutta l'app (Connect IQ permette di default 3 timer attivi): sincronizzazione, immagini, prefetch, scorrimento automatico, orologio |
 | `FontInfo.mc` | **generato** da `pipeline/gwnotes/fontgen.py` (id e metriche dei font) |
 
 I font sono in `../shared/font/generated`, aggiunta al `resourcePath` del jungle:

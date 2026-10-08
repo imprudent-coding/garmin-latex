@@ -320,13 +320,33 @@ di pagine (● = già in cache sull'orologio). L'app riparte dall'ultima domanda
 | Elenco | swipe su/giù | domanda successiva/precedente |
 | Elenco | trascinare il dito su/giù | scorrimento veloce (una voce ogni 30 px) |
 | Elenco | swipe a sinistra / a destra | gruppo successivo / inizio del gruppo (o gruppo precedente) |
-| Elenco | tocco su una riga | la seleziona; secondo tocco (o pulsante in alto) la apre |
-| Lettura | swipe su / pulsante in alto / tocco nella metà inferiore | pagina successiva |
+| Elenco | tocco su una riga | la seleziona; secondo tocco la apre |
+| Lettura | swipe su / tocco nella metà inferiore | pagina successiva |
 | Lettura | swipe giù / tocco nella metà superiore | pagina precedente |
 | Lettura | tocco su un'immagine con il triangolino verde | zoom |
 | Zoom | swipe o trascinamento | sposta l'immagine |
+| Ovunque | pulsante in alto | **orologio** (vedi sotto) |
+| Orologio | pressione prolungata sullo schermo o su un pulsante | torna agli appunti, dove eri |
 | Ovunque | pulsante in basso | indietro |
-| Ovunque | pressione prolungata sullo schermo (o il gesto *menu* del dispositivo) | menu: riprendi lettura, torna all'elenco, sincronizza, svuota cache, mostra memoria |
+| Ovunque | pressione prolungata sullo schermo (o il gesto *menu* del dispositivo) | menu: riprendi lettura, torna all'elenco, scorrimento automatico, pulsante orologio, sincronizza, svuota cache, mostra memoria |
+
+**Scorrimento automatico.** Dal menu, *Scorrimento automatico* cambia a ogni
+tocco: No, 5, 10, 15, 20, 30, 45, 60 secondi per pagina (il menu resta aperto).
+In lettura la pagina avanza da sola; un triangolino accanto al numero di pagina
+indica che è attivo. Puoi sempre andare avanti o tornare indietro a mano: il
+conteggio riparte dalla pagina in cui sei. Si ferma all'ultima pagina della
+domanda e mentre sei nel menu, nello zoom o nell'orologio. Se la pagina non è
+ancora arrivata dal telefono, aspetta che arrivi.
+
+**Orologio.** Il pulsante in alto copre subito gli appunti con una schermata
+orologio (ora, data, batteria), senza animazione. Swipe, tocchi e pulsante
+indietro non fanno nulla. Per tornare agli appunti tieni premuto lo schermo (o
+un pulsante) per almeno 0,7 s: ritrovi la pagina dov'eri. Lo scorrimento
+automatico resta in pausa finché l'orologio è aperto. Si disattiva dal menu
+(*Pulsante orologio*): in quel caso il pulsante in alto torna a girare pagina
+in lettura e ad aprire la domanda nell'elenco. Alcune pressioni prolungate dei
+pulsanti sono riservate al sistema (ad esempio quella del pulsante in alto
+apre i controlli): se quella del pulsante non arriva all'app, usa lo schermo.
 
 Nell'elenco, in basso, ci sono l'identificativo e la posizione (`B3 · 21/61`);
 l'arco sul bordo destro indica dove sei nell'elenco. In lettura, in basso c'è il

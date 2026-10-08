@@ -110,7 +110,11 @@ class ZoomDelegate extends WatchUi.InputDelegate {
     function onKey(evt as WatchUi.KeyEvent) as Boolean {
         var k = evt.getKey();
         if (k == WatchUi.KEY_ENTER) {
-            _view.pan(0, 150);
+            if (getApp().clockButton()) {
+                showClock();
+            } else {
+                _view.pan(0, 150);
+            }
             return true;
         }
         if (k == WatchUi.KEY_ESC) {
