@@ -68,9 +68,10 @@ Il flusso, dalla modifica alla lettura:
 3. L'**app Android** controlla le Release (a mano o ogni 1/6/24 ore), scarica
    il bundle solo se è cambiato, verifica gli hash e lo tiene in cache.
 4. Quando apri l'**app sull'orologio**, questa chiede al telefono la versione
-   (`hello`). Se è cambiata scarica il nuovo indice; poi chiede solo le
-   pagine e le immagini che ti servono, a pezzi da ~1,8 KB, e le tiene in cache.
-   Senza telefono legge ciò che ha già in cache.
+   (`hello`). Se è cambiata scarica il nuovo indice; poi, mentre l'app è aperta,
+   scarica in sottofondo **tutti** gli appunti (pezzi da ~1,8 KB) nella sua
+   memoria. Le pagine che apri hanno sempre la precedenza. Una volta finito, la
+   lettura non dipende più dal Bluetooth né dal telefono.
 
 ### La conversione in breve
 
@@ -298,8 +299,12 @@ cache vengono conservati. Serve solo quando cambia l'app (tag `garmin-v…`),
 1. Telefono: app Android aperta (o servizio attivo), bundle scaricato,
    orologio **Connesso** nella scheda *Orologio*.
 2. Orologio: apri **Appunti LaTeX**. In alto compare «Sincronizzo 1/3…», poi
-   l'elenco dei capitoli. Il primo accesso a una sezione la scarica; dopo è in
-   cache (● accanto al numero di pagine).
+   l'elenco delle domande; in alto «Sezioni 12/150», poi «Immagini 30/154».
+   Lascia l'app aperta finché compare «Tutto in memoria» (la prima volta può
+   richiedere parecchi minuti). L'app Android
+   mostra lo stesso avanzamento nella scheda *Orologio*.
+3. Intanto puoi già leggere: la sezione che apri viene scaricata per prima. Se
+   chiudi l'app, il download riprende da dove era alla riapertura successiva.
 
 ---
 
@@ -343,8 +348,8 @@ L'anteprima dell'elenco è in `preview/_elenco.png` (artifact del workflow `note
    prossimo controllo (automatico o con il pulsante); l'orologio si aggiorna alla
    prossima apertura dell'app (o subito, se è aperta).
 
-Solo le sezioni cambiate vengono riscaricate sull'orologio: ogni sezione ha il
-suo hash.
+Solo le sezioni e le immagini cambiate vengono riscaricate sull'orologio: ogni
+risorsa ha il suo hash, e quelle già in memoria vengono saltate.
 
 Prima di fare push puoi controllare il risultato:
 - nel riepilogo del workflow (**Actions** → esecuzione → *Summary*) c'è il report;
@@ -484,17 +489,29 @@ via Bluetooth. Fonte: *Communicating with Mobile Apps* nella documentazione Garm
 - **Dimensione dei messaggi**: Garmin non documenta un limite, ma l'SDK Android ha
   l'errore `FAILURE_MESSAGE_TOO_LARGE`. Il valore di 1800 byte per pezzo è
   prudente; si cambia in `rules.yaml` senza toccare le app.
-- **Storage**: la documentazione Garmin si contraddice (8 KB/valore e 128 KB
-  totali nella guida, 32 KB/valore e totale variabile nell'API reference). L'app
-  usa pezzi da 1,8 KB, un budget di 96 KB e libera spazio se `setValue` fallisce.
-  Gli appunti completi occupano più del budget (testo ~330 KB, immagini ~1,2 MB):
-  in cache restano le sezioni lette di recente, il resto arriva dal telefono.
+- **Storage**: la guida *Persisting Data* parla di 128 KB totali, ma è un valore
+  generico vecchio. Il device file ufficiale del vívoactive 5 (`simulator.json`
+  nell'SDK) indica `appStorageCapacity` = 10.485.760 byte, cioè **10 MB per
+  app**; l'API reference di `Storage` dice che il totale dipende dal dispositivo.
+  Gli appunti completi occupano circa 1,6 MB (testo ~330 KB, immagini ~1,2 MB),
+  quindi stanno tutti in memoria: l'app usa un budget di 6 MB, pezzi da 1,8 KB
+  (sotto gli 8 KB per valore della guida) e libera le risorse meno usate se
+  `setValue` fallisce comunque. La CI stampa questi valori nel riepilogo del job.
+- **Appunti dentro l'app**: provato (`.prg` di 1,69 MB con tutte le risorse,
+  compilato senza errori), ma scartato: ogni modifica agli appunti
+  richiederebbe di ricompilare e reinstallare l'app, e i 10 MB di Storage
+  bastano.
+- **La memoria USB dell'orologio** (quella che si vede da un PC) non è
+  accessibile alle app Connect IQ: possono usare solo il proprio Storage.
 - **Memoria e prestazioni**: limite di 768 KB per le watch-app sul vivoactive 5.
   I font antialiasing (3 × 349 glifi) e le bitmap delle immagini (al massimo 4
   in memoria, zoom fino a 700×700) vanno misurati nel simulatore e sull'orologio
   vero con le righe `[mem]`.
 - **Velocità del Bluetooth**: una sezione tipica sono 3–8 pezzi di testo più le
-  immagini; il tempo reale va misurato.
+  immagini; gli appunti interi sono circa 900 pezzi. Il tempo del primo
+  download completo va misurato; dopo si scaricano solo le risorse cambiate.
+- **Download in sottofondo**: una watch-app gira solo mentre è aperta, quindi il
+  download procede solo con l'app aperta sull'orologio.
 - **App installate via USB e Garmin Connect**: lo stato «installata» potrebbe
   non essere riportato per un'app sideload; la messaggistica dovrebbe funzionare
   comunque.
@@ -511,7 +528,8 @@ via Bluetooth. Fonte: *Communicating with Mobile Apps* nella documentazione Garm
   font di sistema Roboto 32–63 px.
   <https://developer.garmin.com/connect-iq/device-reference/vivoactive5/>
 - *Persisting Data* (guida Core Topics): «Keys and values are limited to 8 KB
-  each, and a total of 128 KB of storage is available».
+  each, and a total of 128 KB of storage is available» (valore generico; per il
+  vívoactive 5 vale `appStorageCapacity` del device file, 10 MB).
   <https://developer.garmin.com/connect-iq/core-topics/persisting-data/>
 - API reference `Toybox.Application.Storage`: «values are limited to 32 KB»,
   limite totale variabile per dispositivo.
