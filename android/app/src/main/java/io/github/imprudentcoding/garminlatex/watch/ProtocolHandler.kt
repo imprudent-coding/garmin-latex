@@ -85,7 +85,29 @@ class ProtocolHandler(private val schema: Int, private val bundle: () -> Source?
         )
     }
 
+    /** Stato della cache sull'orologio (messaggio `progress`, senza risposta). */
+    data class WatchProgress(
+        val version: String,
+        val sections: Int,
+        val sectionsTotal: Int,
+        val images: Int,
+        val imagesTotal: Int,
+        val finished: Boolean,
+    )
+
     companion object {
+        /** Legge un messaggio `progress` dell'orologio; null se è un altro messaggio. */
+        fun progress(raw: Any?): WatchProgress? {
+            val msg = raw as? Map<*, *> ?: return null
+            if (msg["op"]?.toString() != "progress") return null
+            return WatchProgress(
+                version = msg["ver"]?.toString() ?: "",
+                sections = toInt(msg["sec"]), sectionsTotal = toInt(msg["secs"]),
+                images = toInt(msg["img"]), imagesTotal = toInt(msg["imgs"]),
+                finished = msg["fin"] == true || msg["fin"]?.toString() == "true",
+            )
+        }
+
         fun toInt(v: Any?): Int = when (v) {
             is Number -> v.toInt()
             is String -> v.toIntOrNull() ?: 0
