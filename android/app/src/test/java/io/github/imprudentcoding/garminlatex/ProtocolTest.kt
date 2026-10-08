@@ -99,7 +99,7 @@ class ProtocolTest {
 
     @Test
     fun bundleOpensAndVerifies() {
-        val dir = createTempDir()
+        val dir = kotlin.io.path.createTempDirectory("bundle-test").toFile()
         Bundle.open(makeBundle(dir), 1).use { b ->
             assertEquals("v1", b.manifest.contentVersion)
             assertEquals(2, b.resource("s:a")!!.chunks.size)
@@ -109,7 +109,7 @@ class ProtocolTest {
 
     @Test
     fun corruptBundleIsRejected() {
-        val dir = createTempDir()
+        val dir = kotlin.io.path.createTempDirectory("bundle-test").toFile()
         try {
             Bundle.open(makeBundle(dir, corrupt = true), 1)
             fail("atteso errore di hash")
@@ -120,7 +120,7 @@ class ProtocolTest {
 
     @Test
     fun newerSchemaIsRejected() {
-        val dir = createTempDir()
+        val dir = kotlin.io.path.createTempDirectory("bundle-test").toFile()
         try {
             Bundle.open(makeBundle(dir, schema = 2), 1)
             fail("atteso errore di schema")

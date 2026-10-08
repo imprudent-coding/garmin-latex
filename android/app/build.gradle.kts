@@ -37,8 +37,10 @@ android {
             create("release") {
                 storeFile = File(keystorePath!!)
                 storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("ANDROID_KEY_ALIAS") ?: "notes"
-                keyPassword = System.getenv("ANDROID_KEY_PASSWORD") ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                // i secrets non impostati arrivano come stringa vuota: trattarli come assenti
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")?.takeIf { it.isNotBlank() } ?: "notes"
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")?.takeIf { it.isNotEmpty() }
+                    ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
             }
         }
     }
