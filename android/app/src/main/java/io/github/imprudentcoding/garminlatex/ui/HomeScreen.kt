@@ -50,6 +50,7 @@ import kotlinx.coroutines.launch
 fun HomeScreen(app: NotesApplication, onPreview: () -> Unit, onSettings: () -> Unit) {
     val bundleState by app.repo.state.collectAsStateWithLifecycle()
     val watch by app.watch.state.collectAsStateWithLifecycle()
+    val bundleVersion = bundleState.bundle?.manifest?.contentVersion
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
 
@@ -129,6 +130,16 @@ fun HomeScreen(app: NotesApplication, onPreview: () -> Unit, onSettings: () -> U
                                     AppStatus.UNKNOWN -> stringResource(R.string.app_unknown)
                                 }, color = if (d.app == AppStatus.INSTALLED) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.error)
+                                d.cache?.let { c ->
+                                    val current = bundleVersion == null || c.version == bundleVersion
+                                    Text(when {
+                                        c.finished && current -> stringResource(R.string.cache_complete)
+                                        c.sections < c.sectionsTotal -> stringResource(R.string.cache_sections, c.sections, c.sectionsTotal)
+                                        else -> stringResource(R.string.cache_images, c.images, c.imagesTotal)
+                                    }, style = MaterialTheme.typography.bodySmall,
+                                        color = if (c.finished && current) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
                                 if (d.status == "CONNECTED" && d.app == AppStatus.INSTALLED) {
                                     OutlinedButton(onClick = { app.watch.openWatchApp(d.id) }) {
                                         Text(stringResource(R.string.open_on_watch))

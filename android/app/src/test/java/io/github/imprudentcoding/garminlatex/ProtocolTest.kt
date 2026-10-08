@@ -52,6 +52,18 @@ class ProtocolTest {
     }
 
     @Test
+    fun progressIsParsedAndNotAnswered() {
+        val m = mapOf("op" to "progress", "ver" to "v1", "sec" to 3L, "secs" to 10, "img" to 0, "imgs" to 0, "fin" to false)
+        assertNull(handler.handle(m))
+        val p = ProtocolHandler.progress(m)!!
+        assertEquals(3, p.sections)
+        assertEquals(10, p.sectionsTotal)
+        assertEquals(false, p.finished)
+        assertEquals(true, ProtocolHandler.progress(m + ("fin" to true))!!.finished)
+        assertNull(ProtocolHandler.progress(mapOf("op" to "get")))
+    }
+
+    @Test
     fun getChunk() {
         val r = handler.handle(mapOf("op" to "get", "k" to "idx", "n" to 1, "h" to "h-idx", "req" to 3))!!
         assertEquals("chunk", r.message["op"])

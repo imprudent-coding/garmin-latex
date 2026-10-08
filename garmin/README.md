@@ -13,13 +13,16 @@ connectiq & monkeydo bin/appunti.prg vivoactive5
 |---|---|
 | `NotesApp.mc` | applicazione: avvio, indice, sincronizzazione, posizione di lettura |
 | `Sync.mc` | protocollo con il telefono ([`../shared/PROTOCOL.md`](../shared/PROTOCOL.md)): un messaggio in volo, timeout 10 s, 3 tentativi |
-| `Store.mc` | cache in `Application.Storage`: un valore per pezzo (~1,8 KB), metadati, LRU, budget 96 KB, recupero se lo spazio finisce |
+| `Store.mc` | cache in `Application.Storage`: un valore per pezzo (~1,8 KB), metadati divisi in 16 valori, LRU, budget 6 MB, recupero se lo spazio finisce |
+| `Prefetch.mc` | scaricamento in sottofondo di tutte le sezioni e immagini quando il collegamento è libero; avanzamento sull'orologio e sul telefono |
 | `Index.mc` | indice: capitoli, sezioni, pezzo che contiene ogni pagina |
 | `QuestionList.mc` | elenco unico delle domande raggruppate per capitolo: righe compatte, voce selezionata espansa al centro, trascinamento veloce, salto di gruppo con swipe laterale |
 | `ReaderView.mc` | lettura: carica solo il pezzo della pagina corrente, precarica il successivo |
 | `RichText.mc` | disegno del testo ricco (pedici, apici, vettori, accenti) con i font custom |
 | `ImageCache.mc` | immagini: RLE a 2 bit → `BufferedBitmap` a palette, decodifica a blocchi (watchdog), al massimo 4 in memoria |
 | `ZoomView.mc` | versione ingrandita con swipe/trascinamento |
+| `ClockView.mc` | schermata orologio sul pulsante in alto; si chiude con una pressione prolungata |
+| `Ticker.mc` | un solo `Timer` per tutta l'app (Connect IQ permette di default 3 timer attivi): sincronizzazione, immagini, prefetch, scorrimento automatico, orologio |
 | `FontInfo.mc` | **generato** da `pipeline/gwnotes/fontgen.py` (id e metriche dei font) |
 
 I font sono in `../shared/font/generated`, aggiunta al `resourcePath` del jungle:
@@ -33,9 +36,12 @@ watch-app 786.432 byte, glance 65.536, background 65.536; schermo 390×390, 65.5
 colori, touch. La CI stampa nel riepilogo del job i valori letti dai device file
 (`compiler.json`).
 
-Storage: la guida *Persisting Data* indica 8 KB per valore e 128 KB in totale;
-l'API reference indica 32 KB per valore e un totale variabile. L'app rispetta il
-limite più stretto.
+Storage: il device file `simulator.json` del vívoactive 5 indica
+`appStorageCapacity` = 10.485.760 byte (10 MB per app); il pool grafico
+(`graphicsResourcePoolSize`) è di 2 MB. La guida *Persisting Data* parla di
+128 KB totali e 8 KB per valore: il totale non vale per questo dispositivo, il
+limite per valore lo rispettiamo comunque (pezzi da 1,8 KB, metadati divisi in
+16 valori). Budget della cache: 6 MB; gli appunti interi sono ~1,6 MB.
 
 ## Memoria (da misurare)
 

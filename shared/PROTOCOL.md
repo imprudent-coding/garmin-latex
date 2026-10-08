@@ -8,7 +8,9 @@ questo i dati viaggiano in pezzi di al massimo `chunkBytes` (default 1800 byte)
 e c'è **un solo messaggio in volo alla volta**.
 
 È l'orologio a chiedere (modello *pull*): il telefono risponde solo alle
-richieste, tranne la notifica `update`.
+richieste, tranne la notifica `update`. `progress` è una notifica
+dell'orologio: il telefono la mostra e non risponde. Chi riceve un `op`
+sconosciuto lo ignora.
 
 ## Orologio → telefono
 
@@ -16,6 +18,7 @@ richieste, tranne la notifica `update`.
 |---|---|---|
 | `hello` | `schema`, `font`, `ver` (versione in cache o `""`) | apertura: "che versione hai?" |
 | `get` | `k` chiave, `n` indice del pezzo, `h` hash atteso (o `""`), `req` id richiesta | "dammi il pezzo n della risorsa k" |
+| `progress` | `ver`, `sec`/`secs` sezioni in cache/totali, `img`/`imgs` immagini in cache/trovate, `fin` tutto in cache | stato del download in sottofondo; **nessuna risposta** |
 
 ## Telefono → orologio
 
@@ -55,13 +58,27 @@ orologio                         telefono
 
 ## Cache sull'orologio (`Application.Storage`)
 
-Limiti documentati da Garmin: 8 KB per valore e 128 KB in totale secondo la
-guida *Persisting Data*; 32 KB per valore e totale variabile per dispositivo
-secondo l'API reference di `Storage`. L'app rispetta il limite più stretto:
+Spazio: 10 MB per app sul vívoactive 5 (`appStorageCapacity` nel device file
+`simulator.json`). La guida *Persisting Data* indica 8 KB per valore e 128 KB
+in totale, l'API reference di `Storage` 32 KB per valore e un totale variabile
+per dispositivo: il totale della guida non vale qui, il limite per valore lo
+rispettiamo comunque.
 
 - una chiave per pezzo: `c|<chiave>|<n>` → stringa (≤ `chunkBytes`);
-- `meta` → dizionario con, per ogni risorsa, hash, pezzi presenti, byte e
-  ultimo accesso;
-- budget di default 96 KB; se lo supera, o se `setValue` lancia
-  un'eccezione di spazio esaurito, elimina le risorse usate meno di recente
-  (mai l'indice o la sezione aperta) e riprova.
+- `m0` … `m15` → metadati divisi in 16 dizionari (per hash della chiave):
+  per ogni risorsa hash, pezzi presenti, byte e ultimo accesso. Un dizionario
+  unico con tutte le risorse supererebbe gli 8 KB. Il vecchio valore unico
+  `meta` viene convertito al primo avvio;
+- `pf` → versione degli appunti già scaricata per intero;
+- budget di 6 MB (gli appunti interi sono ~1,6 MB); se lo supera, o se
+  `setValue` lancia un'eccezione di spazio esaurito, elimina le risorse usate
+  meno di recente (mai l'indice o la sezione aperta) e riprova.
+
+## Download in sottofondo
+
+Dopo l'indice, l'orologio scarica tutte le sezioni (in ordine di indice) e
+poi le immagini citate nelle loro righe `I`. Chiede un pezzo solo quando non
+c'è nulla in volo né in coda: le richieste della lettura passano sempre
+prima. Si ferma se il telefono non risponde e riprende al prossimo `hello`
+riuscito, saltando le risorse già in cache. Ogni 10 risorse e alla fine invia
+`progress`.

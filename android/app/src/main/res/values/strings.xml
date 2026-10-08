@@ -27,6 +27,9 @@
     <string name="app_not_supported">Questo orologio non supporta l\'app</string>
     <string name="app_unknown">Stato dell\'app sull\'orologio sconosciuto (orologio non connesso?)</string>
     <string name="open_on_watch">Apri l\'app sull\'orologio</string>
+    <string name="cache_complete">Tutti gli appunti sono sull\'orologio</string>
+    <string name="cache_sections">Sull\'orologio: sezioni %1$d/%2$d</string>
+    <string name="cache_images">Sull\'orologio: immagini %1$d/%2$d</string>
     <string name="sync_stats">Pezzi inviati: %1$d · errori: %2$d · ultima richiesta: %3$s</string>
     <string name="refresh">Aggiorna stato</string>
     <string name="restart_link">Riavvia collegamento</string>

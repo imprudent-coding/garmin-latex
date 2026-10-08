@@ -133,6 +133,13 @@ jobs:
                   if any(w in low for w in ("memory", "version", "resolution", "storage", "type")):
                       print(f"- `{path}` = {x}")
           walk(data)
+          sim = d / "simulator.json"
+          if sim.exists():
+              s = json.loads(sim.read_text())
+              print(f"\n### Spazio (da {d.name}/simulator.json)\n")
+              for k in ("appStorageCapacity", "graphicsResourcePoolSize"):
+                  if k in s:
+                      print(f"- `{k}` = {s[k]}")
           EOF
 
       - name: Compila .prg e .iq

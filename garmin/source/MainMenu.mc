@@ -5,12 +5,23 @@ function showMainMenu() as Void {
     var m = new WatchUi.Menu2({:title => WatchUi.loadResource(Rez.Strings.MenuTitle) as String});
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuResume) as String, null, :resume, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuIndex) as String, null, :index, null));
+    m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuAuto) as String, autoLabel(getApp().autoSeconds()),
+        :auto, null));
+    m.addItem(new WatchUi.ToggleMenuItem(WatchUi.loadResource(Rez.Strings.MenuClockKey) as String,
+        WatchUi.loadResource(Rez.Strings.MenuClockKeySub) as String, :clockKey, getApp().clockButton(), null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuSync) as String, getApp().status, :sync, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuClear) as String,
-        getApp().store.count().toString() + " risorse", :clear, null));
+        getApp().store.count().toString() + " risorse, " + (getApp().store.used() / 1024) + " KB", :clear, null));
     m.addItem(new WatchUi.ToggleMenuItem(WatchUi.loadResource(Rez.Strings.MenuMemory) as String, null, :memory,
         getApp().showMemory, null));
     WatchUi.pushView(m, new MainMenuDelegate(), WatchUi.SLIDE_UP);
+}
+
+// valori dello scorrimento automatico, in secondi per pagina (0 = spento)
+const AUTO_STEPS = [0, 5, 10, 15, 20, 30, 45, 60];
+
+function autoLabel(secs as Number) as String {
+    return secs == 0 ? (WatchUi.loadResource(Rez.Strings.Off) as String) : secs.toString() + " s";
 }
 
 class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
@@ -21,6 +32,20 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
     function onSelect(item as WatchUi.MenuItem) as Void {
         var app = getApp();
         var id = item.getId();
+        if (id == :auto) {
+            // ogni tocco passa al valore successivo; il menu resta aperto
+            var cur = app.autoSeconds();
+            var i = AUTO_STEPS.indexOf(cur);
+            var next = AUTO_STEPS[(i + 1) % AUTO_STEPS.size()] as Number;
+            app.store.setValue("auto", next);
+            item.setSubLabel(autoLabel(next));
+            WatchUi.requestUpdate();
+            return;
+        }
+        if (id == :clockKey) {
+            app.store.setValue("clockKey", (item as WatchUi.ToggleMenuItem).isEnabled());
+            return;
+        }
         if (id == :memory) {
             app.showMemory = !app.showMemory;
             Mem.log("richiesta dall'utente");
@@ -32,6 +57,7 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
             app.images.retryFailed();
             app.startSync();
         } else if (id == :clear) {
+            app.prefetch.stop();
             app.store.clearAll();
             app.images.clear();
             app.index = null;

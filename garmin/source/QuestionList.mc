@@ -353,8 +353,13 @@ class QuestionListDelegate extends WatchUi.BehaviorDelegate {
         return System.getTimer() - _dragMovedAt < 400;
     }
 
+    // pulsante in alto: orologio (o apre la domanda, se l'orologio è disattivato)
     function onSelect() as Boolean {
-        _view.openSelected();
+        if (getApp().clockButton()) {
+            showClock();
+        } else {
+            _view.openSelected();
+        }
         return true;
     }
 

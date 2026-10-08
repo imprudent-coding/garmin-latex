@@ -27,6 +27,7 @@ data class WatchDevice(
     val status: String,  // CONNECTED, NOT_CONNECTED, NOT_PAIRED, UNKNOWN
     val app: AppStatus = AppStatus.UNKNOWN,
     val appVersion: Int = 0,
+    val cache: ProtocolHandler.WatchProgress? = null,
 )
 
 data class WatchState(
@@ -199,6 +200,11 @@ class WatchLink(
         }
         _state.update { it.copy(lastRequest = System.currentTimeMillis()) }
         for (m in messages.orEmpty()) {
+            ProtocolHandler.progress(m)?.let { p ->
+                updateDevice(d.deviceIdentifier) { it.copy(cache = p) }
+                if (p.finished) log("Tutti gli appunti sono sull'orologio (${p.version})")
+                continue
+            }
             val reply = try {
                 handler.handle(m)
             } catch (e: Exception) {
