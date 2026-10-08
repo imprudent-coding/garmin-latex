@@ -1,0 +1,8 @@
+<!-- Generato da pipeline/gwnotes/fontgen.py: non modificare a mano. -->
+<resources>
+    <fonts>
+        <font id="Font_body" filename="body.fnt" antialias="true" />
+        <font id="Font_bold" filename="bold.fnt" antialias="true" />
+        <font id="Font_small" filename="small.fnt" antialias="true" />
+    </fonts>
+</resources>

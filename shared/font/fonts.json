@@ -1,0 +1,9 @@
+{
+  "_comment": "Font dell'orologio. Dopo una modifica: cd pipeline && python -m gwnotes.fontgen, poi ricompila l'app Garmin.",
+  "antialias": true,
+  "fonts": {
+    "body":  {"ttf": "DejaVuSansCondensed.ttf",      "size": 26},
+    "bold":  {"ttf": "DejaVuSansCondensed-Bold.ttf", "size": 26},
+    "small": {"ttf": "DejaVuSansCondensed.ttf",      "size": 19}
+  }
+}

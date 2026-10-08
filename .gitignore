@@ -1,0 +1,18 @@
+# pipeline
+/dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+# android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.keystore
+*.jks
+# garmin
+garmin/bin/
+garmin/gen/
+*.der
+*.pem

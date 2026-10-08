@@ -1,0 +1,18 @@
+<strings>
+    <string id="AppName">Appunti LaTeX</string>
+    <string id="Chapters">Appunti</string>
+    <string id="NoIndex">Nessun appunto. Apri l'app sul telefono e scarica gli appunti.</string>
+    <string id="Loading">Caricamento…</string>
+    <string id="Offline">Telefono non raggiungibile</string>
+    <string id="Synced">Aggiornato</string>
+    <string id="Syncing">Sincronizzo</string>
+    <string id="NoBundle">Il telefono non ha ancora appunti</string>
+    <string id="OldApp">Aggiorna l'app dell'orologio</string>
+    <string id="MenuTitle">Opzioni</string>
+    <string id="MenuSync">Sincronizza ora</string>
+    <string id="MenuIndex">Torna all'indice</string>
+    <string id="MenuClear">Svuota cache</string>
+    <string id="MenuMemory">Mostra memoria</string>
+    <string id="MenuResume">Riprendi lettura</string>
+    <string id="Missing">Non in cache: collega il telefono</string>
+</strings>

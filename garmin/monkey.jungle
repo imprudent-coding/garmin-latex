@@ -1,0 +1,6 @@
+project.manifest = manifest.xml
+
+# I font sono generati dalla pipeline (shared/font/generated): stesso file usato
+# per impaginare gli appunti, così le metriche coincidono.
+base.sourcePath = source
+base.resourcePath = resources;../shared/font/generated
