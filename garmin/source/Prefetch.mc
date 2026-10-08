@@ -146,7 +146,7 @@ class Prefetch {
             }
             if (missing >= 0) {
                 _waiting = true;
-                _sync.request(key, missing, sec.hash, method(:onSection), false);
+                _sync.requestBatch(key, missing, total - missing, sec.hash, method(:onSection));
                 return;
             }
             _si += 1;
@@ -181,13 +181,14 @@ class Prefetch {
                 }
             }
             _waiting = true;
-            _sync.request(key, n, "", method(:onImage), false);
+            _sync.requestBatch(key, n, total > 0 ? total - n : MAX_BATCH, "", method(:onImage));
             return;
         }
         active = false;
         finished = failed == 0;
         if (finished) {
             _store.setValue("pf", _ver);
+            _store.dropImagesExcept(_seen);
         }
         Mem.log("prefetch completato");
         notify();
@@ -225,9 +226,13 @@ class Prefetch {
             onFailure();
             return;
         }
-        _store.put(key as String, n as Number, total as Number, hash as String, data as String);
-        scan(data as String);
-        _scanned[n] = true;
+        var d = data as Array;
+        for (var i = 0; i < d.size(); i++) {
+            var c = d[i] as String;
+            _store.put(key as String, (n as Number) + i, total as Number, hash as String, c);
+            scan(c);
+            _scanned[(n as Number) + i] = true;
+        }
     }
 
     function onImage(key, n, total, hash, data) as Void {
@@ -236,7 +241,10 @@ class Prefetch {
             onFailure();
             return;
         }
-        _store.put(key as String, n as Number, total as Number, hash as String, data as String);
+        var d = data as Array;
+        for (var i = 0; i < d.size(); i++) {
+            _store.put(key as String, (n as Number) + i, total as Number, hash as String, d[i] as String);
+        }
     }
 
     // Telefono non raggiungibile o bundle cambiato: si riprende al prossimo hello.

@@ -11,6 +11,9 @@ const ST_OFFLINE = 3;
 const ST_NOBUNDLE = 4;
 const ST_SCHEMA = 5;
 
+// pezzi al massimo per richiesta multipla (il telefono si ferma prima, a ~7 KB)
+const MAX_BATCH = 8;
+
 class CommListener extends Communications.ConnectionListener {
     private var _sync;
 
@@ -30,7 +33,7 @@ class CommListener extends Communications.ConnectionListener {
 // Protocollo con l'app del telefono (shared/PROTOCOL.md): l'orologio chiede,
 // il telefono risponde; un solo messaggio in volo, timeout e tentativi.
 class Sync {
-    const SCHEMA = 1;
+    const SCHEMA = 2;
     const TIMEOUT_MS = 10000;
     const MAX_TRIES = 3;
 
@@ -42,10 +45,11 @@ class Sync {
     // chiamato quando non c'è nulla in volo né in coda (usato dal prefetch)
     var idle as Method or Null = null;
 
-    // richieste in coda: [chiave, n, hash, callback]; callback è un Array<Method>
-    // (più richieste uguali condividono la stessa risposta)
+    // richieste in coda: [chiave, n, hash, callback, pezzi]; callback è un Array di
+    // [Method, multiplo] (più richieste uguali condividono la stessa risposta)
     private var _queue as Array<Array> = [] as Array<Array>;
-    private var _inflight as Array or Null = null;  // [chiave, n, hash, callback, req, tentativi]
+    // [chiave, n, hash, callback, req, tentativi, pezzi]
+    private var _inflight as Array or Null = null;
     private var _req as Number = 0;
     private var _ticker as Ticker;
     private var _listener as CommListener;
@@ -68,25 +72,40 @@ class Sync {
         if (_inflight != null && !((_inflight as Array)[0] as String).equals("hello")) {
             // la richiesta interrotta torna in testa alla coda e riparte dopo l'hello
             var f = _inflight as Array;
-            _queue = [[f[0], f[1], f[2], f[3]]].addAll(_queue) as Array<Array>;
+            _queue = [[f[0], f[1], f[2], f[3], f[6]]].addAll(_queue) as Array<Array>;
         }
         state = ST_HELLO;
-        _inflight = ["hello", 0, cachedVersion, cb, nextReq(), 0];
+        _inflight = ["hello", 0, cachedVersion, cb, nextReq(), 0, 1];
         sendCurrent();
     }
 
     // ------------------------------------------------------------- richieste
-    // cb.invoke(chiave, n, totale, hash, dati) ; dati = null se fallita
+    // Un pezzo: cb.invoke(chiave, n, totale, hash, dati); dati = String, o null se fallita.
     function request(key as String, n as Number, hash as String, cb as Method, urgent as Boolean) as Void {
+        add(key, n, hash, cb, urgent, 1);
+    }
+
+    // Fino a `count` pezzi consecutivi da n in un messaggio (op "chunks"):
+    // cb.invoke(chiave, n, totale, hash, dati); dati = Array<String> (almeno un pezzo) o null.
+    function requestBatch(key as String, n as Number, count as Number, hash as String, cb as Method) as Void {
+        add(key, n, hash, cb, false, count > MAX_BATCH ? MAX_BATCH : count);
+    }
+
+    private function add(key as String, n as Number, hash as String, cb as Method, urgent as Boolean,
+                         count as Number) as Void {
+        var entry = [cb, count > 1];
         if (_inflight != null && (_inflight[0] as String).equals(key) && (_inflight[1] as Number) == n
             && (_inflight[3] instanceof Lang.Array)) {
-            (_inflight[3] as Array).add(cb);
+            (_inflight[3] as Array).add(entry);
             return;
         }
         for (var i = 0; i < _queue.size(); i++) {
             var q = _queue[i];
             if ((q[0] as String).equals(key) && (q[1] as Number) == n) {
-                (q[3] as Array).add(cb);
+                (q[3] as Array).add(entry);
+                if (count > (q[4] as Number)) {
+                    q[4] = count;
+                }
                 if (urgent && i > 0) {
                     _queue.remove(q);
                     _queue = [q].addAll(_queue) as Array<Array>;
@@ -94,7 +113,7 @@ class Sync {
                 return;
             }
         }
-        var item = [key, n, hash, [cb]];
+        var item = [key, n, hash, [entry], count];
         if (urgent) {
             _queue = [item].addAll(_queue) as Array<Array>;
         } else {
@@ -112,11 +131,21 @@ class Sync {
         return _req;
     }
 
-    // risposta a tutte le callback di una richiesta
+    // Risposta a tutte le callback di una richiesta: chi ha chiesto un pezzo
+    // riceve una String, chi ne ha chiesti più di uno un Array<String>.
     private function deliver(f as Array, total as Number, hash, data) as Void {
         var cbs = f[3] as Array;
         for (var i = 0; i < cbs.size(); i++) {
-            (cbs[i] as Method).invoke(f[0], f[1], total, hash, data);
+            var e = cbs[i] as Array;
+            var d = data;
+            if (data != null) {
+                if (e[1] as Boolean) {
+                    d = (data instanceof Lang.Array) ? data : [data];
+                } else if (data instanceof Lang.Array) {
+                    d = (data as Array).size() > 0 ? (data as Array)[0] : null;
+                }
+            }
+            (e[0] as Method).invoke(f[0], f[1], total, hash, d);
         }
     }
 
@@ -140,7 +169,7 @@ class Sync {
         }
         var q = _queue[0];
         _queue = _queue.slice(1, null) as Array<Array>;
-        _inflight = [q[0], q[1], q[2], q[3], nextReq(), 0];
+        _inflight = [q[0], q[1], q[2], q[3], nextReq(), 0, q[4]];
         sendCurrent();
     }
 
@@ -151,6 +180,9 @@ class Sync {
             msg = {"op" => "hello", "schema" => SCHEMA, "font" => FontInfo.ID, "ver" => f[2], "req" => f[4]};
         } else {
             msg = {"op" => "get", "k" => f[0], "n" => f[1], "h" => f[2], "req" => f[4]};
+            if ((f[6] as Number) > 1) {
+                msg["c"] = f[6];
+            }
         }
         _ticker.schedule("sync", TIMEOUT_MS, method(:onTimeout), false);
         try {
@@ -230,15 +262,19 @@ class Sync {
             WatchUi.requestUpdate();
             return;
         }
-        if (op.equals("chunk") || op.equals("err")) {
+        if (op.equals("chunk") || op.equals("chunks") || op.equals("err")) {
             var k = data["k"];
             if (k == null || !k.toString().equals(f[0] as String) || Util.toNum(data["n"]) != (f[1] as Number)) {
                 return;
             }
             _ticker.cancel("sync");
             _inflight = null;
-            if (op.equals("chunk")) {
-                deliver(f, Util.toNum(data["of"]), data["h"].toString(), data["d"]);
+            if (op.equals("chunk") || op.equals("chunks")) {
+                var payload = data["d"];
+                if (op.equals("chunks") && !(payload instanceof Lang.Array && (payload as Array).size() > 0)) {
+                    payload = null;
+                }
+                deliver(f, Util.toNum(data["of"]), data["h"].toString(), payload);
             } else {
                 lastError = data["err"] != null ? data["err"].toString() : "err";
                 deliver(f, 0, f[2], null);

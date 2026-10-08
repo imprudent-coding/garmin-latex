@@ -4,13 +4,14 @@ import Toybox.StringUtil;
 import Toybox.System;
 import Toybox.WatchUi;
 
-// Immagini delle formule/figure: pezzi -> base64 -> RLE a 2 bit -> BufferedBitmap.
+// Immagini delle formule/figure: pezzi -> base64 -> [LZ, schema 2] -> RLE a 2 bit -> BufferedBitmap.
 // La decodifica è incrementale (a blocchi su un timer) per non superare il
 // limite di tempo di esecuzione del watchdog; si tengono in memoria poche
 // bitmap alla volta (LRU).
 class ImageCache {
     const MAX_BITMAPS = 4;
     const BYTES_PER_TICK = 1500;
+    const LZ_PER_TICK = 4000;   // byte prodotti dalla decompressione LZ per passo
 
     private var _store as Store;
     private var _sync as Sync;
@@ -28,6 +29,10 @@ class ImageCache {
     private var _decY as Number = 0;
     private var _decW as Number = 0;
     private var _decRef = null;
+    // decompressione LZ in corso (schema 2): ingresso e posizioni
+    private var _lzIn as ByteArray or Null = null;
+    private var _lzI as Number = 0;
+    private var _lzO as Number = 0;
     private var _ticker as Ticker;
 
     function initialize(store as Store, sync as Sync, ticker as Ticker) {
@@ -93,7 +98,7 @@ class ImageCache {
                 }
             }
         }
-        _sync.request(key, n, "", method(:onChunk), false);
+        _sync.requestBatch(key, n, total > 0 ? total - n : MAX_BATCH, "", method(:onChunk));
     }
 
     function onChunk(key, n, total, hash, data) as Void {
@@ -104,9 +109,13 @@ class ImageCache {
             WatchUi.requestUpdate();
             return;
         }
-        _store.put(key as String, n as Number, total as Number, hash as String, data as String);
-        if ((n as Number) + 1 < (total as Number)) {
-            _sync.request(key as String, (n as Number) + 1, hash as String, method(:onChunk), false);
+        var d = data as Array;
+        for (var i = 0; i < d.size(); i++) {
+            _store.put(key as String, (n as Number) + i, total as Number, hash as String, d[i] as String);
+        }
+        var after = (n as Number) + d.size();
+        if (after < (total as Number)) {
+            _sync.requestBatch(key as String, after, (total as Number) - after, hash as String, method(:onChunk));
         } else {
             next();
         }
@@ -134,6 +143,17 @@ class ImageCache {
             :toRepresentation => StringUtil.REPRESENTATION_BYTE_ARRAY
         }) as ByteArray;
         b64 = null;
+        // schema 2: "<w>,<h>,2,<byte RLE>" = RLE compresso con LZ, da decomprimere prima
+        var lzIn = null;
+        if (head.size() >= 4) {
+            var rawLen = Util.toNum(head[3]);
+            if (rawLen <= 0) {
+                _failed[key] = true;
+                return;
+            }
+            lzIn = bytes;
+            bytes = new [rawLen]b;
+        }
         freeRoom();
         var ref = null;
         try {
@@ -160,6 +180,9 @@ class ImageCache {
         _decY = 0;
         _decW = w;
         _decRef = ref;
+        _lzIn = lzIn;
+        _lzI = 0;
+        _lzO = 0;
         _sizes[key] = [w, h];
         _ticker.schedule("img", 50, method(:onDecodeTick), true);
     }
@@ -167,6 +190,16 @@ class ImageCache {
     function onDecodeTick() as Void {
         if (_decKey == null) {
             _ticker.cancel("img");
+            return;
+        }
+        if (_lzIn != null) {
+            // prima fase: decompressione LZ, a passi
+            var r = lzStep();
+            if (r < 0) {
+                abortDecode();
+            } else if (r > 0) {
+                _lzIn = null;
+            }
             return;
         }
         var bmp = (_decRef as Graphics.BufferedBitmapReference).get();
@@ -231,6 +264,70 @@ class ImageCache {
         }
     }
 
+    // Un passo di decompressione LZ (formato: pipeline/gwnotes/lz.py) da _lzIn a
+    // _decBytes. Ritorna 0 se c'è ancora lavoro, 1 se ha finito, -1 se i dati sono errati.
+    private function lzStep() as Number {
+        var c = _lzIn as ByteArray;
+        var out = _decBytes as ByteArray;
+        var n = c.size();
+        var size = out.size();
+        var i = _lzI;
+        var o = _lzO;
+        var limit = o + LZ_PER_TICK;
+        while (i < n && o < limit) {
+            var tok = c[i];
+            i += 1;
+            var ll = tok >> 4;
+            if (ll == 15) {
+                var b = 255;
+                while (b == 255 && i < n) {
+                    b = c[i];
+                    i += 1;
+                    ll += b;
+                }
+            }
+            if (o + ll > size || i + ll > n) {
+                return -1;
+            }
+            for (var k = 0; k < ll; k++) {
+                out[o] = c[i];
+                o += 1;
+                i += 1;
+            }
+            if (i >= n) {
+                break;
+            }
+            if (i + 1 >= n) {
+                return -1;
+            }
+            var off = c[i] | (c[i + 1] << 8);
+            i += 2;
+            var ml = tok & 15;
+            if (ml == 15) {
+                var b = 255;
+                while (b == 255 && i < n) {
+                    b = c[i];
+                    i += 1;
+                    ml += b;
+                }
+            }
+            ml += 4;
+            if (off <= 0 || off > o || o + ml > size) {
+                return -1;
+            }
+            for (var k = 0; k < ml; k++) {
+                out[o] = out[o - off];
+                o += 1;
+            }
+        }
+        _lzI = i;
+        _lzO = o;
+        if (i >= n) {
+            return o == size ? 1 : -1;
+        }
+        return 0;
+    }
+
     private function abortDecode() as Void {
         _ticker.cancel("img");
         if (_decKey != null) {
@@ -239,6 +336,7 @@ class ImageCache {
         _decKey = null;
         _decBytes = null;
         _decRef = null;
+        _lzIn = null;
         next();
     }
 

@@ -264,6 +264,18 @@ class Store {
         }
     }
 
+    // Dopo un download completo: elimina le immagini che nessuna pagina usa più
+    // (versioni precedenti degli appunti; le chiavi sono hash del contenuto).
+    function dropImagesExcept(keep as Dictionary) as Void {
+        var keys = _meta.keys();
+        for (var i = 0; i < keys.size(); i++) {
+            var k = keys[i] as String;
+            if (k.length() > 2 && k.substring(0, 2).equals("i:") && keep[k] == null) {
+                remove(k);
+            }
+        }
+    }
+
     function clearAll() as Void {
         Storage.clearValues();
         _meta = {} as Dictionary;
