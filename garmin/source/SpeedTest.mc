@@ -1,5 +1,6 @@
 import Toybox.Communications;
 import Toybox.Lang;
+import Toybox.PersistedContent;
 import Toybox.System;
 import Toybox.WatchUi;
 
@@ -66,7 +67,7 @@ class SpeedTest {
         }
     }
 
-    function onResponse(code, data) as Void {
+    function onResponse(code as Number, data as Dictionary or String or PersistedContent.Iterator or Null) as Void {
         var ms = System.getTimer() - _start;
         if (code == 200 && data instanceof Lang.Dictionary && (data as Dictionary)["content"] instanceof Lang.String) {
             var bytes = ((data as Dictionary)["content"] as String).length() + META_BYTES;
