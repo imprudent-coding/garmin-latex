@@ -1,0 +1,157 @@
+name: garmin-probe
+
+# Esperimento (temporaneo): limiti di storage del vivoactive5 dai device file e
+# compilazione di un .prg con tutti gli appunti incorporati come risorse jsonData.
+on:
+  push:
+    paths:
+      - ".github/workflows/garmin-probe.yml"
+      - "garmin/tools/embed_probe.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CIQ_SDK_VERSION: "9.2.0"
+  SDK_MANAGER_CLI: "v0.8.4"
+  DEVICE: vivoactive5
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5.0.0
+
+      - name: Controllo dei secrets
+        id: check
+        env:
+          GARMIN_USERNAME: ${{ secrets.GARMIN_USERNAME }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          CIQ_KEY: ${{ secrets.CIQ_DEVELOPER_KEY_BASE64 }}
+          AGREEMENT: ${{ vars.CIQ_AGREEMENT_HASH || secrets.CIQ_AGREEMENT_HASH }}
+        run: |
+          missing=""
+          [ -z "$GARMIN_USERNAME" ] && missing="$missing GARMIN_USERNAME"
+          [ -z "$GARMIN_PASSWORD" ] && missing="$missing GARMIN_PASSWORD"
+          [ -z "$CIQ_KEY" ] && missing="$missing CIQ_DEVELOPER_KEY_BASE64"
+          if [ -n "$missing" ]; then
+            echo "::warning title=Build Garmin saltata::Mancano i secrets:$missing. Vedi README, sezione «Secrets»."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+          [ -z "$AGREEMENT" ] && echo "agreement=missing" >> "$GITHUB_OUTPUT" || echo "agreement=ok" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-go@v5.5.0
+        if: steps.check.outputs.ok == 'true'
+        with:
+          go-version: "1.25"
+          cache: false
+
+      - uses: actions/setup-java@v5.0.0
+        if: steps.check.outputs.ok == 'true'
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: SDK manager (connect-iq-sdk-manager-cli ${{ env.SDK_MANAGER_CLI }})
+        if: steps.check.outputs.ok == 'true'
+        run: |
+          go install "github.com/lindell/connect-iq-sdk-manager-cli@${SDK_MANAGER_CLI}"
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Licenza Connect IQ
+        if: steps.check.outputs.ok == 'true'
+        env:
+          AGREEMENT: ${{ vars.CIQ_AGREEMENT_HASH || secrets.CIQ_AGREEMENT_HASH }}
+        run: |
+          # spazi o a capo incollati per sbaglio
+          AGREEMENT="$(echo "$AGREEMENT" | tr -d '[:space:]')"
+          if [ -z "$AGREEMENT" ]; then
+            connect-iq-sdk-manager-cli agreement view | tee agreement.txt
+            echo "::error title=Licenza da accettare::Leggi l'accordo all'indirizzo stampato qui sopra e, se lo accetti, salva il valore «Current Hash» come CIQ_AGREEMENT_HASH in Settings → Secrets and variables → Actions (variabile o secret, a livello di repository, non di environment). Vedi README."
+            exit 1
+          fi
+          connect-iq-sdk-manager-cli agreement accept --agreement-hash="$AGREEMENT" \
+            || { echo "::error::L'accordo Garmin è cambiato: rileggilo e aggiorna CIQ_AGREEMENT_HASH"; exit 1; }
+
+      - name: Cache SDK e device
+        if: steps.check.outputs.ok == 'true'
+        uses: actions/cache@v4.2.4
+        with:
+          path: |
+            ~/.Garmin/ConnectIQ/Sdks
+            ~/.Garmin/ConnectIQ/Devices
+          key: ciq-${{ env.CIQ_SDK_VERSION }}-${{ env.DEVICE }}-${{ hashFiles('garmin/manifest.xml') }}
+
+      - name: Login, SDK e device
+        if: steps.check.outputs.ok == 'true'
+        env:
+          GARMIN_USERNAME: ${{ secrets.GARMIN_USERNAME }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+        run: |
+          connect-iq-sdk-manager-cli login \
+            || { echo "::error title=Login Garmin fallito::Controlla GARMIN_USERNAME/GARMIN_PASSWORD; l'account non deve avere la verifica in due passaggi."; exit 1; }
+          connect-iq-sdk-manager-cli sdk set "$CIQ_SDK_VERSION"
+          echo "$(connect-iq-sdk-manager-cli sdk current-path --bin)" >> "$GITHUB_PATH"
+          connect-iq-sdk-manager-cli device download --manifest=garmin/manifest.xml
+
+      - name: Parametri dei device file
+        run: |
+          D="$HOME/.Garmin/ConnectIQ/Devices/$DEVICE"
+          echo "### File del dispositivo" | tee -a "$GITHUB_STEP_SUMMARY"
+          ls -la "$D" | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 - "$D" <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, pathlib, re, sys
+          d = pathlib.Path(sys.argv[1])
+          pat = re.compile(r"stor|persist|object|size|limit|memory|flash|quota|byte|kb", re.I)
+          for f in sorted(d.glob("*.json")):
+              data = json.loads(f.read_text())
+              print(f"\n#### {f.name}\n")
+              def walk(x, p=""):
+                  if isinstance(x, dict):
+                      for k, v in x.items():
+                          walk(v, f"{p}.{k}" if p else k)
+                  elif isinstance(x, list):
+                      for i, v in enumerate(x[:40]):
+                          walk(v, f"{p}[{i}]")
+                  elif pat.search(p):
+                      print(f"- `{p}` = {x}")
+              walk(data)
+          PY
+
+      - name: Ultimo bundle degli appunti
+        run: |
+          URL=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases | python3 -c "
+          import json,sys
+          for r in json.load(sys.stdin):
+              if r['tag_name'].startswith('notes-'):
+                  for a in r['assets']:
+                      if a['name']=='notes-bundle.zip':
+                          print(a['browser_download_url']); raise SystemExit
+          ")
+          curl -sL "$URL" -o notes-bundle.zip
+          ls -la notes-bundle.zip
+
+      - name: Compila un .prg con gli appunti incorporati
+        continue-on-error: true
+        env:
+          CIQ_KEY: ${{ secrets.CIQ_DEVELOPER_KEY_BASE64 }}
+        run: |
+          echo "$CIQ_KEY" | base64 -d > "$RUNNER_TEMP/k.der"
+          cp -r garmin "$RUNNER_TEMP/probe"
+          python3 garmin/tools/embed_probe.py notes-bundle.zip "$RUNNER_TEMP/probe/resources-embed" | tee -a "$GITHUB_STEP_SUMMARY"
+          cd "$RUNNER_TEMP/probe"
+          sed -i '/^base.resourcePath/d' monkey.jungle
+          echo "base.resourcePath = resources;$GITHUB_WORKSPACE/shared/font/generated;resources-embed" >> monkey.jungle
+          cat monkey.jungle
+          set +e
+          monkeyc -f monkey.jungle -d "$DEVICE" -o embed.prg -y "$RUNNER_TEMP/k.der" -r --build-stats 2>&1 | tee build.txt
+          echo "exit=$?"
+          echo '### Compilazione con appunti incorporati' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          tail -40 build.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          ls -la embed.prg 2>/dev/null | tee -a "$GITHUB_STEP_SUMMARY"
