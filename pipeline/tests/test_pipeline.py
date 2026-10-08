@@ -18,6 +18,7 @@ from gwnotes.prepare import prepare  # noqa: E402
 from gwnotes.profile import VIVOACTIVE5  # noqa: E402
 from gwnotes.rich import load_metrics, plain  # noqa: E402
 from gwnotes.rules import Rules  # noqa: E402
+from gwnotes.toc import strip_qid  # noqa: E402
 from gwnotes.texsource import load_document, parse_definitions, strip_comments, struct_from_macro  # noqa: E402
 
 HAS_TEX = shutil.which("pdflatex") and shutil.which("latexmk")
@@ -139,6 +140,11 @@ def test_pack_avoids_orphans():
     assert lines == [[0, 1]]
 
 
+def test_strip_qid():
+    assert plain(strip_qid(["A1\u00a0\u00a0First integral"], "A1")) == "First integral"
+    assert plain(strip_qid(["B2 Synodic"], "A1")) == "B2 Synodic"
+
+
 # ---------------------------------------------------------------- bundle
 
 
@@ -201,6 +207,37 @@ def test_end_to_end(tmp_path):
     assert text.startswith("P\n") and "\nI" in text  # almeno un'immagine (equazione)
     assert "Moto" in text and "circolare" in text and "∑" in text
     assert (out / "preview").exists() and (out / "notes.pdf").exists()
+    assert (out / "preview" / "_elenco.png").exists()
+    idx = "\n".join(json.loads(z.read(m["resources"]["idx"]["file"]))["chunks"])
+    q = [l.split("|") for l in idx.split("\n") if l.startswith("Q|")]
+    assert len(q) == 2 and all(len(f) == 6 for f in q)
+
+
+@pytest.mark.skipif(not (HAS_TEX and HAS_PANDOC), reason="servono TeX Live e pandoc")
+def test_question_ids_from_currentlabel(tmp_path):
+    src = tmp_path / "latex"
+    src.mkdir()
+    (src / "main.tex").write_text(r"""\documentclass{article}
+\makeatletter
+\newcommand{\gruppo}[2]{\clearpage\addcontentsline{toc}{section}{#1. #2}}
+\newcommand{\domanda}[2]{\section*{#1\quad #2}\addcontentsline{toc}{subsection}{#1\quad #2}\def\@currentlabel{#1}\label{q:#1}}
+\makeatother
+\begin{document}
+\gruppo{A}{Primo gruppo}
+Testo introduttivo del gruppo.
+\domanda{A1}{Che cos'è $x^2$?}
+Risposta.
+\domanda{A2}{Seconda domanda}
+Altra risposta.
+\end{document}
+""", encoding="utf-8")
+    out = tmp_path / "dist"
+    p = subprocess.run([sys.executable, "-m", "gwnotes", "build", "--latex", str(src), "--out", str(out),
+                        "--preview", "1"], cwd=ROOT, capture_output=True, text=True)
+    assert p.returncode == 0, p.stdout + p.stderr
+    m = json.loads(zipfile.ZipFile(out / "notes-bundle.zip").read("manifest.json"))
+    secs = m["toc"][0]["sections"]
+    assert [(s["kind"], s["qid"]) for s in secs] == [("intro", ""), ("question", "A1"), ("question", "A2")]
 
 
 @pytest.mark.skipif(not HAS_TEX, reason="serve TeX Live")

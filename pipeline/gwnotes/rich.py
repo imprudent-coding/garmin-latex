@@ -32,6 +32,7 @@ CODES = {
     "vec": 12,     # freccia sopra
     "uarr": 13,    # freccia sotto (diade)
     "box": 14,     # riquadro
+    "small": 17,   # testo nel font piccolo (righe compatte dell'elenco)
 }
 END = chr(BASE + 15)
 GAP = 16  # spazio di N pixel, senza chiusura

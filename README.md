@@ -305,19 +305,32 @@ cache vengono conservati. Serve solo quando cambia l'app (tag `garmin-v…`),
 
 ## Usare l'app sull'orologio
 
+All'apertura compare l'**elenco di tutte le domande**, raggruppate per capitolo
+(A, B, C…). Ogni riga mostra l'identificativo della domanda in arancio e il titolo
+su una riga; la voce selezionata, al centro, mostra il titolo completo e il numero
+di pagine (● = già in cache sull'orologio). L'app riparte dall'ultima domanda aperta.
+
 | Dove | Gesto / pulsante | Azione |
 |---|---|---|
-| Elenchi | swipe su/giù | scorre |
-| Elenchi | tocco su una voce (o pulsante in alto) | apre |
+| Elenco | swipe su/giù | domanda successiva/precedente |
+| Elenco | trascinare il dito su/giù | scorrimento veloce (una voce ogni 30 px) |
+| Elenco | swipe a sinistra / a destra | gruppo successivo / inizio del gruppo (o gruppo precedente) |
+| Elenco | tocco su una riga | la seleziona; secondo tocco (o pulsante in alto) la apre |
 | Lettura | swipe su / pulsante in alto / tocco nella metà inferiore | pagina successiva |
 | Lettura | swipe giù / tocco nella metà superiore | pagina precedente |
 | Lettura | tocco su un'immagine con il triangolino verde | zoom |
 | Zoom | swipe o trascinamento | sposta l'immagine |
 | Ovunque | pulsante in basso | indietro |
-| Ovunque | pressione prolungata sullo schermo (o il gesto *menu* del dispositivo) | menu: riprendi lettura, torna all'indice, sincronizza, svuota cache, mostra memoria |
+| Ovunque | pressione prolungata sullo schermo (o il gesto *menu* del dispositivo) | menu: riprendi lettura, torna all'elenco, sincronizza, svuota cache, mostra memoria |
 
-In basso c'è il numero di pagina (`3/28`), sul bordo un arco con l'avanzamento
-nella sezione. L'app ricorda dove eri arrivato (*Riprendi lettura*).
+Nell'elenco, in basso, ci sono l'identificativo e la posizione (`B3 · 21/61`);
+l'arco sul bordo destro indica dove sei nell'elenco. In lettura, in basso c'è il
+numero di pagina (`3/28`) e sul bordo un arco con l'avanzamento nella sezione.
+
+L'elenco si costruisce da solo: una macro di sezionamento che imposta
+`\def\@currentlabel{…}` (qui `\question{A1}{…}`) fornisce l'identificativo; i
+testi che precedono la prima domanda di un gruppo compaiono come «Introduzione».
+L'anteprima dell'elenco è in `preview/_elenco.png` (artifact del workflow `notes`).
 
 ---
 

@@ -31,7 +31,8 @@ class RichText {
         var hasBold = false;
         for (var i = 0; i < _kinds.size(); i++) {
             var k = _kinds[i];
-            if (k == 3 || k == 4) {
+            if (k == 3 || k == 4 || k == 17) {
+                // pedice, apice, testo piccolo (righe compatte dell'elenco)
                 return small;
             }
             if (k == 1) {

@@ -49,8 +49,8 @@ class NotesApp extends Application.AppBase {
     }
 
     function getInitialView() {
-        var v = new ChapterListView();
-        return [v, new ListDelegate(v)];
+        var v = new QuestionListView();
+        return [v, new QuestionListDelegate(v)];
     }
 
     // ------------------------------------------------------------- indice

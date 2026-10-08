@@ -32,7 +32,10 @@ class Profile:
     zoom_max: int = 700
     eq_indent: int = 24
     eq_line_gap: int = 6
-    title_w: int = 290         # larghezza delle voci nei menu dell'orologio
+    title_w: int = 290         # larghezza del titolo completo (voce selezionata dell'elenco)
+    row_w_wide: int = 290      # titolo compatto su una riga, vicino al centro dello schermo
+    row_w_narrow: int = 230    # titolo compatto verso i bordi (il cerchio è più stretto)
+    row_w_header: int = 260    # intestazione di gruppo nell'elenco
 
     @property
     def r(self) -> float:

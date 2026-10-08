@@ -85,7 +85,7 @@ class _Break:
 
 def font_of(stack) -> str:
     kinds = [k for k, _, _ in stack]
-    if "sub" in kinds or "sup" in kinds:
+    if "sub" in kinds or "sup" in kinds or "small" in kinds:
         return "small"
     if "bold" in kinds:
         return "bold"
@@ -533,14 +533,36 @@ def encode_title_lines(lay: Layouter, nodes, width: int, max_lines: int = 2):
     if cur:
         lines.append((cur, w))
     if len(lines) > max_lines:
-        lines = lines[:max_lines]
-        last, lw = lines[-1]
+        # ultima riga riempita carattere per carattere, poi "…"
+        rest = list(lines[max_lines - 1][0])
+        for pieces, _ in lines[max_lines:]:
+            rest.append(Seg(" ", ()))
+            rest.extend(pieces)
+        lines = lines[:max_lines - 1]
         ell = Seg("…", ())
-        while last and lw + lay.piece_w(ell) > width:
-            pc = last.pop()
-            lw -= lay.piece_w(pc)
-        last.append(ell)
-        lines[-1] = (last, lw + lay.piece_w(ell))
+        ew = lay.piece_w(ell)
+        out, lw = [], 0
+        for pc in rest:
+            pw = lay.piece_w(pc)
+            if lw + pw + ew <= width:
+                out.append(pc)
+                lw += pw
+                continue
+            if isinstance(pc, Seg):
+                f = font_of(pc.stack)
+                part = ""
+                for ch in pc.text:
+                    if lw + lay.m.width(f, part + ch) + ew > width:
+                        break
+                    part += ch
+                if part.strip():
+                    out.append(Seg(part, pc.stack))
+                    lw += lay.m.width(f, part)
+            break
+        while out and isinstance(out[-1], Seg) and not out[-1].text.strip():
+            lw -= lay.piece_w(out.pop())
+        out.append(ell)
+        lines.append((out, lw + ew))
     enc = []
     for pieces, lw in lines:
         dummy: list = []

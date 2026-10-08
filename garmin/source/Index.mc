@@ -9,6 +9,11 @@ class Section {
     var widths as Array<Number>;
     var lines as Array<String>;
     var chapter as Number;
+    // elenco compatto (righe "Q" dell'indice): tipo, id della domanda, riga larga e stretta
+    var kind as String = "section";
+    var qid as String = "";
+    var cLines as Array<String> or Null = null;
+    var cWidths as Array<Number> or Null = null;
 
     function initialize(f as Array<String>, chapter as Number) {
         id = f[1];
@@ -40,6 +45,9 @@ class Chapter {
     var widths as Array<Number>;
     var lines as Array<String>;
     var sections as Array<Section> = [] as Array<Section>;
+    // intestazione compatta del gruppo nell'elenco (riga "H"), null se il gruppo ha una sola sezione
+    var hLine as String or Null = null;
+    var hWidth as Number = 0;
 
     function initialize(f as Array<String>) {
         widths = Util.numbers(f[2]);
@@ -79,7 +87,22 @@ class Index {
                 chapters.add(current);
             } else if (t.equals("S") && current != null) {
                 (current as Chapter).sections.add(new Section(Util.splitN(row, "|", 7), chapters.size() - 1));
+            } else if (t.equals("H") && current != null) {
+                var f = Util.splitN(row, "|", 3);
+                (current as Chapter).hWidth = Util.toNum(f[1]);
+                (current as Chapter).hLine = f[2];
+            } else if (t.equals("Q") && current != null) {
+                var secs = (current as Chapter).sections;
+                var f = Util.splitN(row, "|", 6);
+                if (secs.size() > 0 && secs[secs.size() - 1].id.equals(f[1])) {
+                    var sec = secs[secs.size() - 1];
+                    sec.kind = f[2];
+                    sec.qid = f[3];
+                    sec.cWidths = Util.numbers(f[4]);
+                    sec.cLines = Util.split(f[5], Index.titleBreak());
+                }
             }
+            // righe di tipo sconosciuto: ignorate (compatibilità con indici più recenti)
         }
     }
 

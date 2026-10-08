@@ -71,7 +71,7 @@ class PageRenderer(context: Context) {
         var x = x0
         val run = StringBuilder()
         fun font(): Font {
-            if (stack.any { it.kind == 3 || it.kind == 4 }) return fonts.getValue("small")
+            if (stack.any { it.kind == 3 || it.kind == 4 || it.kind == 17 }) return fonts.getValue("small")
             if (stack.any { it.kind == 1 }) return fonts.getValue("bold")
             return fonts.getValue("body")
         }

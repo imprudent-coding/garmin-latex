@@ -52,6 +52,8 @@ class Section:
     title: list
     label: str | None
     blocks: list = field(default_factory=list)
+    qid: str = ""          # identificativo breve (es. "A1"), dal \\def\\@currentlabel della macro o dal .aux
+    kind: str = "section"  # "question" se ha un qid, "intro" per il testo prima della prima sezione
 
 
 @dataclass
@@ -543,14 +545,14 @@ def build_book(stream: list, title: str, front_title: str) -> Book:
     section = None
     ids = set()
 
-    def new_section(title_nodes, label):
+    def new_section(title_nodes, label, qid=None, kind="section"):
         nonlocal section
         base = slug(label) if label else slug(plain(title_nodes))
         sid, k = base, 2
         while sid in ids:
             sid, k = f"{base}-{k}", k + 1
         ids.add(sid)
-        section = Section(sid, title_nodes, label)
+        section = Section(sid, title_nodes, label, qid=qid or "", kind="question" if qid else kind)
         chapter.sections.append(section)
         return section
 
@@ -560,7 +562,7 @@ def build_book(stream: list, title: str, front_title: str) -> Book:
             chapter = Chapter([front_title])
             book.chapters.append(chapter)
         if section is None:
-            new_section(list(chapter.title), None)
+            new_section(list(chapter.title), None, kind="intro")
 
     for item in stream:
         if isinstance(item, _Struct) and item.level == chap_level:
@@ -568,13 +570,13 @@ def build_book(stream: list, title: str, front_title: str) -> Book:
             book.chapters.append(chapter)
             section = None
             if sec_level is None:
-                new_section(item.title, item.label)
+                new_section(item.title, item.label, item.labeltext)
             continue
         if isinstance(item, _Struct) and item.level == sec_level:
             if chapter is None:
                 chapter = Chapter([front_title])
                 book.chapters.append(chapter)
-            new_section(item.title, item.label)
+            new_section(item.title, item.label, item.labeltext)
             continue
         if isinstance(item, _Struct):
             ensure_section()
