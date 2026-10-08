@@ -77,6 +77,6 @@ module Mem {
 
     function label() as String {
         var s = System.getSystemStats();
-        return (s.usedMemory / 1024) + "/" + (s.totalMemory / 1024) + " KB";
+        return (s.usedMemory / 1024).toString() + "/" + (s.totalMemory / 1024) + " KB";
     }
 }

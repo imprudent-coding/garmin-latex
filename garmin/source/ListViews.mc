@@ -170,7 +170,7 @@ class ChapterListView extends BaseListView {
     }
     function itemSub(i as Number) as String or Null {
         var n = chapters()[i].sections.size();
-        return n == 1 ? "1 sezione" : n + " sezioni";
+        return n == 1 ? "1 sezione" : n.toString() + " sezioni";
     }
     function header() as String {
         var idx = getApp().index;
@@ -211,7 +211,7 @@ class SectionListView extends BaseListView {
         var s = _chapter.sections[i];
         var cached = getApp().store.hashOf(s.key());
         var mark = (cached != null && (cached as String).equals(s.hash)) ? " ●" : "";
-        return s.pages + " pagine" + mark;
+        return s.pages.toString() + " pagine" + mark;
     }
     function header() as String {
         return "";

@@ -74,11 +74,11 @@ class RichText {
         return Palette.color(c);
     }
 
-    private function flush(dc as Dc, text as String, from as Number, to as Number, baseline as Number) as Void {
-        if (to <= from) {
+    private function flush(dc as Dc, text as String, a as Number, b as Number, baseline as Number) as Void {
+        if (b <= a) {
             return;
         }
-        var run = text.substring(from, to) as String;
+        var run = text.substring(a, b) as String;
         var f = fontNow();
         var d = _kinds.size();
         dc.setColor(colorNow(d), Graphics.COLOR_TRANSPARENT);

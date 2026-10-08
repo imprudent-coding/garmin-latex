@@ -177,15 +177,15 @@ class ImageCache {
         }
         var dc = (bmp as Graphics.BufferedBitmap).getDc();
         var bytes = _decBytes as ByteArray;
-        var end = _decPos + BYTES_PER_TICK;
-        if (end > bytes.size()) {
-            end = bytes.size();
+        var stop = _decPos + BYTES_PER_TICK;
+        if (stop > bytes.size()) {
+            stop = bytes.size();
         }
         var w = _decW;
         var x = _decX;
         var y = _decY;
         var lastV = -1;
-        for (var i = _decPos; i < end; i++) {
+        for (var i = _decPos; i < stop; i++) {
             var b = bytes[i];
             var v = (b >> 6) & 3;
             var len = (b & 63) + 1;
@@ -215,7 +215,7 @@ class ImageCache {
                 }
             }
         }
-        _decPos = end;
+        _decPos = stop;
         _decX = x;
         _decY = y;
         if (_decPos >= bytes.size()) {

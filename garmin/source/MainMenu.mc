@@ -7,7 +7,7 @@ function showMainMenu() as Void {
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuIndex) as String, null, :index, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuSync) as String, getApp().status, :sync, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuClear) as String,
-        getApp().store.count() + " risorse", :clear, null));
+        getApp().store.count().toString() + " risorse", :clear, null));
     m.addItem(new WatchUi.ToggleMenuItem(WatchUi.loadResource(Rez.Strings.MenuMemory) as String, null, :memory,
         getApp().showMemory, null));
     WatchUi.pushView(m, new MainMenuDelegate(), WatchUi.SLIDE_UP);

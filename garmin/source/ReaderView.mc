@@ -162,7 +162,7 @@ class ReaderView extends WatchUi.View {
         }
         // numero di pagina e avanzamento
         dc.setColor(Palette.color(2), Graphics.COLOR_TRANSPARENT);
-        dc.drawText(w / 2, 362, rt.small, (page + 1) + "/" + section.pages, Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(w / 2, 362, rt.small, (page + 1).toString() + "/" + section.pages, Graphics.TEXT_JUSTIFY_CENTER);
         if (section.pages > 1) {
             var deg = 300 * page / (section.pages - 1);
             dc.setPenWidth(3);
