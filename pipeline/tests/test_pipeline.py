@@ -255,6 +255,16 @@ def test_end_to_end(tmp_path):
         for name in f[2].split(";"):
             web_keys |= {r[0] for r in json.loads((out / "web" / "w" / f"{name}.json").read_text())["r"]}
     assert web_keys == {k for k in m["resources"] if k != "idx"}
+    # stesso contenuto, indice diverso (senza file web): il contentHash deve cambiare,
+    # altrimenti l'app Android terrebbe il bundle vecchio
+    out2 = tmp_path / "dist2"
+    p2 = subprocess.run([sys.executable, "-m", "gwnotes", "build", "--latex", str(src), "--out", str(out2),
+                         "--preview", "0"], cwd=ROOT, capture_output=True, text=True)
+    assert p2.returncode == 0, p2.stdout + p2.stderr
+    m2 = json.loads(zipfile.ZipFile(out2 / "notes-bundle.zip").read("manifest.json"))
+    assert {k: r["hash"] for k, r in m2["resources"].items() if k != "idx"} == \
+        {k: r["hash"] for k, r in m["resources"].items() if k != "idx"}  # stesse sezioni e immagini
+    assert m2["contentHash"] != m["contentHash"]
 
 
 @pytest.mark.skipif(not (HAS_TEX and HAS_PANDOC), reason="servono TeX Live e pandoc")

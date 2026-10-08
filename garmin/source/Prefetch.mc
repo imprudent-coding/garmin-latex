@@ -66,7 +66,8 @@ class Prefetch {
     private var _webOff as Boolean = false;
     private var _webFails as Number = 0;
     private var _webInFlight as Boolean = false;
-    var viaWeb as Boolean = false;                          // l'ultimo file è arrivato dal web
+    // fonte dell'ultimo dato arrivato: 0 nessuno ancora, 1 web, 2 telefono
+    var source as Number = 0;
     private var _wp as Dictionary = {} as Dictionary;      // file web già salvati
     private var _wpBad as Dictionary = {} as Dictionary;   // file web falliti in questo giro
     private var _imgSec as Dictionary = {} as Dictionary;  // immagine -> sezione che la cita per prima
@@ -109,6 +110,10 @@ class Prefetch {
         finished = false;
         active = true;
         _webBase = index.webBase;
+        source = 0;
+        if (_webBase == null) {
+            setWebInfo(WatchUi.loadResource(Rez.Strings.WebNone) as String);
+        }
         _webOff = false;
         _webFails = 0;
         _wpBad = {} as Dictionary;
@@ -213,6 +218,7 @@ class Prefetch {
     }
 
     private function accept(key, n, total, hash, data, isSection as Boolean) as Void {
+        source = 2;
         var d = (data instanceof Lang.Array) ? data : [data];
         _pend = [key, n, total, hash, d, isSection, 0];
         _ticker.schedule("pf", 50, method(:onTick), false);
@@ -377,7 +383,8 @@ class Prefetch {
         var name = _packName;
         if (code == 200 && data instanceof Lang.Dictionary && (data as Dictionary)["r"] instanceof Lang.Array) {
             _webFails = 0;
-            viaWeb = true;
+            source = 1;
+            setWebInfo(WatchUi.loadResource(Rez.Strings.WebOk) as String);
             _pack = [name, (data as Dictionary)["r"], 0, 0];
             _ticker.schedule("pf", 50, method(:onTick), false);
             return;
@@ -388,12 +395,21 @@ class Prefetch {
 
     private function webFailed(name as String, code as Number) as Void {
         System.println("web " + name + ": " + code);
+        setWebInfo((WatchUi.loadResource(Rez.Strings.WebError) as String) + " " + code);
         _wpBad[name] = true;
         _webFails += 1;
         if (_webFails >= WEB_FAILS_OFF) {
             // web non raggiungibile: il resto di questo giro passa dal telefono
             _webOff = true;
-            viaWeb = false;
+        }
+    }
+
+    // Esito dell'ultimo tentativo web, mostrato nel menu sotto "Sincronizza ora"
+    // (salvato: resta visibile anche dopo la riapertura dell'app).
+    private function setWebInfo(s as String) as Void {
+        var old = _store.getValue("winfo");
+        if (!(old instanceof Lang.String) || !(old as String).equals(s)) {
+            _store.setValue("winfo", s);
         }
     }
 
@@ -491,7 +507,8 @@ class Prefetch {
         if (!active) {
             return null;
         }
-        var via = viaWeb ? " web" : "";
+        // fonte dell'ultimo file arrivato: web (GitHub Pages) o telefono
+        var via = source == 1 ? " web" : (source == 2 ? " tel" : "");
         if (_si < _secs.size()) {
             return (WatchUi.loadResource(Rez.Strings.PrefetchSections) as String) + " " + secDone + "/" + secTotal + via;
         }

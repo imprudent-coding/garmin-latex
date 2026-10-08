@@ -229,9 +229,6 @@ def build(args) -> int:
         chapters_idx.append((encode_title_lines(lay, ch.title, profile.title_w), chapter_header(lay, profile, ch), secs))
         toc.append({"title": plain(ch.title), "sections": tsec})
 
-    content_hash = short_hash("|".join(f"{k}:{r.hash}" for k, r in sorted(bb.resources.items())), 12)
-    version = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d.%H%M%S") if not args.version else args.version
-    content_version = f"{version}-{content_hash}"
     # file per il download via web (GitHub Pages): sezione + immagini, per sezione
     web_files, web_packs = build_web_packs(
         [(sp.id, res.key, image_keys(sp.pages)) for _, _, secs in chapters_idx for sp, res, _ in secs],
@@ -239,6 +236,14 @@ def build(args) -> int:
     web_base = (args.web_base or "").strip()
     if web_base and not web_base.endswith("/"):
         web_base += "/"
+    # contentHash copre anche l'indice (tranne la riga V, che contiene la versione):
+    # l'app Android salta un bundle con lo stesso contentHash, quindi un cambio solo
+    # dell'indice (es. righe W/F dei file web) deve cambiarlo.
+    idx_body = build_index(book.title, metrics.font_id, "", chapters_idx, web_base=web_base, web_packs=web_packs)[1:]
+    content_hash = short_hash("|".join(f"{k}:{r.hash}" for k, r in sorted(bb.resources.items()))
+                              + "|idx:" + short_hash("\n".join(idx_body)), 12)
+    version = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d.%H%M%S") if not args.version else args.version
+    content_version = f"{version}-{content_hash}"
     idx_lines = build_index(book.title, metrics.font_id, content_version, chapters_idx,
                             web_base=web_base, web_packs=web_packs)
     bb.add(Resource("idx", chunk_text(idx_lines, rules.chunk_bytes)))

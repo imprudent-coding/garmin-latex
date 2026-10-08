@@ -9,7 +9,9 @@ function showMainMenu() as Void {
         :auto, null));
     m.addItem(new WatchUi.ToggleMenuItem(WatchUi.loadResource(Rez.Strings.MenuClockKey) as String,
         WatchUi.loadResource(Rez.Strings.MenuClockKeySub) as String, :clockKey, getApp().clockButton(), null));
-    m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuSync) as String, getApp().status, :sync, null));
+    var winfo = getApp().store.getValue("winfo");
+    m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuSync) as String,
+        getApp().status + ((winfo instanceof Lang.String) ? " · " + winfo : ""), :sync, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuClear) as String,
         getApp().store.count().toString() + " risorse, " + (getApp().store.used() / 1024) + " KB", :clear, null));
     var sr = speedResult();

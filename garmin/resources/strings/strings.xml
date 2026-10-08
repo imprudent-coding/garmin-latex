@@ -19,6 +19,9 @@
     <string id="MenuSpeed">Test velocità</string>
     <string id="MenuSpeedSub">Richieste web tramite il telefono</string>
     <string id="MenuSpeedRunning">In corso…</string>
+    <string id="WebOk">web: ok</string>
+    <string id="WebNone">web: indice senza file web</string>
+    <string id="WebError">web: errore</string>
     <string id="MenuSync">Sincronizza ora</string>
     <string id="MenuIndex">Torna all'elenco</string>
     <string id="MenuClear">Svuota cache</string>
