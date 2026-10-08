@@ -281,14 +281,23 @@ class ReaderDelegate extends WatchUi.BehaviorDelegate {
         return true;
     }
 
-    // pulsante in alto: orologio (o pagina successiva, se l'orologio è disattivato)
-    function onSelect() as Boolean {
-        if (getApp().clockButton()) {
+    // pulsante in alto (pressione fisica): orologio, oppure pagina successiva
+    // se l'orologio è disattivato
+    function onKeyPressed(evt as WatchUi.KeyEvent) as Boolean {
+        if (evt.getKey() != WatchUi.KEY_ENTER) {
+            return false;
+        }
+        if (isClockKey(evt)) {
             showClock();
         } else {
             _view.go(1);
         }
         return true;
+    }
+
+    // sugli schermi touch anche un tocco genera onSelect: i tocchi li gestisce onTap
+    function onSelect() as Boolean {
+        return false;
     }
 
     function onTap(evt as WatchUi.ClickEvent) as Boolean {
@@ -297,6 +306,11 @@ class ReaderDelegate extends WatchUi.BehaviorDelegate {
         if (z != null) {
             var v = new ZoomView(z as String);
             WatchUi.pushView(v, new ZoomDelegate(v), WatchUi.SLIDE_UP);
+            return true;
+        }
+        // numero di pagina in basso: menu
+        if (c[1] >= 345) {
+            showMainMenu();
             return true;
         }
         // metà superiore: indietro, metà inferiore: avanti

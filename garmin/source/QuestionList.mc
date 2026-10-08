@@ -11,6 +11,9 @@ import Toybox.WatchUi;
 // - swipe sinistra/destra: gruppo successivo/precedente;
 // - tocco su una voce: la seleziona, secondo tocco (o pulsante): la apre.
 // Disposizione identica all'anteprima pipeline/gwnotes/preview.py (render_index).
+// tocchi sopra questa y (riga di stato con i tre puntini) aprono il menu
+const MENU_AREA = 44;
+
 class QuestionListView extends WatchUi.View {
     const ROW_H = 30;
     const HEAD_H = 30;
@@ -101,6 +104,10 @@ class QuestionListView extends WatchUi.View {
         _hits = [] as Array<Array<Number>>;
         dc.setColor(Palette.color(2), Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, 6, rt.small, app.status, Graphics.TEXT_JUSTIFY_CENTER);
+        // tre puntini: toccando qui si apre il menu
+        for (var d = -1; d <= 1; d++) {
+            dc.fillCircle(cx + d * 9, 36, 2);
+        }
         if (_selectable.size() == 0) {
             rt.drawWrapped(dc, WatchUi.loadResource(Rez.Strings.NoIndex) as String, cx, 150, 280, 0);
             return;
@@ -353,9 +360,13 @@ class QuestionListDelegate extends WatchUi.BehaviorDelegate {
         return System.getTimer() - _dragMovedAt < 400;
     }
 
-    // pulsante in alto: orologio (o apre la domanda, se l'orologio è disattivato)
-    function onSelect() as Boolean {
-        if (getApp().clockButton()) {
+    // pulsante in alto (pressione fisica): orologio, oppure apre la domanda
+    // selezionata se l'orologio è disattivato
+    function onKeyPressed(evt as WatchUi.KeyEvent) as Boolean {
+        if (evt.getKey() != WatchUi.KEY_ENTER) {
+            return false;
+        }
+        if (isClockKey(evt)) {
             showClock();
         } else {
             _view.openSelected();
@@ -363,11 +374,21 @@ class QuestionListDelegate extends WatchUi.BehaviorDelegate {
         return true;
     }
 
+    // sugli schermi touch anche un tocco genera onSelect: i tocchi li gestisce onTap
+    function onSelect() as Boolean {
+        return false;
+    }
+
     function onTap(evt as WatchUi.ClickEvent) as Boolean {
         if (justDragged()) {
             return true;
         }
         var c = evt.getCoordinates();
+        // riga di stato in alto (con i tre puntini): menu
+        if (c[1] < MENU_AREA) {
+            showMainMenu();
+            return true;
+        }
         return _view.tapAt(c[1]);
     }
 
