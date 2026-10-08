@@ -309,6 +309,7 @@ class Prefetch {
     private function onFailure() as Void {
         if (_sync.state != ST_OK || _sync.lastError.equals("stale")) {
             stop();
+            getApp().retrySoon();
             return;
         }
         failed += 1;

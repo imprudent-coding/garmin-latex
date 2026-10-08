@@ -330,7 +330,7 @@ di pagine (● = già in cache sull'orologio). L'app riparte dall'ultima domanda
 | Ovunque | pulsante in alto (premuto, non toccando lo schermo) | **orologio** (vedi sotto) |
 | Orologio | pressione prolungata sullo schermo o su un pulsante | torna agli appunti, dove eri |
 | Ovunque | pulsante in basso | indietro |
-| Ovunque | pressione prolungata sullo schermo (o il gesto *menu* del dispositivo), oppure i tocchi sopra | menu: riprendi lettura, torna all'elenco, scorrimento automatico, pulsante orologio, sincronizza, svuota cache, mostra memoria |
+| Ovunque | pressione prolungata sullo schermo (o il gesto *menu* del dispositivo), oppure i tocchi sopra | menu: riprendi lettura, torna all'elenco, scorrimento automatico, pulsante orologio, sincronizza, svuota cache, test velocità, mostra memoria |
 
 **Scorrimento automatico.** Dal menu, *Scorrimento automatico* cambia a ogni
 tocco: No, 5, 10, 15, 20, 30, 45, 60 secondi per pagina (il menu resta aperto).
@@ -539,12 +539,15 @@ via Bluetooth. Fonte: *Communicating with Mobile Apps* nella documentazione Garm
   I font antialiasing (3 × 349 glifi) e le bitmap delle immagini (al massimo 4
   in memoria, zoom fino a 700×700) vanno misurati nel simulatore e sull'orologio
   vero con le righe `[mem]`.
-- **Velocità del Bluetooth**: conta soprattutto il numero di scambi con il
-  telefono, non i byte. Gli appunti interi sono ~830 pezzi da 1,8 KB, ma il
-  download in sottofondo ne chiede fino a 8 per messaggio (~7 KB), quindi
-  servono circa 300 scambi; dopo si scaricano solo le risorse cambiate. Garmin
-  non documenta la dimensione massima dei messaggi: se il telefono riceve
-  «messaggio troppo grande» riduce da solo i pezzi per messaggio.
+- **Velocità del Bluetooth**: misurata su un vívoactive 5, i messaggi
+  telefono → orologio viaggiano a ~0,4 KB/s (l'app Android mostra il valore nella
+  scheda *Orologio*). Gli appunti interi (~1,2 MB) richiedono quindi circa 50
+  minuti la prima volta; dopo si scaricano solo le risorse cambiate. Il download
+  in sottofondo chiede fino a 8 pezzi per messaggio (~7 KB): conta poco quando
+  il limite è la banda, ma evita la latenza per scambio. Garmin non documenta la
+  dimensione massima dei messaggi: se il telefono riceve «messaggio troppo
+  grande» riduce da solo i pezzi per messaggio. *Test velocità* nel menu
+  dell'orologio misura le richieste web, che passano anch'esse dal telefono.
 - **Immagini compresse**: dallo schema 2 del bundle le immagini sono compresse
   senza perdita (LZ sopra l'RLE, −30%). La compressione sulla trasmissione
   (anche del testo) è stata misurata e scartata: −5…19%, non vale il lavoro in

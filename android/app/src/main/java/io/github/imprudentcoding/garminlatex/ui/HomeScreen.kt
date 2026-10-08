@@ -151,6 +151,10 @@ fun HomeScreen(app: NotesApplication, onPreview: () -> Unit, onSettings: () -> U
                     Text(stringResource(R.string.sync_stats, watch.chunksSent, watch.failures,
                         if (watch.lastRequest > 0) DateUtils.getRelativeTimeSpanString(watch.lastRequest).toString() else "–"),
                         style = MaterialTheme.typography.bodySmall)
+                    if (watch.bytesPerSecond > 0) {
+                        Text(stringResource(R.string.sync_speed, watch.bytesPerSecond / 1024f, watch.lastSendMs, watch.duplicates),
+                            style = MaterialTheme.typography.bodySmall)
+                    }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = { app.watch.refreshDevices() }) { Text(stringResource(R.string.refresh)) }
                         OutlinedButton(onClick = { app.watch.restart() }) { Text(stringResource(R.string.restart_link)) }

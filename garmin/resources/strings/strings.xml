@@ -16,6 +16,9 @@
     <string id="MenuClockKey">Pulsante orologio</string>
     <string id="MenuClockKeySub">Tieni premuto per tornare</string>
     <string id="Off">No</string>
+    <string id="MenuSpeed">Test velocità</string>
+    <string id="MenuSpeedSub">Richieste web tramite il telefono</string>
+    <string id="MenuSpeedRunning">In corso…</string>
     <string id="MenuSync">Sincronizza ora</string>
     <string id="MenuIndex">Torna all'elenco</string>
     <string id="MenuClear">Svuota cache</string>

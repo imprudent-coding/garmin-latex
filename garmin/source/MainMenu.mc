@@ -12,6 +12,9 @@ function showMainMenu() as Void {
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuSync) as String, getApp().status, :sync, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuClear) as String,
         getApp().store.count().toString() + " risorse, " + (getApp().store.used() / 1024) + " KB", :clear, null));
+    var sr = speedResult();
+    m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuSpeed) as String,
+        sr != null ? sr : WatchUi.loadResource(Rez.Strings.MenuSpeedSub) as String, :speed, null));
     m.addItem(new WatchUi.ToggleMenuItem(WatchUi.loadResource(Rez.Strings.MenuMemory) as String, null, :memory,
         getApp().showMemory, null));
     WatchUi.pushView(m, new MainMenuDelegate(), WatchUi.SLIDE_UP);
@@ -25,6 +28,19 @@ function autoLabel(secs as Number) as String {
 }
 
 class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
+    private var _speedItem as WatchUi.MenuItem or Null = null;
+
+    function onSpeedDone() as Void {
+        var app = getApp();
+        if (_speedItem != null) {
+            var r = speedResult();
+            (_speedItem as WatchUi.MenuItem).setSubLabel(r != null ? r : "");
+        }
+        // riprende il download in sottofondo sospeso per la prova
+        app.startSync();
+        WatchUi.requestUpdate();
+    }
+
     function initialize() {
         Menu2InputDelegate.initialize();
     }
@@ -40,6 +56,17 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
             app.store.setValue("auto", next);
             item.setSubLabel(autoLabel(next));
             WatchUi.requestUpdate();
+            return;
+        }
+        if (id == :speed) {
+            // il menu resta aperto: il risultato compare sotto la voce
+            if (!app.speed.running) {
+                _speedItem = item;
+                item.setSubLabel(WatchUi.loadResource(Rez.Strings.MenuSpeedRunning) as String);
+                app.prefetch.stop();   // niente altro traffico durante la prova
+                app.speed.run(method(:onSpeedDone));
+                WatchUi.requestUpdate();
+            }
             return;
         }
         if (id == :clockKey) {

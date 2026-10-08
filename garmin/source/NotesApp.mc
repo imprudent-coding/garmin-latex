@@ -9,11 +9,14 @@ function getApp() as NotesApp {
 }
 
 class NotesApp extends Application.AppBase {
+    const RETRY_MS = 30000;
+
     var ticker as Ticker;
     var store as Store;
     var sync as Sync;
     var images as ImageCache;
     var prefetch as Prefetch;
+    var speed as SpeedTest;
     var rich as RichText or Null = null;
     var index as Index or Null = null;
     var showMemory as Boolean = false;
@@ -30,6 +33,7 @@ class NotesApp extends Application.AppBase {
         sync = new Sync(ticker);
         images = new ImageCache(store, sync, ticker);
         prefetch = new Prefetch(store, sync, ticker);
+        speed = new SpeedTest();
         if (Communications has :registerForPhoneAppMessages) {
             Communications.registerForPhoneAppMessages(method(:onPhoneMessage));
         }
@@ -79,6 +83,15 @@ class NotesApp extends Application.AppBase {
         sync.hello(ver instanceof Lang.String ? ver as String : "", method(:onHello));
     }
 
+    // Telefono non raggiungibile con il download incompleto: nuovo hello tra
+    // RETRY_MS, finché il download non finisce (prima si fermava fino alla
+    // riapertura della lettura o a "Sincronizza ora").
+    function retrySoon() as Void {
+        if (sync.state == ST_OFFLINE && !prefetch.finished && !ticker.isScheduled("rehello")) {
+            ticker.schedule("rehello", RETRY_MS, method(:startSync), false);
+        }
+    }
+
     function onPhoneUpdate() as Void {
         startSync();
     }
@@ -86,6 +99,7 @@ class NotesApp extends Application.AppBase {
     function onHello(res) as Void {
         if (res == false || !(res instanceof Lang.Dictionary)) {
             status = statusText();
+            retrySoon();
             WatchUi.requestUpdate();
             return;
         }
