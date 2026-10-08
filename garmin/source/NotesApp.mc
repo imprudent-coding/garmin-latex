@@ -99,6 +99,10 @@ class NotesApp extends Application.AppBase {
     function onHello(res) as Void {
         if (res == false || !(res instanceof Lang.Dictionary)) {
             status = statusText();
+            // anche senza l'app del telefono si può scaricare dal web (indice in cache)
+            if (index != null && sync.state == ST_OFFLINE) {
+                prefetch.start(index as Index);
+            }
             retrySoon();
             WatchUi.requestUpdate();
             return;

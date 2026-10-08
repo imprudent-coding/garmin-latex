@@ -14,6 +14,8 @@ class Section {
     var qid as String = "";
     var cLines as Array<String> or Null = null;
     var cWidths as Array<Number> or Null = null;
+    // file web (riga "F") con la sezione e le sue immagini; vuoto = solo telefono
+    var packs as Array<String> = [] as Array<String>;
 
     function initialize(f as Array<String>, chapter as Number) {
         id = f[1];
@@ -65,6 +67,8 @@ class Index {
     var version as String = "";
     var fontId as String = "";
     var title as String = "";
+    // indirizzo dei file web (riga "W"), null se gli appunti non sono sul web
+    var webBase as String or Null = null;
     var chapters as Array<Chapter> = [] as Array<Chapter>;
 
     function initialize(text as String) {
@@ -87,6 +91,17 @@ class Index {
                 chapters.add(current);
             } else if (t.equals("S") && current != null) {
                 (current as Chapter).sections.add(new Section(Util.splitN(row, "|", 7), chapters.size() - 1));
+            } else if (t.equals("W")) {
+                var f = Util.splitN(row, "|", 2);
+                if (f.size() == 2 && f[1].length() > 8) {
+                    webBase = f[1];
+                }
+            } else if (t.equals("F") && current != null) {
+                var secs = (current as Chapter).sections;
+                var f = Util.splitN(row, "|", 3);
+                if (f.size() == 3 && secs.size() > 0 && secs[secs.size() - 1].id.equals(f[1])) {
+                    secs[secs.size() - 1].packs = Util.split(f[2], ";");
+                }
             } else if (t.equals("H") && current != null) {
                 var f = Util.splitN(row, "|", 3);
                 (current as Chapter).hWidth = Util.toNum(f[1]);

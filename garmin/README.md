@@ -14,7 +14,8 @@ connectiq & monkeydo bin/appunti.prg vivoactive5
 | `NotesApp.mc` | applicazione: avvio, indice, sincronizzazione, posizione di lettura |
 | `Sync.mc` | protocollo con il telefono ([`../shared/PROTOCOL.md`](../shared/PROTOCOL.md)): un messaggio in volo, timeout 10 s, 3 tentativi |
 | `Store.mc` | cache in `Application.Storage`: un valore per pezzo (~1,8 KB), metadati divisi in 16 valori, LRU, budget 6 MB, recupero se lo spazio finisce |
-| `Prefetch.mc` | scaricamento in sottofondo di tutte le sezioni e immagini quando il collegamento è libero; avanzamento sull'orologio e sul telefono |
+| `Prefetch.mc` | scaricamento in sottofondo di tutte le sezioni e immagini: prima dai file web (GitHub Pages, `makeWebRequest`), poi dal telefono per ciò che manca; avanzamento sull'orologio e sul telefono |
+| `SpeedTest.mc` | *Test velocità* nel menu: richieste web verso GitHub tramite il telefono |
 | `Index.mc` | indice: capitoli, sezioni, pezzo che contiene ogni pagina |
 | `QuestionList.mc` | elenco unico delle domande raggruppate per capitolo: righe compatte, voce selezionata espansa al centro, trascinamento veloce, salto di gruppo con swipe laterale |
 | `ReaderView.mc` | lettura: carica solo il pezzo della pagina corrente, precarica il successivo |
