@@ -321,14 +321,16 @@ di pagine (● = già in cache sull'orologio). L'app riparte dall'ultima domanda
 | Elenco | trascinare il dito su/giù | scorrimento veloce (una voce ogni 30 px) |
 | Elenco | swipe a sinistra / a destra | gruppo successivo / inizio del gruppo (o gruppo precedente) |
 | Elenco | tocco su una riga | la seleziona; secondo tocco la apre |
+| Elenco | tocco sulla riga di stato in alto (con i tre puntini **···**) | menu |
 | Lettura | swipe su / tocco nella metà inferiore | pagina successiva |
 | Lettura | swipe giù / tocco nella metà superiore | pagina precedente |
 | Lettura | tocco su un'immagine con il triangolino verde | zoom |
+| Lettura | tocco sul numero di pagina in basso | menu |
 | Zoom | swipe o trascinamento | sposta l'immagine |
-| Ovunque | pulsante in alto | **orologio** (vedi sotto) |
+| Ovunque | pulsante in alto (premuto, non toccando lo schermo) | **orologio** (vedi sotto) |
 | Orologio | pressione prolungata sullo schermo o su un pulsante | torna agli appunti, dove eri |
 | Ovunque | pulsante in basso | indietro |
-| Ovunque | pressione prolungata sullo schermo (o il gesto *menu* del dispositivo) | menu: riprendi lettura, torna all'elenco, scorrimento automatico, pulsante orologio, sincronizza, svuota cache, mostra memoria |
+| Ovunque | pressione prolungata sullo schermo (o il gesto *menu* del dispositivo), oppure i tocchi sopra | menu: riprendi lettura, torna all'elenco, scorrimento automatico, pulsante orologio, sincronizza, svuota cache, mostra memoria |
 
 **Scorrimento automatico.** Dal menu, *Scorrimento automatico* cambia a ogni
 tocco: No, 5, 10, 15, 20, 30, 45, 60 secondi per pagina (il menu resta aperto).

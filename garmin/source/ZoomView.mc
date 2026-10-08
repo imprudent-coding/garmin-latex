@@ -107,16 +107,21 @@ class ZoomDelegate extends WatchUi.InputDelegate {
         return true;
     }
 
+    // pulsante in alto (pressione fisica): orologio, oppure sposta in basso
+    function onKeyPressed(evt as WatchUi.KeyEvent) as Boolean {
+        if (evt.getKey() != WatchUi.KEY_ENTER) {
+            return false;
+        }
+        if (isClockKey(evt)) {
+            showClock();
+        } else {
+            _view.pan(0, 150);
+        }
+        return true;
+    }
+
     function onKey(evt as WatchUi.KeyEvent) as Boolean {
         var k = evt.getKey();
-        if (k == WatchUi.KEY_ENTER) {
-            if (getApp().clockButton()) {
-                showClock();
-            } else {
-                _view.pan(0, 150);
-            }
-            return true;
-        }
         if (k == WatchUi.KEY_ESC) {
             WatchUi.popView(WatchUi.SLIDE_DOWN);
             return true;

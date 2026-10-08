@@ -121,6 +121,12 @@ class ClockDelegate extends WatchUi.BehaviorDelegate {
     }
 }
 
+// Pressione fisica del pulsante in alto (non un tocco: sugli schermi touch un
+// tocco genera anche onSelect, quindi l'orologio non può stare su onSelect).
+function isClockKey(evt as WatchUi.KeyEvent) as Boolean {
+    return evt.getKey() == WatchUi.KEY_ENTER && getApp().clockButton();
+}
+
 // Apre l'orologio sopra la vista corrente, senza animazione.
 function showClock() as Void {
     var v = new ClockView();
