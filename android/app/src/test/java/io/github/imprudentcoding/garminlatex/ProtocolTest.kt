@@ -3,6 +3,7 @@ package io.github.imprudentcoding.garminlatex
 import io.github.imprudentcoding.garminlatex.bundle.Bundle
 import io.github.imprudentcoding.garminlatex.bundle.BundleException
 import io.github.imprudentcoding.garminlatex.bundle.BundleRepository
+import io.github.imprudentcoding.garminlatex.render.Lz
 import io.github.imprudentcoding.garminlatex.watch.ProtocolHandler
 import org.json.JSONArray
 import org.json.JSONObject
@@ -23,7 +24,11 @@ class ProtocolTest {
         override val indexKey = "idx"
         override val indexHash = "h-idx"
         override val indexChunks = 2
-        val res = mapOf("idx" to ("h-idx" to listOf("V|1|x", "C|1|10|T")), "s:a" to ("h-a" to listOf("P\nT1,2,x")))
+        val res = mapOf(
+            "idx" to ("h-idx" to listOf("V|1|x", "C|1|10|T")),
+            "s:a" to ("h-a" to listOf("P\nT1,2,x")),
+            "i:b" to ("h-b" to List(6) { "x".repeat(1800) }),
+        )
         override fun resource(key: String) = res[key]
     }
 
@@ -49,6 +54,34 @@ class ProtocolTest {
     fun helloSchemaMismatch() {
         val r = handler.handle(mapOf("op" to "hello", "schema" to 2))!!
         assertEquals("schema", r.message["err"])
+    }
+
+    @Test
+    fun batchedChunksStayWithinLimit() {
+        val r = handler.handle(mapOf("op" to "get", "k" to "i:b", "n" to 1, "c" to 8, "h" to "h-b", "req" to 4))!!
+        assertEquals("chunks", r.message["op"])
+        assertEquals(1, r.message["n"])
+        assertEquals(6, r.message["of"])
+        @Suppress("UNCHECKED_CAST")
+        val d = r.message["d"] as List<String>
+        assertEquals(ProtocolHandler.DEFAULT_BATCH_BYTES / 1800, d.size)
+        assertEquals(d.size, r.chunks)
+        // limite più basso: almeno un pezzo
+        val small = ProtocolHandler(1) { FakeSource() }.apply { batchBytes = 100 }
+        val r2 = small.handle(mapOf("op" to "get", "k" to "i:b", "n" to 5, "c" to 4, "h" to "h-b"))!!
+        assertEquals(1, (r2.message["d"] as List<*>).size)
+        // senza "c": risposta classica a un pezzo
+        assertEquals("chunk", handler.handle(mapOf("op" to "get", "k" to "i:b", "n" to 0))!!.message["op"])
+    }
+
+    @Test
+    fun lzMatchesPipeline() {
+        // vettore generato da pipeline/gwnotes/lz.py
+        val hex = "6f0000000005070600d8f51b0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2021222324252627616263030000"
+        val c = ByteArray(hex.length / 2) { hex.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
+        val expected = ByteArray(240) { byteArrayOf(0, 0, 0, 0, 5, 7)[it % 6] } +
+            ByteArray(40) { it.toByte() } + "abcabcabcabc".toByteArray()
+        assertTrue(expected.contentEquals(Lz.decompress(c, expected.size)))
     }
 
     @Test

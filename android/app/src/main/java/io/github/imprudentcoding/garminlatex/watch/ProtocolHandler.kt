@@ -8,6 +8,14 @@ import io.github.imprudentcoding.garminlatex.bundle.Bundle
  */
 class ProtocolHandler(private val schema: Int, private val bundle: () -> Source?) {
 
+    /**
+     * Byte massimi di dati in una risposta con più pezzi (`get` con `c` > 1).
+     * Garmin non documenta un limite: se l'invio fallisce con
+     * FAILURE_MESSAGE_TOO_LARGE, WatchLink lo dimezza (fino a un pezzo solo).
+     */
+    @Volatile
+    var batchBytes: Int = DEFAULT_BATCH_BYTES
+
     /** Ciò che serve del bundle (interfaccia per i test). */
     interface Source {
         val schema: Int
@@ -27,7 +35,7 @@ class ProtocolHandler(private val schema: Int, private val bundle: () -> Source?
         override fun resource(key: String) = b.resource(key)?.let { it.hash to it.chunks }
     }
 
-    data class Reply(val message: Map<String, Any>, val chunkSent: Boolean, val description: String)
+    data class Reply(val message: Map<String, Any>, val chunkSent: Boolean, val description: String, val chunks: Int = 1)
 
     fun handle(raw: Any?): Reply? {
         val msg = raw as? Map<*, *> ?: return null
@@ -79,6 +87,24 @@ class ProtocolHandler(private val schema: Int, private val bundle: () -> Source?
             return Reply(mapOf("op" to "err", "k" to key, "n" to n, "req" to req, "err" to "notfound"), false,
                 "get $key/$n: pezzo inesistente")
         }
+        val count = toInt(msg["c"])
+        if (count > 1) {
+            // più pezzi consecutivi in un solo messaggio, entro batchBytes (almeno uno)
+            val out = ArrayList<String>()
+            var bytes = 0
+            var i = n
+            while (i < chunks.size && out.size < count) {
+                val b = chunks[i].toByteArray(Charsets.UTF_8).size
+                if (out.isNotEmpty() && bytes + b > batchBytes) break
+                out.add(chunks[i])
+                bytes += b
+                i++
+            }
+            return Reply(
+                mapOf("op" to "chunks", "k" to key, "n" to n, "of" to chunks.size, "h" to hash, "d" to out, "req" to req),
+                true, "chunks $key ${n + 1}-${n + out.size}/${chunks.size}", chunks = out.size,
+            )
+        }
         return Reply(
             mapOf("op" to "chunk", "k" to key, "n" to n, "of" to chunks.size, "h" to hash, "d" to chunks[n], "req" to req),
             true, "chunk $key ${n + 1}/${chunks.size}",
@@ -96,6 +122,9 @@ class ProtocolHandler(private val schema: Int, private val bundle: () -> Source?
     )
 
     companion object {
+        const val DEFAULT_BATCH_BYTES = 7200
+        const val MIN_BATCH_BYTES = 1800
+
         /** Legge un messaggio `progress` dell'orologio; null se è un altro messaggio. */
         fun progress(raw: Any?): WatchProgress? {
             val msg = raw as? Map<*, *> ?: return null

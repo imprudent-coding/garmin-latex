@@ -361,6 +361,15 @@ L'anteprima dell'elenco è in `preview/_elenco.png` (artifact del workflow `note
 
 ---
 
+## Cambi di schema
+
+Quando il formato del bundle cambia in modo incompatibile (`schema` in
+`shared/FORMAT.md`), le Release degli appunti successive richiedono **entrambe**
+le app aggiornate: l'app Android vecchia rifiuta il nuovo bundle e tiene quello
+che ha, l'orologio con l'app vecchia mostra «Aggiorna l'app dell'orologio».
+Lo schema 2 (immagini compresse) richiede almeno `garmin-v0.4.0` e
+`android-v0.3.0`.
+
 ## Aggiornare gli appunti
 
 1. Modifica o aggiungi file in `latex/`. I nuovi `.tex` vanno inclusi con
@@ -515,7 +524,8 @@ via Bluetooth. Fonte: *Communicating with Mobile Apps* nella documentazione Garm
   generico vecchio. Il device file ufficiale del vívoactive 5 (`simulator.json`
   nell'SDK) indica `appStorageCapacity` = 10.485.760 byte, cioè **10 MB per
   app**; l'API reference di `Storage` dice che il totale dipende dal dispositivo.
-  Gli appunti completi occupano circa 1,6 MB (testo ~330 KB, immagini ~1,2 MB),
+  Gli appunti completi occupano circa 1,2 MB (testo ~340 KB, immagini ~840 KB
+  compresse senza perdita),
   quindi stanno tutti in memoria: l'app usa un budget di 6 MB, pezzi da 1,8 KB
   (sotto gli 8 KB per valore della guida) e libera le risorse meno usate se
   `setValue` fallisce comunque. La CI stampa questi valori nel riepilogo del job.
@@ -529,9 +539,16 @@ via Bluetooth. Fonte: *Communicating with Mobile Apps* nella documentazione Garm
   I font antialiasing (3 × 349 glifi) e le bitmap delle immagini (al massimo 4
   in memoria, zoom fino a 700×700) vanno misurati nel simulatore e sull'orologio
   vero con le righe `[mem]`.
-- **Velocità del Bluetooth**: una sezione tipica sono 3–8 pezzi di testo più le
-  immagini; gli appunti interi sono circa 900 pezzi. Il tempo del primo
-  download completo va misurato; dopo si scaricano solo le risorse cambiate.
+- **Velocità del Bluetooth**: conta soprattutto il numero di scambi con il
+  telefono, non i byte. Gli appunti interi sono ~830 pezzi da 1,8 KB, ma il
+  download in sottofondo ne chiede fino a 8 per messaggio (~7 KB), quindi
+  servono circa 300 scambi; dopo si scaricano solo le risorse cambiate. Garmin
+  non documenta la dimensione massima dei messaggi: se il telefono riceve
+  «messaggio troppo grande» riduce da solo i pezzi per messaggio.
+- **Immagini compresse**: dallo schema 2 del bundle le immagini sono compresse
+  senza perdita (LZ sopra l'RLE, −30%). La compressione sulla trasmissione
+  (anche del testo) è stata misurata e scartata: −5…19%, non vale il lavoro in
+  più sull'orologio.
 - **Download in sottofondo**: una watch-app gira solo mentre è aperta, quindi il
   download procede solo con l'app aperta sull'orologio.
 - **App installate via USB e Garmin Connect**: lo stato «installata» potrebbe

@@ -29,7 +29,7 @@ android {
         versionName = tagVersion ?: "0.1.0-dev"
         buildConfigField("String", "WATCH_APP_ID", "\"$watchAppId\"")
         buildConfigField("String", "DEFAULT_REPO", "\"imprudent-coding/garmin-latex\"")
-        buildConfigField("int", "BUNDLE_SCHEMA", "1")
+        buildConfigField("int", "BUNDLE_SCHEMA", "2")
     }
 
     signingConfigs {

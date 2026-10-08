@@ -7,7 +7,7 @@ import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-SCHEMA = 1
+SCHEMA = 2
 ZIP_DATE = (2020, 1, 1, 0, 0, 0)
 
 

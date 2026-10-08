@@ -1,4 +1,4 @@
-# Formato del bundle (schema 1)
+# Formato del bundle (schema 2)
 
 Il bundle è prodotto dalla pipeline (`pipeline/`), pubblicato come asset
 `notes-bundle.zip` nelle Release GitHub (tag `notes-*`), scaricato dall'app
@@ -131,10 +131,29 @@ Palette (indice → colore): 0 testo `#FFFFFF`, 1 titoli `#FFB54A`,
 Stringa (pezzi concatenati senza separatore):
 
 ```
-<w>,<h>,2|<base64 dei dati RLE>
+<w>,<h>,2,<n>|<base64 di LZ(RLE)>      schema 2
+<w>,<h>,2|<base64 dei dati RLE>        schema 1
 ```
 
 4 livelli di grigio (0 nero = sfondo, 3 bianco). RLE in ordine raster:
 ogni byte è `(valore << 6) | (lunghezza − 1)` con lunghezza 1–64.
+
+Dallo schema 2 i byte RLE sono compressi **senza perdita** con un LZ in stile
+LZ4 (`pipeline/gwnotes/lz.py`); `<n>` è il numero di byte RLE dopo la
+decompressione. Sulle immagini degli appunti riduce i dati del ~30%. La
+decompressione è solo copia di byte, per restare leggera sull'orologio.
+Sequenze:
+
+| campo | contenuto |
+|---|---|
+| token | `(letterali << 4) \| (match − 4)`, 4 bit ciascuno |
+| estensione letterali | se letterali = 15: byte da sommare, `255` = continua |
+| letterali | byte copiati così come sono |
+| offset | 2 byte little-endian: distanza all'indietro (1–65535) |
+| estensione match | se match = 15: come sopra (match ≤ 4096) |
+
+L'ultima sequenza ha solo i letterali. Implementazioni: `pipeline/gwnotes/lz.py`
+(compressione e riferimento), `garmin/source/ImageCache.mc` (a passi, per il
+watchdog), `android/…/render/Lz.kt` (anteprima).
 Palette dei livelli: `#000000`, `#555555`, `#AAAAAA`, `#FFFFFF`.
 La chiave è l'hash del contenuto: immagini identiche sono condivise.

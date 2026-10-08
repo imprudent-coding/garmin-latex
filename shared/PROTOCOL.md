@@ -1,4 +1,4 @@
-# Protocollo orologio ↔ telefono (schema 1)
+# Protocollo orologio ↔ telefono (schema 2)
 
 Trasporto: Connect IQ Communications (orologio: `Communications.transmit` /
 `registerForPhoneAppMessages`; Android: `ConnectIQ.sendMessage` /
@@ -17,7 +17,7 @@ sconosciuto lo ignora.
 | op | campi | significato |
 |---|---|---|
 | `hello` | `schema`, `font`, `ver` (versione in cache o `""`) | apertura: "che versione hai?" |
-| `get` | `k` chiave, `n` indice del pezzo, `h` hash atteso (o `""`), `req` id richiesta | "dammi il pezzo n della risorsa k" |
+| `get` | `k` chiave, `n` indice del pezzo, `h` hash atteso (o `""`), `req` id richiesta, `c` (facoltativo) numero di pezzi | "dammi il pezzo n della risorsa k" (con `c` > 1: "dammi fino a c pezzi da n") |
 | `progress` | `ver`, `sec`/`secs` sezioni in cache/totali, `img`/`imgs` immagini in cache/trovate, `fin` tutto in cache | stato del download in sottofondo; **nessuna risposta** |
 
 ## Telefono → orologio
@@ -26,6 +26,7 @@ sconosciuto lo ignora.
 |---|---|---|
 | `hello` | `ok`, `schema`, `ver`, `ih` hash indice, `ic` pezzi indice, `err` | risposta a `hello`; `ok=false` se non c'è ancora un bundle (`err="nobundle"`) o lo schema non è supportato (`err="schema"`) |
 | `chunk` | `k`, `n`, `of` totale pezzi, `h` hash risorsa, `d` dati, `req` | un pezzo |
+| `chunks` | come `chunk`, ma `d` è un array: i pezzi `n`, `n+1`, … | risposta a `get` con `c` > 1: almeno un pezzo, al massimo `c`, entro ~7 KB di dati |
 | `err` | `k`, `n`, `req`, `err` | `notfound` (chiave inesistente) o `stale` (l'hash atteso non è quello del bundle attuale: l'orologio deve ripetere `hello` e ricaricare l'indice) |
 | `update` | `ver` | è arrivato un nuovo bundle: l'orologio, se aperto, ripete `hello` |
 
@@ -46,6 +47,20 @@ orologio                         telefono
   get(i:3fa…, 0) ───────────────▶
                 ◀─────────────── chunk(i:3fa…, 0, of=2, …)
 ```
+
+## Più pezzi per messaggio
+
+Il tempo di un download completo dipende soprattutto dal numero di scambi
+(ognuno passa per Garmin Connect), non dai byte. Per questo il download in
+sottofondo e le immagini chiedono più pezzi alla volta (`get` con `c`, fino a
+8). Il telefono risponde con `chunks` e si ferma prima di superare
+7200 byte di dati. Garmin non documenta un limite per i messaggi: se l'invio
+fallisce con `FAILURE_MESSAGE_TOO_LARGE`, il telefono dimezza il limite (fino a
+un pezzo per messaggio) e l'orologio, scaduto il timeout, ripete la richiesta.
+La lettura chiede sempre un pezzo solo, per mostrare subito la pagina.
+
+I pezzi salvati sull'orologio restano quelli del bundle (≤ `chunkBytes`):
+una risposta `chunks` diventa più valori nello Storage.
 
 ## Affidabilità
 

@@ -10,6 +10,8 @@ import base64
 
 from PIL import Image, ImageOps
 
+from . import lz
+
 LEVELS = 4
 
 
@@ -87,15 +89,20 @@ def rle_decode(buf: bytes, width: int, height: int) -> Image.Image:
 
 
 def encode_resource(levels: Image.Image) -> str:
-    """Stringa trasmessa all'orologio: "<w>,<h>,2|<base64 RLE>"."""
+    """Stringa trasmessa all'orologio: "<w>,<h>,2,<byte RLE>|<base64 di LZ(RLE)>"
+    (schema 2; vedi shared/FORMAT.md). Senza perdita: LZ comprime l'RLE del ~30%."""
     w, h = levels.size
-    return f"{w},{h},2|" + base64.b64encode(rle_encode(levels)).decode("ascii")
+    rle = rle_encode(levels)
+    return f"{w},{h},2,{len(rle)}|" + base64.b64encode(lz.compress(rle)).decode("ascii")
 
 
 def decode_resource(s: str) -> Image.Image:
     head, _, b64 = s.partition("|")
-    w, h, _bpp = (int(x) for x in head.split(","))
-    return rle_decode(base64.b64decode(b64), w, h)
+    f = [int(x) for x in head.split(",")]
+    data = base64.b64decode(b64)
+    if len(f) >= 4:  # schema 2: RLE compresso con LZ
+        data = lz.decompress(data, f[3])
+    return rle_decode(data, f[0], f[1])
 
 
 def levels_to_display(levels: Image.Image) -> Image.Image:
