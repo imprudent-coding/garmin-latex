@@ -25,9 +25,10 @@ from .bundle import SCHEMA, BundleBuilder, Resource, SectionPages, build_index, 
 from .docmodel import Book, Converter, ImageBlock, MathImage, Para, build_book
 from .latexbuild import LatexError, compile_pdf, latex_warnings, read_labels
 from .layout import Layouter, SectionLayout, encode_title_lines
+from .toc import chapter_header, section_titles
 from .paths import REPO_ROOT
 from .prepare import prepare
-from .preview import Renderer, contact_sheet
+from .preview import Renderer, contact_sheet, parse_index, render_index
 from .profile import VIVOACTIVE5
 from .report import Warnings
 from .rich import Styled, load_metrics, plain
@@ -184,6 +185,14 @@ def build(args) -> int:
         print(f"      equazioni spezzate: {ab.stats['split']}, ridotte: {ab.stats['scaled']}, "
               f"con zoom: {ab.stats['zoom']}")
     _replace_missing(book, assets, all_jobs)
+    for ch in book.chapters:
+        for s in ch.sections:
+            if not s.qid and s.label:
+                for conv, _ in converters:
+                    info = conv.labels.get(s.label)
+                    if info and 0 < len(info.text) <= 6:
+                        s.qid, s.kind = info.text, "question"
+                        break
 
     bb = BundleBuilder(rules.chunk_bytes)
     keys = {}
@@ -207,13 +216,15 @@ def build(args) -> int:
             for k, pg in enumerate(enc):
                 if len(pg.encode("utf-8")) > 7000:
                     warn.add("pagina", f"pagina {k + 1} di {s.id} molto grande ({len(pg.encode())} byte)")
-            sp = SectionPages(s.id, plain(s.title), encode_title_lines(lay, s.title, profile.title_w), enc, ci)
+            full, compact = section_titles(lay, profile, s, ch.title, alone=len(ch.sections) == 1)
+            sp = SectionPages(s.id, plain(s.title), full, enc, ci, qid=s.qid, kind=s.kind, compact=compact)
             res, starts = bb.section(sp)
             secs.append((sp, res, starts))
             all_pages[s.id] = enc
             total_pages += len(enc)
-            tsec.append({"id": s.id, "title": plain(s.title), "pages": len(enc), "key": res.key, "hash": res.hash})
-        chapters_idx.append((encode_title_lines(lay, ch.title, profile.title_w), secs))
+            tsec.append({"id": s.id, "title": plain(s.title), "pages": len(enc), "key": res.key, "hash": res.hash,
+                         "qid": s.qid, "kind": s.kind})
+        chapters_idx.append((encode_title_lines(lay, ch.title, profile.title_w), chapter_header(lay, profile, ch), secs))
         toc.append({"title": plain(ch.title), "sections": tsec})
 
     content_hash = short_hash("|".join(f"{k}:{r.hash}" for k, r in sorted(bb.resources.items())), 12)
@@ -258,6 +269,13 @@ def build(args) -> int:
         contact_sheet(imgs, cols=min(4, len(imgs))).save(prev_dir / f"{sid}.png", optimize=True)
         imgs[0].save(prev_dir / f"{sid}-p1.png")
         count += 1
+
+    # anteprima dell'elenco delle domande, con alcune voci selezionate
+    rows = parse_index(idx_lines)
+    nsel = sum(1 for r in rows if r["t"] == "S")
+    picks = sorted({0, 2, nsel // 3, nsel // 2, (2 * nsel) // 3, nsel - 1})
+    contact_sheet([render_index(renderer, rows, k) for k in picks if 0 <= k < nsel],
+                  cols=3).save(prev_dir / "_elenco.png", optimize=True)
 
     sizes = {"text": sum(r.bytes for k, r in bb.resources.items() if k.startswith("s:")),
              "images": sum(r.bytes for k, r in bb.resources.items() if k.startswith("i:")),

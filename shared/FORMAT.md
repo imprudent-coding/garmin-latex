@@ -54,11 +54,26 @@ C|<n. sezioni>|<larghezze>|<titolo>
 S|<id>|<hash>|<n. pagine>|<pagine iniziali dei pezzi>|<larghezze>|<titolo>
 ```
 
+```
+H|<larghezza>|<intestazione compatta del gruppo>
+Q|<id>|<tipo>|<id domanda>|<largh. larga>;<largh. stretta>|<riga larga>U+E01E<riga stretta>
+```
+
 - `C` apre un capitolo; le righe `S` che seguono sono le sue sezioni.
+- `H` (facoltativa, subito dopo `C`) è l'intestazione del gruppo nell'elenco
+  compatto; manca se il gruppo ha una sola sezione.
+- `Q` (facoltativa, subito dopo la sua `S`) descrive la voce nell'elenco compatto:
+  `tipo` è `question` (con `id domanda`, es. `A1`, preso dal `\def\@currentlabel`
+  della macro di sezionamento o dall'etichetta nel `.aux`), `intro` (testo prima
+  della prima sezione del gruppo) o `section`. Le due righe sono il titolo su una
+  riga nel font piccolo, troncato con «…» a 290 px (vicino al centro) e a 230 px
+  (verso i bordi del cerchio).
+- Le app ignorano le righe di tipo sconosciuto: aggiungere tipi di riga non
+  richiede di cambiare `schema`.
 - `<pagine iniziali dei pezzi>`: `0;5;11` significa che il pezzo 0 contiene
   le pagine 0–4, il pezzo 1 le pagine 5–10, ecc. Serve per chiedere al telefono
   solo il pezzo della pagina da mostrare.
-- Il titolo è testo ricco già diviso in righe (separatore U+E01E);
+- Il titolo è testo ricco già diviso in righe (separatore U+E01E, al massimo 3);
   `<larghezze>` sono le larghezze in pixel di ciascuna riga (`;`), per centrarle.
 - Il titolo è l'ultimo campo: può contenere `|`.
 
@@ -100,6 +115,7 @@ la **chiusura** è `U+E00F` e chiude l'ultimo stile aperto (pila).
 | 12 | freccia sopra | altezza sopra la baseline |
 | 13 | freccia sotto (diade) | distanza sotto la baseline |
 | 16 | spazio vuoto (per un'immagine inline), **senza chiusura** | larghezza (px) |
+| 17 | testo nel font `small` (righe compatte dell'elenco) | – |
 
 Gli spostamenti di pedici/apici si sommano lungo la pila. Le decorazioni
 (5–13) si disegnano alla chiusura, sull'intervallo orizzontale coperto dal

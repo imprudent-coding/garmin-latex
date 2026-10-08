@@ -82,7 +82,7 @@ class Renderer:
 
         def cur_font():
             kinds = [k for k, _, _ in stack]
-            if "sub" in kinds or "sup" in kinds:
+            if "sub" in kinds or "sup" in kinds or "small" in kinds:
                 return self.fonts["small"]
             if "bold" in kinds:
                 return self.fonts["bold"]
@@ -208,3 +208,105 @@ def contact_sheet(pages: list[Image.Image], cols: int = 4, pad: int = 10) -> Ima
         r, c = divmod(k, cols)
         sheet.paste(p, (pad + c * (390 + pad), pad + r * (390 + pad)))
     return sheet
+
+
+# ---------------------------------------------------------------- elenco delle domande
+# Stessa disposizione di garmin/source/QuestionList.mc (righe compatte, voce
+# selezionata espansa al centro).
+
+ROW_H = 30        # riga compatta (font piccolo)
+HEAD_H = 30       # intestazione di gruppo
+NARROW_DY = 95    # oltre questa distanza dal centro si usa la riga stretta
+TB = chr(0xE01E)
+
+
+def parse_index(lines: list[str]) -> list[dict]:
+    rows, chapters = [], 0
+    for l in lines:
+        t = l[:1]
+        if t == "C":
+            chapters += 1
+        elif t == "H":
+            _, w, text = l.split("|", 2)
+            rows.append({"t": "H", "w": int(w), "text": text})
+        elif t == "S":
+            f = l.split("|", 6)
+            rows.append({"t": "S", "id": f[1], "pages": int(f[3]),
+                         "fw": [int(x) for x in f[5].split(";") if x], "full": f[6].split(TB)})
+        elif t == "Q":
+            f = l.split("|", 5)
+            r = rows[-1]
+            r.update(kind=f[2], qid=f[3], cw=[int(x) for x in f[4].split(";")], compact=f[5].split(TB))
+    if chapters <= 1:
+        rows = [r for r in rows if r["t"] != "H"]
+    return rows
+
+
+def _sel_height(r) -> int:
+    return 14 + len(r["full"]) * 34 + 23 + 6
+
+
+def render_index(renderer: "Renderer", rows: list[dict], sel: int, status: str = "Aggiornato") -> Image.Image:
+    img = Image.new("RGB", (390, 390), (0, 0, 0))
+    d = ImageDraw.Draw(img)
+    small = renderer.fonts["small"]
+    selectable = [i for i, r in enumerate(rows) if r["t"] == "S"]
+    si = selectable[sel]
+    r = rows[si]
+    h = _sel_height(r)
+    top = 195 - h // 2
+    # voce selezionata: sfondo leggero, titolo completo in arancio
+    d.rounded_rectangle([20, top, 369, top + h], radius=14, fill=(26, 26, 26))
+    y = top + 8 + 25
+    for k, line in enumerate(r["full"]):
+        w = r["fw"][k] if k < len(r["fw"]) else 200
+        renderer.draw_text(img, d, 195 - w // 2, y, _with_base(line, 1))
+        y += 34
+    sub = f"{r['pages']} pagine"
+    small.draw(img, 195 - small.width(sub) // 2, y - 25, sub, PALETTE[2])
+
+    def draw_row(i, rtop):
+        row = rows[i]
+        hh = HEAD_H if row["t"] == "H" else ROW_H
+        mid = rtop + hh // 2
+        base = rtop + hh - 9
+        if row["t"] == "H":
+            renderer.draw_text(img, d, 195 - row["w"] // 2, base, row["text"])
+            d.line([(195 - row["w"] // 2, rtop + 3), (195 + row["w"] // 2, rtop + 3)], fill=(60, 60, 60))
+            return
+        k = 1 if abs(mid - 195) > NARROW_DY else 0
+        renderer.draw_text(img, d, 195 - row["cw"][k] // 2, base, row["compact"][k])
+
+    yy = top
+    for i in range(si - 1, -1, -1):
+        hh = HEAD_H if rows[i]["t"] == "H" else ROW_H
+        yy -= hh
+        if yy < 28:
+            break
+        draw_row(i, yy)
+    yy = top + h
+    for i in range(si + 1, len(rows)):
+        hh = HEAD_H if rows[i]["t"] == "H" else ROW_H
+        if yy + hh > 352:
+            break
+        draw_row(i, yy)
+        yy += hh
+    small.draw(img, 195 - small.width(status) // 2, 6, status, PALETTE[2])
+    pos = f"{sel + 1}/{len(selectable)}"
+    small.draw(img, 195 - small.width(pos) // 2, 362, pos, PALETTE[2])
+    # arco di posizione a destra
+    frac = sel / max(1, len(selectable) - 1)
+    d.arc([3, 3, 386, 386], -40, 40, fill=(51, 51, 51), width=3)
+    a = -40 + 80 * frac
+    d.arc([3, 3, 386, 386], a - 3, a + 3, fill=PALETTE[1], width=5)
+    m = Image.new("L", img.size, 0)
+    ImageDraw.Draw(m).ellipse([0, 0, 389, 389], fill=255)
+    bg = Image.new("RGB", img.size, (40, 40, 40))
+    bg.paste(img, (0, 0), m)
+    ImageDraw.Draw(bg).ellipse([0, 0, 389, 389], outline=(90, 90, 90))
+    return bg
+
+
+def _with_base(text: str, color: int) -> str:
+    """Applica un colore di base a una riga (come RichText.baseColor sull'orologio)."""
+    return chr(BASE + CODES["color"]) + chr(PARAM_BASE + color) + text + chr(BASE + 15)

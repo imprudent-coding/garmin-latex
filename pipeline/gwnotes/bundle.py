@@ -73,9 +73,12 @@ class Resource:
 class SectionPages:
     id: str
     title_plain: str
-    title_lines: list  # [(testo codificato, larghezza px)]
+    title_lines: list  # [(testo codificato, larghezza px)] titolo completo (voce selezionata)
     pages: list[str]
     chapter: int
+    qid: str = ""
+    kind: str = "section"
+    compact: list = field(default_factory=list)  # [(riga, larghezza)] versione larga e stretta
 
 
 @dataclass
@@ -113,17 +116,28 @@ class BundleBuilder:
         return key
 
 
+TITLE_SEP = chr(0xE01E)  # separatore delle righe dei titoli (rich.TITLE_BREAK)
+
+
 def build_index(title: str, font_id: str, content_version: str, chapters: list) -> list[str]:
-    """chapters: [(title_lines, [(SectionPages, Resource, starts)])]"""
+    """chapters: [(title_lines, header_line, [(SectionPages, Resource, starts)])]
+
+    Le righe "H" e "Q" (titoli compatti per scorrere l'elenco) sono un'aggiunta
+    compatibile: le versioni dell'app che non le conoscono le ignorano."""
     lines = [f"V|{SCHEMA}|{content_version}|{font_id}|{title}"]
-    for title_lines, secs in chapters:
+    for title_lines, header, secs in chapters:
         ws = ";".join(str(w) for _, w in title_lines)
-        lines.append(f"C|{len(secs)}|{ws}|" + "".join(t for t, _ in title_lines))
+        lines.append(f"C|{len(secs)}|{ws}|" + TITLE_SEP.join(t for t, _ in title_lines))
+        if header:
+            lines.append(f"H|{header[1]}|{header[0]}")
         for sp, res, starts in secs:
             ws = ";".join(str(w) for _, w in sp.title_lines)
             st = ";".join(str(s) for s in starts)
             lines.append(f"S|{sp.id}|{res.hash}|{len(sp.pages)}|{st}|{ws}|"
-                         + "".join(t for t, _ in sp.title_lines))
+                         + TITLE_SEP.join(t for t, _ in sp.title_lines))
+            if sp.compact:
+                cw = ";".join(str(w) for _, w in sp.compact)
+                lines.append(f"Q|{sp.id}|{sp.kind}|{sp.qid}|{cw}|" + TITLE_SEP.join(t for t, _ in sp.compact))
     return lines
 
 

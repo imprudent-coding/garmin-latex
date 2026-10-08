@@ -38,8 +38,8 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
             app.startSync();
         } else if (id == :index) {
             // torna alla lista dei capitoli
-            var v = new ChapterListView();
-            WatchUi.switchToView(v, new ListDelegate(v), WatchUi.SLIDE_RIGHT);
+            var v = new QuestionListView();
+            WatchUi.switchToView(v, new QuestionListDelegate(v), WatchUi.SLIDE_RIGHT);
         } else if (id == :resume) {
             var pos = app.lastPosition();
             if (pos != null && app.index != null) {

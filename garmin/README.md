@@ -15,7 +15,7 @@ connectiq & monkeydo bin/appunti.prg vivoactive5
 | `Sync.mc` | protocollo con il telefono ([`../shared/PROTOCOL.md`](../shared/PROTOCOL.md)): un messaggio in volo, timeout 10 s, 3 tentativi |
 | `Store.mc` | cache in `Application.Storage`: un valore per pezzo (~1,8 KB), metadati, LRU, budget 96 KB, recupero se lo spazio finisce |
 | `Index.mc` | indice: capitoli, sezioni, pezzo che contiene ogni pagina |
-| `ListViews.mc` | elenco di capitoli e sezioni (voce selezionata al centro del cerchio) |
+| `QuestionList.mc` | elenco unico delle domande raggruppate per capitolo: righe compatte, voce selezionata espansa al centro, trascinamento veloce, salto di gruppo con swipe laterale |
 | `ReaderView.mc` | lettura: carica solo il pezzo della pagina corrente, precarica il successivo |
 | `RichText.mc` | disegno del testo ricco (pedici, apici, vettori, accenti) con i font custom |
 | `ImageCache.mc` | immagini: RLE a 2 bit → `BufferedBitmap` a palette, decodifica a blocchi (watchdog), al massimo 4 in memoria |
