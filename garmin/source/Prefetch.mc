@@ -140,6 +140,12 @@ class Prefetch {
         var p = _pend as Array;
         var d = p[4] as Array;
         var i = p[6] as Number;
+        if (i >= d.size()) {
+            _pend = null;
+            _waiting = false;
+            onIdle();
+            return;
+        }
         var n = (p[1] as Number) + i;
         var c = d[i] as String;
         _store.put(p[0] as String, n, p[2] as Number, p[3] as String, c);
@@ -158,7 +164,8 @@ class Prefetch {
     }
 
     private function accept(key, n, total, hash, data, isSection as Boolean) as Void {
-        _pend = [key, n, total, hash, data, isSection, 0];
+        var d = (data instanceof Lang.Array) ? data : [data];
+        _pend = [key, n, total, hash, d, isSection, 0];
         _ticker.schedule("pf", 50, method(:onTick), false);
     }
 
