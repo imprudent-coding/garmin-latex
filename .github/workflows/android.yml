@@ -45,25 +45,74 @@ jobs:
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          if [ -n "$KEYSTORE_B64" ] && [ -n "$KEYSTORE_PASSWORD" ]; then
-            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
-            echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
-            echo "signed=true" >> "$GITHUB_OUTPUT"
-          else
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORD" ]; then
             echo "::warning title=APK non firmato::Mancano i secrets ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD: viene prodotto un APK di debug. Vedi README, sezione «Secrets»."
             echo "signed=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          KS="$RUNNER_TEMP/release.jks"
+          # spazi e a capo copiati per sbaglio (anche \r da Windows)
+          echo "$KEYSTORE_B64" | tr -d '[:space:]' | base64 -d > "$KS" \
+            || { echo "::error title=Keystore non valido::ANDROID_KEYSTORE_BASE64 non è un base64 valido."; exit 1; }
+          SP="$(printf '%s' "$KEYSTORE_PASSWORD" | tr -d '\r\n')"
+          AL="$(printf '%s' "$KEY_ALIAS" | tr -d '[:space:]')"
+          KP="$(printf '%s' "$KEY_PASSWORD" | tr -d '\r\n')"
+          echo "::add-mask::$SP"
+          [ -n "$KP" ] && echo "::add-mask::$KP"
+          if ! keytool -list -keystore "$KS" -storepass "$SP" > "$RUNNER_TEMP/ks.txt" 2>&1; then
+            echo "::error title=Password del keystore errata::ANDROID_KEYSTORE_PASSWORD non apre il keystore."
+            exit 1
+          fi
+          # alias: quello indicato, altrimenti l'unico presente nel keystore
+          ALIASES="$(keytool -list -v -keystore "$KS" -storepass "$SP" 2>/dev/null | sed -n 's/^Alias name: //p')"
+          if [ -z "$AL" ] || ! printf '%s\n' "$ALIASES" | grep -qxF "$AL"; then
+            if [ "$(printf '%s\n' "$ALIASES" | grep -c .)" = "1" ]; then
+              [ -n "$AL" ] && echo "::warning::L'alias indicato in ANDROID_KEY_ALIAS non esiste: uso l'unico alias del keystore («$ALIASES»)."
+              AL="$ALIASES"
+            else
+              echo "::error title=Alias non trovato::ANDROID_KEY_ALIAS non corrisponde a nessuna chiave. Alias presenti: $(echo $ALIASES)"
+              exit 1
+            fi
+          fi
+          # password della chiave: quella indicata, altrimenti quella del keystore (PKCS12: sono uguali)
+          # stessa verifica che fa Gradle in firma: KeyStore.getKey(alias, password)
+          cat > "$RUNNER_TEMP/KeyCheck.java" <<'JAVA'
+          import java.io.File;
+          import java.security.KeyStore;
+          public class KeyCheck {
+              public static void main(String[] a) throws Exception {
+                  KeyStore ks = KeyStore.getInstance(new File(a[0]), a[1].toCharArray());
+                  if (ks.getKey(a[2], a[3].toCharArray()) == null) System.exit(2);
+              }
+          }
+          JAVA
+          keyok() { java "$RUNNER_TEMP/KeyCheck.java" "$KS" "$SP" "$AL" "$1" > /dev/null 2>&1; }
+          if [ -n "$KP" ] && keyok "$KP"; then
+            :
+          elif keyok "$SP"; then
+            [ -n "$KP" ] && echo "::warning title=ANDROID_KEY_PASSWORD ignorato::La password in ANDROID_KEY_PASSWORD non apre la chiave; uso quella del keystore, che funziona. Puoi eliminare il secret ANDROID_KEY_PASSWORD."
+            KP="$SP"
+          else
+            echo "::error title=Password della chiave errata::Né ANDROID_KEY_PASSWORD né ANDROID_KEYSTORE_PASSWORD aprono la chiave «$AL». Controlla le password (vedi README, punto 2d)."
+            exit 1
+          fi
+          {
+            echo "ANDROID_KEYSTORE_PATH=$KS"
+            echo "ANDROID_KEYSTORE_PASSWORD=$SP"
+            echo "ANDROID_KEY_ALIAS=$AL"
+            echo "ANDROID_KEY_PASSWORD=$KP"
+          } >> "$GITHUB_ENV"
+          echo "signed=true" >> "$GITHUB_OUTPUT"
+          echo "Keystore verificato (alias «$AL»)."
 
       - name: Unit test
         run: ./gradlew --no-daemon testDebugUnitTest
 
       - name: Build APK
         id: apk
-        env:
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           if [ "${{ steps.sign.outputs.signed }}" = "true" ]; then
             ./gradlew --no-daemon assembleRelease
