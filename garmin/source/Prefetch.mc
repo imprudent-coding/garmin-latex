@@ -124,7 +124,7 @@ class Prefetch {
     }
 
     private function step() as Void {
-        if (_store.used() > Store.BUDGET * 9 / 10) {
+        if (_store.nearlyFull()) {
             // gli appunti non stanno nel budget: il resto si scarica quando serve
             System.println("prefetch: cache quasi piena, mi fermo");
             stop();

@@ -199,6 +199,11 @@ class Store {
         return _used;
     }
 
+    // oltre il 90% del budget: il prefetch si ferma
+    function nearlyFull() as Boolean {
+        return _used > BUDGET / 10 * 9;
+    }
+
     private function makeRoom(bytes as Number, keep as String) as Void {
         while (_used + bytes > BUDGET) {
             if (!evictOne(keep)) {
