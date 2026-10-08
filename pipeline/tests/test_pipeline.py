@@ -182,6 +182,21 @@ def test_profile_band_is_narrower_at_top():
     assert w_top < w_mid <= 390
 
 
+def test_web_packs_split_and_dedupe():
+    R = bundle.Resource
+    res = {"s:a": R("s:a", ["x" * 1000]), "s:b": R("s:b", ["y" * 1000]),
+           "i:1": R("i:1", ["1" * 20000]), "i:2": R("i:2", ["2" * 20000])}
+    files, by_sec = bundle.build_web_packs([("a", "s:a", ["i:1", "i:2"]), ("b", "s:b", ["i:2"])], res, limit=32000)
+    assert len(by_sec["a"]) == 2 and len(by_sec["b"]) == 1  # a: [s:a, i:1] + [i:2]; b: solo s:b
+    got = {}
+    for name in by_sec["a"] + by_sec["b"]:
+        for k, h, chunks in json.loads(files[name])["r"]:
+            assert h == res[k].hash and chunks == res[k].chunks
+            got[k] = got.get(k, 0) + 1
+    assert got == {"s:a": 1, "i:1": 1, "i:2": 1, "s:b": 1}
+    assert bundle.image_keys(["P\nI1,2,3,4,0,i:1,i:2\nT1,1,x", "P\nI1,2,3,4,0,i:1,"]) == ["i:1", "i:2"]
+
+
 # ---------------------------------------------------------------- end-to-end
 
 
@@ -212,7 +227,7 @@ def test_end_to_end(tmp_path):
     (src / "main.tex").write_text(SAMPLE.replace("\\newtcolorbox{nota}{title={Nota}}\n", ""), encoding="utf-8")
     out = tmp_path / "dist"
     p = subprocess.run([sys.executable, "-m", "gwnotes", "build", "--latex", str(src), "--out", str(out),
-                        "--preview", "2"], cwd=ROOT, capture_output=True, text=True)
+                        "--preview", "2", "--web-base", "https://x.example/w"], cwd=ROOT, capture_output=True, text=True)
     assert p.returncode == 0, p.stdout + p.stderr
     z = zipfile.ZipFile(out / "notes-bundle.zip")
     m = json.loads(z.read("manifest.json"))
@@ -232,6 +247,14 @@ def test_end_to_end(tmp_path):
     idx = "\n".join(json.loads(z.read(m["resources"]["idx"]["file"]))["chunks"])
     q = [l.split("|") for l in idx.split("\n") if l.startswith("Q|")]
     assert len(q) == 2 and all(len(f) == 6 for f in q)
+    assert "W|https://x.example/w/" in idx.split("\n")
+    f_rows = [l.split("|") for l in idx.split("\n") if l.startswith("F|")]
+    assert [f[1] for f in f_rows] == ["sec-circ", m["toc"][0]["sections"][1]["id"]]
+    web_keys = set()
+    for f in f_rows:
+        for name in f[2].split(";"):
+            web_keys |= {r[0] for r in json.loads((out / "web" / "w" / f"{name}.json").read_text())["r"]}
+    assert web_keys == {k for k in m["resources"] if k != "idx"}
 
 
 @pytest.mark.skipif(not (HAS_TEX and HAS_PANDOC), reason="servono TeX Live e pandoc")

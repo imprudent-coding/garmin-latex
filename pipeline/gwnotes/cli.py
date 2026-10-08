@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import html
 import json
 import re
 import shutil
@@ -21,7 +22,8 @@ from pathlib import Path
 
 from . import images, rich
 from .assets import AssetBuilder
-from .bundle import SCHEMA, BundleBuilder, Resource, SectionPages, build_index, chunk_text, res_file, short_hash, write_zip
+from .bundle import (SCHEMA, BundleBuilder, Resource, SectionPages, build_index, build_web_packs, chunk_text,
+                     image_keys, res_file, short_hash, write_zip)
 from .docmodel import Book, Converter, ImageBlock, MathImage, Para, build_book
 from .latexbuild import LatexError, compile_pdf, latex_warnings, read_labels
 from .layout import Layouter, SectionLayout, encode_title_lines
@@ -230,7 +232,15 @@ def build(args) -> int:
     content_hash = short_hash("|".join(f"{k}:{r.hash}" for k, r in sorted(bb.resources.items())), 12)
     version = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d.%H%M%S") if not args.version else args.version
     content_version = f"{version}-{content_hash}"
-    idx_lines = build_index(book.title, metrics.font_id, content_version, chapters_idx)
+    # file per il download via web (GitHub Pages): sezione + immagini, per sezione
+    web_files, web_packs = build_web_packs(
+        [(sp.id, res.key, image_keys(sp.pages)) for _, _, secs in chapters_idx for sp, res, _ in secs],
+        bb.resources)
+    web_base = (args.web_base or "").strip()
+    if web_base and not web_base.endswith("/"):
+        web_base += "/"
+    idx_lines = build_index(book.title, metrics.font_id, content_version, chapters_idx,
+                            web_base=web_base, web_packs=web_packs)
     bb.add(Resource("idx", chunk_text(idx_lines, rules.chunk_bytes)))
 
     manifest = {
@@ -250,6 +260,17 @@ def build(args) -> int:
     }
     print("[5/5] Scrittura del bundle e dell'anteprima…")
     write_zip(out / "notes-bundle.zip", manifest, bb.resources)
+    web_dir = out / "web"
+    if web_dir.exists():
+        shutil.rmtree(web_dir)
+    (web_dir / "w").mkdir(parents=True)
+    for name, body in web_files.items():
+        (web_dir / "w" / f"{name}.json").write_bytes(body)
+    (web_dir / "index.html").write_text(
+        f"<!doctype html><meta charset=utf-8><title>{html.escape(plain(book.title))}</title>"
+        f"<p>File degli appunti per l'app dell'orologio (versione {content_version}).</p>\n", encoding="utf-8")
+    print(f"      web: {len(web_files)} file, {sum(len(b) for b in web_files.values()) // 1024} KB"
+          + (f" su {web_base}" if web_base else " (senza --web-base: l'indice non li cita)"))
     (out / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1), encoding="utf-8")
 
     # anteprime
@@ -311,6 +332,8 @@ def main(argv=None) -> int:
     b.add_argument("--preview", type=int, default=12, help="numero di sezioni in anteprima")
     b.add_argument("--preview-sections", nargs="*", help="regex degli id di sezione da mostrare in anteprima")
     b.add_argument("--version", default=None, help="versione contenuti (default: data UTC)")
+    b.add_argument("--web-base", default="",
+                   help="URL dei file web (es. https://utente.github.io/repo/w/); vuoto = solo bundle")
     args = ap.parse_args(argv)
     if args.cmd == "build":
         return build(args)
