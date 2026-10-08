@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from gwnotes import bundle, eqsplit, images  # noqa: E402
+from gwnotes import bundle, eqsplit, images, lz  # noqa: E402
 from gwnotes.mathconv import Unconvertible, convert  # noqa: E402
 from gwnotes.prepare import prepare  # noqa: E402
 from gwnotes.profile import VIVOACTIVE5  # noqa: E402
@@ -78,6 +78,27 @@ def test_rle_roundtrip():
     enc = images.encode_resource(img)
     back = images.decode_resource(enc)
     assert back.size == img.size and back.tobytes() == img.tobytes()
+
+
+def test_lz_roundtrip():
+    import random
+    rnd = random.Random(1)
+    samples = [b"", b"a", b"abcabcabcabcabcabc" * 50, bytes(rnd.randrange(256) for _ in range(3000)),
+               bytes([0, 0, 0, 0, 5]) * 2000 + bytes(range(256)) * 3]
+    for d in samples:
+        assert lz.decompress(lz.compress(d), len(d)) == d
+    assert len(lz.compress(b"x" * 10000)) < 100
+
+
+def test_image_resource_is_compressed_and_lossless():
+    img = Image.new("L", (200, 80), 0)
+    d = ImageDraw.Draw(img)
+    for x in range(0, 200, 20):
+        d.line([x, 0, x + 10, 79], fill=2, width=2)
+    enc = images.encode_resource(img)
+    head = enc.split("|", 1)[0].split(",")
+    assert len(head) == 4 and head[2] == "2"
+    assert images.decode_resource(enc).tobytes() == img.tobytes()
 
 
 def test_to_levels_inverts_white_background():
