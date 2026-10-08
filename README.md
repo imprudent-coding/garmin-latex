@@ -509,6 +509,7 @@ via Bluetooth. Fonte: *Communicating with Mobile Apps* nella documentazione Garm
 | Orologio «Non connesso» | Bluetooth attivo, orologio vicino, Garmin Connect aperto almeno una volta. Prova *Riavvia collegamento*. |
 | «App sull'orologio non installata» | Copia il `.prg` (punto 5). Per le app installate via USB, Garmin Connect a volte non le rileva anche se funzionano: se l'orologio sincronizza, ignora il messaggio. |
 | Orologio: «Telefono non raggiungibile» | App Android aperta o servizio attivo (notifica fissa), batteria senza restrizioni. Poi menu → *Sincronizza ora*. |
+| Download lento, «tel» accanto a «Sezioni …/…» | Gli appunti arrivano dal telefono invece che dal web. Il menu, sotto *Sincronizza ora*, dice perché: «web: indice senza file web» (il telefono ha un bundle vecchio: *Controlla aggiornamenti*), «web: errore <codice>» (la richiesta fallisce). *Test velocità* prova anche un file vero di GitHub Pages («pages: …»). |
 | Download lento, nessun «web» accanto a «Sezioni …/…» | GitHub Pages non attivo o non ancora pubblicato (Settings → Pages, poi rilancia il workflow `notes`), oppure il telefono è senza internet. L'orologio usa il telefono come riserva. |
 | Orologio: «Il telefono non ha ancora appunti» | Nell'app Android premi *Controlla aggiornamenti*. |
 | Orologio: «Aggiorna l'app dell'orologio» | Bundle o font più nuovi dell'app: installa l'ultimo `.prg` (tag `garmin-v…`). |

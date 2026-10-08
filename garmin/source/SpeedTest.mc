@@ -6,11 +6,13 @@ import Toybox.WatchUi;
 
 // Prova di velocità delle richieste web (Communications.makeWebRequest), da
 // confrontare con i messaggi app↔telefono (la velocità di questi la mostra
-// l'app Android). Anche le richieste web passano dal telefono (Garmin
-// Connect), ma per un'altra strada: se fossero molto più veloci, l'orologio
-// potrebbe scaricare gli appunti direttamente da GitHub.
-// Scarica due file della repository tramite l'API di GitHub (JSON, contenuto
-// in base64): uno piccolo e uno medio, per separare latenza e velocità.
+// l'app Android). Anche le richieste web passano dal telefono (Garmin Connect).
+// Tre richieste:
+//   1-2. due file della repository dall'API di GitHub (~10 e ~42 KB, un solo
+//        testo base64): latenza e velocità;
+//   3.   un vero file degli appunti da GitHub Pages, preso dall'indice (righe
+//        "W"/"F"), come lo scarica il download in sottofondo: stesso server,
+//        stessa forma (elenco di pezzi con i caratteri del testo ricco).
 class SpeedTest {
     const API = "https://api.github.com/repos/imprudent-coding/garmin-latex/contents/";
     // circa 10 KB e 42 KB di risposta
@@ -40,11 +42,11 @@ class SpeedTest {
     }
 
     private function next() as Void {
-        if (_i >= FILES.size()) {
+        if (_i > FILES.size()) {
             running = false;
-            var r = "web:";
+            var r = "";
             for (var k = 0; k < _parts.size(); k++) {
-                r += (k == 0 ? " " : " · ") + _parts[k];
+                r += (k == 0 ? "" : " · ") + _parts[k];
             }
             getApp().store.setValue("speed", r);
             System.println("[speed] " + r);
@@ -53,37 +55,99 @@ class SpeedTest {
             }
             return;
         }
+        var url = null;
+        var opts = {
+            :method => Communications.HTTP_REQUEST_METHOD_GET,
+            :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON
+        };
+        if (_i < FILES.size()) {
+            url = API + FILES[_i];
+            opts[:headers] = {"Accept" => "application/vnd.github+json"};
+        } else {
+            url = pagesUrl();
+            if (url == null) {
+                _parts.add("pages: indice senza file web");
+                _i += 1;
+                next();
+                return;
+            }
+        }
         _start = System.getTimer();
         try {
-            Communications.makeWebRequest(API + FILES[_i], null, {
-                :method => Communications.HTTP_REQUEST_METHOD_GET,
-                :headers => {"Accept" => "application/vnd.github+json"},
-                :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON
-            }, method(:onResponse));
+            Communications.makeWebRequest(url as String, null, opts, method(:onResponse));
         } catch (e) {
-            _parts.add("errore");
+            _parts.add(label() + "errore");
             _i += 1;
             next();
         }
     }
 
+    private function label() as String {
+        return _i < FILES.size() ? "api: " : "pages: ";
+    }
+
+    // Il primo file della sezione con più file web: di solito è pieno (~32 KB).
+    private function pagesUrl() as String or Null {
+        var idx = getApp().index;
+        if (idx == null || (idx as Index).webBase == null) {
+            return null;
+        }
+        var best = null;
+        var chs = (idx as Index).chapters;
+        for (var c = 0; c < chs.size(); c++) {
+            for (var s = 0; s < chs[c].sections.size(); s++) {
+                var sec = chs[c].sections[s];
+                if (sec.packs.size() > 0 && (best == null || sec.packs.size() > (best as Section).packs.size())) {
+                    best = sec;
+                }
+            }
+        }
+        if (best == null) {
+            return null;
+        }
+        return ((idx as Index).webBase as String) + (best as Section).packs[0] + ".json";
+    }
+
     function onResponse(code as Number, data as Dictionary or String or PersistedContent.Iterator or Null) as Void {
         var ms = System.getTimer() - _start;
-        if (code == 200 && data instanceof Lang.Dictionary && (data as Dictionary)["content"] instanceof Lang.String) {
-            var bytes = ((data as Dictionary)["content"] as String).length() + META_BYTES;
-            if (ms < 1) {
-                ms = 1;
+        if (ms < 1) {
+            ms = 1;
+        }
+        var bytes = -1;
+        if (code == 200 && data instanceof Lang.Dictionary) {
+            var d = data as Dictionary;
+            if (d["content"] instanceof Lang.String) {
+                bytes = (d["content"] as String).length() + META_BYTES;
+            } else if (d["r"] instanceof Lang.Array) {
+                bytes = packBytes(d["r"] as Array);
             }
+        }
+        if (bytes >= 0) {
             // KB/s con un decimale
             var tenths = bytes * 10000 / 1024 / ms;
-            _parts.add((tenths / 10) + "." + (tenths % 10) + " KB/s (" + (bytes / 1024) + " KB, " + ms + " ms)");
+            _parts.add(label() + (tenths / 10) + "." + (tenths % 10) + " KB/s (" + (bytes / 1024) + " KB, " + ms + " ms)");
         } else {
-            _parts.add("errore " + code);
+            _parts.add(label() + "errore " + code);
         }
         _i += 1;
         next();
     }
 
+    // Byte dei pezzi di un file web (le chiavi e gli hash sono pochi byte).
+    private function packBytes(items as Array) as Number {
+        var n = 0;
+        for (var i = 0; i < items.size(); i++) {
+            var it = items[i];
+            if (it instanceof Lang.Array && (it as Array).size() == 3 && (it as Array)[2] instanceof Lang.Array) {
+                var chunks = (it as Array)[2] as Array;
+                for (var k = 0; k < chunks.size(); k++) {
+                    n += (chunks[k] as String).length() + 3;
+                }
+                n += 40;
+            }
+        }
+        return n;
+    }
 }
 
 // Risultato dell'ultima prova (salvato), o null.
