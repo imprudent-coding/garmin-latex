@@ -461,7 +461,7 @@ via Bluetooth. Fonte: *Communicating with Mobile Apps* nella documentazione Garm
 
 ## Limiti noti e cose da verificare sul dispositivo
 
-- **Compilazione dell'app orologio**: senza device file non si compila, e i
+- **Compilazione dell'app orologio**: verificata in CI (SDK 9.2.0, vívoactive 5 con Connect IQ 5.2.0). Senza device file non si compila, e i
   device file richiedono il login Garmin. Il codice Monkey C viene verificato dalla
   CI solo dopo la configurazione dei secrets.
 - **Dimensione dei messaggi**: Garmin non documenta un limite, ma l'SDK Android ha

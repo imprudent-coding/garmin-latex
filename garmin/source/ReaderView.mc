@@ -12,7 +12,6 @@ class ReaderView extends WatchUi.View {
     var page as Number;
     // elementi della pagina corrente: [tipo, ...]
     private var _items as Array<Array> or Null = null;
-    private var _loading as Boolean = false;
     private var _missing as Boolean = false;
 
     function initialize(sec as Section, p as Number) {
@@ -43,12 +42,10 @@ class ReaderView extends WatchUi.View {
         var n = section.chunkFor(page);
         var chunk = app.store.get(section.key(), n, section.hash);
         if (chunk == null) {
-            _loading = true;
             app.sync.request(section.key(), n, section.hash, method(:onChunk), true);
             WatchUi.requestUpdate();
             return;
         }
-        _loading = false;
         parse(chunk as String, page - section.starts[n]);
         Mem.log("pagina " + section.id + ":" + page);
         prefetch(n + 1);
@@ -73,7 +70,6 @@ class ReaderView extends WatchUi.View {
 
     function onChunk(key, n, total, hash, data) as Void {
         if (data == null) {
-            _loading = false;
             _missing = true;
             WatchUi.requestUpdate();
             return;
@@ -81,7 +77,6 @@ class ReaderView extends WatchUi.View {
         var app = getApp();
         app.store.put(key as String, n as Number, total as Number, hash as String, data as String);
         if ((n as Number) == section.chunkFor(page)) {
-            _loading = false;
             parse(data as String, page - section.starts[n as Number]);
             Mem.log("pagina " + section.id + ":" + page + " (dal telefono)");
             prefetch((n as Number) + 1);

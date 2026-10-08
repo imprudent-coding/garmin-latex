@@ -46,7 +46,6 @@ class Sync {
     private var _req as Number = 0;
     private var _timer as Timer.Timer;
     private var _listener as CommListener;
-    private var _onHello as Method or Null = null;
 
     function initialize() {
         _timer = new Timer.Timer();
@@ -63,7 +62,6 @@ class Sync {
 
     // ------------------------------------------------------------- hello
     function hello(cachedVersion as String, cb as Method) as Void {
-        _onHello = cb;
         state = ST_HELLO;
         _inflight = ["hello", 0, cachedVersion, cb, nextReq(), 0];
         sendCurrent();
