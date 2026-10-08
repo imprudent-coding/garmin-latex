@@ -260,4 +260,10 @@ class ListDelegate extends WatchUi.BehaviorDelegate {
         showMainMenu();
         return true;
     }
+
+    // pressione prolungata sullo schermo: stesso menu
+    function onHold(evt as WatchUi.ClickEvent) as Boolean {
+        showMainMenu();
+        return true;
+    }
 }

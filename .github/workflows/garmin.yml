@@ -8,6 +8,9 @@ name: garmin
 # Senza secrets il job non fallisce: salta la build con un avviso.
 on:
   push:
+    # con "tags" serve anche "branches", altrimenti il workflow parte solo sui tag
+    branches:
+      - "**"
     paths:
       - "garmin/**"
       - "shared/app-id.txt"

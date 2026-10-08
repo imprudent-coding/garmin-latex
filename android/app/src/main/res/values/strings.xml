@@ -23,7 +23,7 @@
     <string name="dev_not_connected">Non connesso (Bluetooth spento o fuori portata?)</string>
     <string name="dev_not_paired">Non associato a Garmin Connect</string>
     <string name="app_installed">App sull\'orologio installata (versione %1$d)</string>
-    <string name="app_not_installed">App sull\'orologio non installata: copia il file .prg (vedi README)</string>
+    <string name="app_not_installed">App sull\'orologio non rilevata: copia il file .prg (vedi README). Se l\'hai installata via USB e sincronizza, ignora questo messaggio</string>
     <string name="app_not_supported">Questo orologio non supporta l\'app</string>
     <string name="app_unknown">Stato dell\'app sull\'orologio sconosciuto (orologio non connesso?)</string>
     <string name="open_on_watch">Apri l\'app sull\'orologio</string>

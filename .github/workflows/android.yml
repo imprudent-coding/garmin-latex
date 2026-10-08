@@ -4,6 +4,9 @@ name: android
 # altrimenti APK di debug (con avviso). Sui tag "android-v*" crea la Release.
 on:
   push:
+    # con "tags" serve anche "branches", altrimenti il workflow parte solo sui tag
+    branches:
+      - "**"
     paths:
       - "android/**"
       - "shared/app-id.txt"
