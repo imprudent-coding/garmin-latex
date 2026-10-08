@@ -29,7 +29,7 @@ class Profile:
     img_maxh: int = 300
     fit_radius: float = 182.0
     zoom_threshold: float = 0.8
-    zoom_max: int = 900
+    zoom_max: int = 700
     eq_indent: int = 24
     eq_line_gap: int = 6
     title_w: int = 290         # larghezza delle voci nei menu dell'orologio

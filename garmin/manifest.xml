@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<iq:manifest version="3" xmlns:iq="http://www.garmin.com/xml/connectiq">
+    <!-- L'id deve coincidere con shared/app-id.txt (usato anche dall'app Android). -->
+    <iq:application id="619ec2e59cde4b65aed44d27b101cd5e" type="watch-app" name="@Strings.AppName"
+        entry="NotesApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="4.0.0">
+        <iq:products>
+            <iq:product id="vivoactive5"/>
+        </iq:products>
+        <iq:permissions>
+            <iq:uses-permission id="Communications"/>
+        </iq:permissions>
+        <iq:languages>
+            <iq:language>ita</iq:language>
+        </iq:languages>
+        <iq:barrels/>
+    </iq:application>
+</iq:manifest>
