@@ -40,7 +40,11 @@ class Sync {
     var phoneVersion as String = "";
     var lastError as String = "";
 
-    // richieste in coda: [chiave, n, hash, callback]
+    // chiamato quando non c'è nulla in volo né in coda (usato dal prefetch)
+    var idle as Method or Null = null;
+
+    // richieste in coda: [chiave, n, hash, callback]; callback è un Array<Method>
+    // (più richieste uguali condividono la stessa risposta)
     private var _queue as Array<Array> = [] as Array<Array>;
     private var _inflight as Array or Null = null;  // [chiave, n, hash, callback, req, tentativi]
     private var _req as Number = 0;
@@ -62,6 +66,11 @@ class Sync {
 
     // ------------------------------------------------------------- hello
     function hello(cachedVersion as String, cb as Method) as Void {
+        if (_inflight != null && !((_inflight as Array)[0] as String).equals("hello")) {
+            // la richiesta interrotta torna in testa alla coda e riparte dopo l'hello
+            var f = _inflight as Array;
+            _queue = [[f[0], f[1], f[2], f[3]]].addAll(_queue) as Array<Array>;
+        }
         state = ST_HELLO;
         _inflight = ["hello", 0, cachedVersion, cb, nextReq(), 0];
         sendCurrent();
@@ -70,16 +79,23 @@ class Sync {
     // ------------------------------------------------------------- richieste
     // cb.invoke(chiave, n, totale, hash, dati) ; dati = null se fallita
     function request(key as String, n as Number, hash as String, cb as Method, urgent as Boolean) as Void {
-        if (_inflight != null && (_inflight[0] as String).equals(key) && (_inflight[1] as Number) == n) {
+        if (_inflight != null && (_inflight[0] as String).equals(key) && (_inflight[1] as Number) == n
+            && (_inflight[3] instanceof Lang.Array)) {
+            (_inflight[3] as Array).add(cb);
             return;
         }
         for (var i = 0; i < _queue.size(); i++) {
             var q = _queue[i];
             if ((q[0] as String).equals(key) && (q[1] as Number) == n) {
+                (q[3] as Array).add(cb);
+                if (urgent && i > 0) {
+                    _queue.remove(q);
+                    _queue = [q].addAll(_queue) as Array<Array>;
+                }
                 return;
             }
         }
-        var item = [key, n, hash, cb];
+        var item = [key, n, hash, [cb]];
         if (urgent) {
             _queue = [item].addAll(_queue) as Array<Array>;
         } else {
@@ -97,15 +113,29 @@ class Sync {
         return _req;
     }
 
+    // risposta a tutte le callback di una richiesta
+    private function deliver(f as Array, total as Number, hash, data) as Void {
+        var cbs = f[3] as Array;
+        for (var i = 0; i < cbs.size(); i++) {
+            (cbs[i] as Method).invoke(f[0], f[1], total, hash, data);
+        }
+    }
+
     private function pump() as Void {
-        if (_inflight != null || _queue.size() == 0) {
+        if (_inflight != null) {
+            return;
+        }
+        if (_queue.size() == 0) {
+            if (idle != null) {
+                (idle as Method).invoke();
+            }
             return;
         }
         if (state == ST_OFFLINE || state == ST_NOBUNDLE || state == ST_SCHEMA) {
             // non insistere: fallisce subito, la vista mostrerà "non in cache"
             var q = _queue[0];
             _queue = _queue.slice(1, null) as Array<Array>;
-            (q[3] as Method).invoke(q[0], q[1], 0, q[2], null);
+            deliver(q, 0, q[2], null);
             pump();
             return;
         }
@@ -154,7 +184,7 @@ class Sync {
         if ((f[0] as String).equals("hello")) {
             (f[3] as Method).invoke(false);
         } else {
-            (f[3] as Method).invoke(f[0], f[1], 0, f[2], null);
+            deliver(f, 0, f[2], null);
         }
         // le richieste rimaste falliscono subito (telefono non raggiungibile)
         pump();
@@ -211,10 +241,10 @@ class Sync {
             _timer.stop();
             _inflight = null;
             if (op.equals("chunk")) {
-                (f[3] as Method).invoke(f[0], f[1], Util.toNum(data["of"]), data["h"].toString(), data["d"]);
+                deliver(f, Util.toNum(data["of"]), data["h"].toString(), data["d"]);
             } else {
                 lastError = data["err"] != null ? data["err"].toString() : "err";
-                (f[3] as Method).invoke(f[0], f[1], 0, f[2], null);
+                deliver(f, 0, f[2], null);
                 if (lastError.equals("stale")) {
                     getApp().onPhoneUpdate();
                 }
