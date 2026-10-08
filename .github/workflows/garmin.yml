@@ -1,0 +1,162 @@
+name: garmin
+
+# Build dell'app Connect IQ (.prg per vivoactive5 e .iq).
+#
+# Il compilatore (SDK) si scarica liberamente, ma i "device file" (la definizione
+# del vivoactive5, indispensabile per compilare) richiedono il login Garmin:
+# si usano connect-iq-sdk-manager-cli e i secrets GARMIN_USERNAME/GARMIN_PASSWORD.
+# Senza secrets il job non fallisce: salta la build con un avviso.
+on:
+  push:
+    paths:
+      - "garmin/**"
+      - "shared/app-id.txt"
+      - "shared/font/generated/**"
+      - ".github/workflows/garmin.yml"
+    tags:
+      - "garmin-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: garmin-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CIQ_SDK_VERSION: "9.2.0"
+  SDK_MANAGER_CLI: "v0.8.4"
+  DEVICE: vivoactive5
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5.0.0
+
+      - name: Controllo dei secrets
+        id: check
+        env:
+          GARMIN_USERNAME: ${{ secrets.GARMIN_USERNAME }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          CIQ_KEY: ${{ secrets.CIQ_DEVELOPER_KEY_BASE64 }}
+          AGREEMENT: ${{ vars.CIQ_AGREEMENT_HASH }}
+        run: |
+          missing=""
+          [ -z "$GARMIN_USERNAME" ] && missing="$missing GARMIN_USERNAME"
+          [ -z "$GARMIN_PASSWORD" ] && missing="$missing GARMIN_PASSWORD"
+          [ -z "$CIQ_KEY" ] && missing="$missing CIQ_DEVELOPER_KEY_BASE64"
+          if [ -n "$missing" ]; then
+            echo "::warning title=Build Garmin saltata::Mancano i secrets:$missing. Vedi README, sezione «Secrets»."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+          [ -z "$AGREEMENT" ] && echo "agreement=missing" >> "$GITHUB_OUTPUT" || echo "agreement=ok" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-go@v5.5.0
+        if: steps.check.outputs.ok == 'true'
+        with:
+          go-version: "1.25"
+          cache: false
+
+      - uses: actions/setup-java@v5.0.0
+        if: steps.check.outputs.ok == 'true'
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: SDK manager (connect-iq-sdk-manager-cli ${{ env.SDK_MANAGER_CLI }})
+        if: steps.check.outputs.ok == 'true'
+        run: |
+          go install "github.com/lindell/connect-iq-sdk-manager-cli@${SDK_MANAGER_CLI}"
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Licenza Connect IQ
+        if: steps.check.outputs.ok == 'true'
+        env:
+          AGREEMENT: ${{ vars.CIQ_AGREEMENT_HASH }}
+        run: |
+          if [ -z "$AGREEMENT" ]; then
+            connect-iq-sdk-manager-cli agreement view | tee agreement.txt
+            echo "::error title=Licenza da accettare::Leggi l'accordo all'indirizzo stampato qui sopra e, se lo accetti, salva il valore «Current Hash» nella variabile di repository CIQ_AGREEMENT_HASH (Settings → Secrets and variables → Actions → Variables). Vedi README."
+            exit 1
+          fi
+          connect-iq-sdk-manager-cli agreement accept --agreement-hash="$AGREEMENT" \
+            || { echo "::error::L'accordo Garmin è cambiato: rileggilo e aggiorna CIQ_AGREEMENT_HASH"; exit 1; }
+
+      - name: Cache SDK e device
+        if: steps.check.outputs.ok == 'true'
+        uses: actions/cache@v4.2.4
+        with:
+          path: |
+            ~/.Garmin/ConnectIQ/Sdks
+            ~/.Garmin/ConnectIQ/Devices
+          key: ciq-${{ env.CIQ_SDK_VERSION }}-${{ env.DEVICE }}-${{ hashFiles('garmin/manifest.xml') }}
+
+      - name: Login, SDK e device
+        if: steps.check.outputs.ok == 'true'
+        env:
+          GARMIN_USERNAME: ${{ secrets.GARMIN_USERNAME }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+        run: |
+          connect-iq-sdk-manager-cli login \
+            || { echo "::error title=Login Garmin fallito::Controlla GARMIN_USERNAME/GARMIN_PASSWORD; l'account non deve avere la verifica in due passaggi."; exit 1; }
+          connect-iq-sdk-manager-cli sdk set "$CIQ_SDK_VERSION"
+          echo "$(connect-iq-sdk-manager-cli sdk current-path --bin)" >> "$GITHUB_PATH"
+          connect-iq-sdk-manager-cli device download --manifest=garmin/manifest.xml
+
+      - name: Limiti del dispositivo (dai device file ufficiali)
+        if: steps.check.outputs.ok == 'true'
+        run: |
+          python3 - <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, os, pathlib
+          d = pathlib.Path.home() / ".Garmin/ConnectIQ/Devices" / os.environ["DEVICE"]
+          print(f"### Limiti di {os.environ['DEVICE']} (da {d.name}/compiler.json)\n")
+          data = json.loads((d / "compiler.json").read_text())
+          def walk(x, path=""):
+              if isinstance(x, dict):
+                  for k, v in x.items():
+                      walk(v, f"{path}.{k}" if path else k)
+              elif isinstance(x, list):
+                  for i, v in enumerate(x):
+                      walk(v, f"{path}[{i}]")
+              else:
+                  low = path.lower()
+                  if any(w in low for w in ("memory", "version", "resolution", "storage", "type")):
+                      print(f"- `{path}` = {x}")
+          walk(data)
+          EOF
+
+      - name: Compila .prg e .iq
+        if: steps.check.outputs.ok == 'true'
+        env:
+          CIQ_KEY: ${{ secrets.CIQ_DEVELOPER_KEY_BASE64 }}
+        run: |
+          echo "$CIQ_KEY" | base64 -d > "$RUNNER_TEMP/developer_key.der"
+          mkdir -p out
+          monkeyc --version
+          monkeyc -f garmin/monkey.jungle -d "$DEVICE" -o "out/appunti-$DEVICE.prg" -y "$RUNNER_TEMP/developer_key.der" -w -r
+          monkeyc -f garmin/monkey.jungle -e -o out/appunti.iq -y "$RUNNER_TEMP/developer_key.der" -w -r
+          ls -la out
+
+      - uses: actions/upload-artifact@v4.6.2
+        if: steps.check.outputs.ok == 'true'
+        with:
+          name: garmin-${{ github.run_number }}
+          path: out/
+          retention-days: 30
+
+      - name: Release
+        if: steps.check.outputs.ok == 'true' && startsWith(github.ref, 'refs/tags/garmin-v')
+        uses: softprops/action-gh-release@v2.3.2
+        with:
+          name: App orologio ${{ github.ref_name }}
+          files: |
+            out/appunti-${{ env.DEVICE }}.prg
+            out/appunti.iq
+          body: |
+            App Connect IQ per vivoactive 5. Installazione: copia il file .prg nella cartella GARMIN/Apps
+            dell'orologio collegato via USB (vedi README, «Installare l'app sull'orologio»).
