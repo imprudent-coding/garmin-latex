@@ -12,6 +12,7 @@ class NotesApp extends Application.AppBase {
     var store as Store;
     var sync as Sync;
     var images as ImageCache;
+    var prefetch as Prefetch;
     var rich as RichText or Null = null;
     var index as Index or Null = null;
     var showMemory as Boolean = false;
@@ -26,6 +27,7 @@ class NotesApp extends Application.AppBase {
         store = new Store();
         sync = new Sync();
         images = new ImageCache(store, sync);
+        prefetch = new Prefetch(store, sync);
         if (Communications has :registerForPhoneAppMessages) {
             Communications.registerForPhoneAppMessages(method(:onPhoneMessage));
         }
@@ -92,9 +94,11 @@ class NotesApp extends Application.AppBase {
         var cachedVer = store.getValue("ver");
         if (index != null && cachedVer != null && _idxVersion.equals(cachedVer) && store.isComplete("idx", _idxHash)) {
             status = statusText();
+            prefetch.start(index as Index);
             WatchUi.requestUpdate();
             return;
         }
+        prefetch.stop();
         if (store.hashOf("idx") != null && !_idxHash.equals(store.hashOf("idx"))) {
             store.pinned = [] as Array<String>;
             store.remove("idx");
@@ -127,7 +131,15 @@ class NotesApp extends Application.AppBase {
             }
             store.dropStale(valid);
             Mem.log("nuovo indice");
+            status = statusText();
+            prefetch.start(index as Index);
         }
+        status = statusText();
+        WatchUi.requestUpdate();
+    }
+
+    // Aggiorna la riga di stato (avanzamento del prefetch).
+    function refreshStatus() as Void {
         status = statusText();
         WatchUi.requestUpdate();
     }
@@ -147,6 +159,13 @@ class NotesApp extends Application.AppBase {
         if (st == ST_OK) {
             if (index != null && !(index as Index).fontId.equals(FontInfo.ID)) {
                 return WatchUi.loadResource(Rez.Strings.OldApp) as String;
+            }
+            var p = prefetch.label();
+            if (p != null) {
+                return p as String;
+            }
+            if (prefetch.finished) {
+                return WatchUi.loadResource(Rez.Strings.AllOnWatch) as String;
             }
             return WatchUi.loadResource(Rez.Strings.Synced) as String;
         }

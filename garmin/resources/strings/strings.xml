@@ -6,6 +6,9 @@
     <string id="Offline">Telefono non raggiungibile</string>
     <string id="Synced">Aggiornato</string>
     <string id="Syncing">Sincronizzo</string>
+    <string id="PrefetchSections">Sezioni</string>
+    <string id="PrefetchImages">Immagini</string>
+    <string id="AllOnWatch">Tutto in memoria</string>
     <string id="NoBundle">Il telefono non ha ancora appunti</string>
     <string id="OldApp">Aggiorna l'app dell'orologio</string>
     <string id="MenuTitle">Opzioni</string>
