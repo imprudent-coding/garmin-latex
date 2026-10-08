@@ -152,8 +152,12 @@ class PageRenderer(context: Context) {
         val res = bundle.resource(key) ?: return null
         val s = res.chunks.joinToString("")
         val bar = s.indexOf('|')
-        val (w, h) = s.substring(0, bar).split(",").map { it.toInt() }
-        val rle = Base64.decode(s.substring(bar + 1), Base64.DEFAULT)
+        val head = s.substring(0, bar).split(",").map { it.toInt() }
+        val w = head[0]
+        val h = head[1]
+        val packed = Base64.decode(s.substring(bar + 1), Base64.DEFAULT)
+        // schema 2: quarto campo = byte RLE dopo la decompressione LZ
+        val rle = if (head.size >= 4) Lz.decompress(packed, head[3]) else packed
         val px = IntArray(w * h)
         var i = 0
         for (b in rle) {

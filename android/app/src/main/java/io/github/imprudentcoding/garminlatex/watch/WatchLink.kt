@@ -213,7 +213,7 @@ class WatchLink(
             } ?: continue
             if (!reply.chunkSent) log(reply.description)
             send(d, reply.message, attempt = 0) { ok ->
-                if (ok && reply.chunkSent) _state.update { it.copy(chunksSent = it.chunksSent + 1) }
+                if (ok && reply.chunkSent) _state.update { it.copy(chunksSent = it.chunksSent + reply.chunks) }
             }
         }
     }
@@ -225,6 +225,13 @@ class WatchLink(
             c.sendMessage(d, app, msg) { _, _, st ->
                 when {
                     st == ConnectIQ.IQMessageStatus.SUCCESS -> done(true)
+                    st == ConnectIQ.IQMessageStatus.FAILURE_MESSAGE_TOO_LARGE && msg["op"] == "chunks" &&
+                        handler.batchBytes > ProtocolHandler.MIN_BATCH_BYTES -> {
+                        // risposte con più pezzi troppo grandi: dimezza; l'orologio ripete la richiesta
+                        handler.batchBytes = maxOf(ProtocolHandler.MIN_BATCH_BYTES, handler.batchBytes / 2)
+                        log("Messaggio troppo grande: ora al massimo ${handler.batchBytes} byte per risposta")
+                        done(false)
+                    }
                     st == ConnectIQ.IQMessageStatus.FAILURE_MESSAGE_TOO_LARGE -> {
                         log("Messaggio troppo grande per l'orologio: riduci chunk_bytes in pipeline/rules.yaml")
                         _state.update { it.copy(failures = it.failures + 1) }
