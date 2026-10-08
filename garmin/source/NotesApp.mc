@@ -26,7 +26,7 @@ class NotesApp extends Application.AppBase {
     function initialize() {
         AppBase.initialize();
         ticker = new Ticker();
-        store = new Store();
+        store = new Store(ticker);
         sync = new Sync(ticker);
         images = new ImageCache(store, sync, ticker);
         prefetch = new Prefetch(store, sync, ticker);
