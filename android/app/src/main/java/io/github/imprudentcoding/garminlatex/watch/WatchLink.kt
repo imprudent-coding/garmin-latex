@@ -36,6 +36,11 @@ data class WatchState(
     val lastRequest: Long = 0,
     val chunksSent: Int = 0,
     val failures: Int = 0,
+    /** Velocità misurata delle risposte con dati (media mobile), byte/s; 0 = non ancora misurata. */
+    val bytesPerSecond: Int = 0,
+    /** Durata dell'ultimo invio con dati, ms. */
+    val lastSendMs: Long = 0,
+    val duplicates: Int = 0,
     val log: List<String> = emptyList(),
     val error: String? = null,
     val simulator: Boolean = false,
@@ -58,6 +63,9 @@ class WatchLink(
         repo.bundle()?.let { ProtocolHandler.BundleSource(it) }
     }
     private val known = mutableMapOf<Long, IQDevice>()
+    // risposte in corso di invio (dispositivo|req|chiave|n): un nuovo tentativo
+    // dell'orologio mentre il telefono sta ancora inviando non va risposto di nuovo
+    private val sending: MutableSet<String> = java.util.Collections.synchronizedSet(mutableSetOf())
     private val _state = MutableStateFlow(WatchState())
     val state: StateFlow<WatchState> = _state
 
@@ -200,6 +208,13 @@ class WatchLink(
         }
         _state.update { it.copy(lastRequest = System.currentTimeMillis()) }
         for (m in messages.orEmpty()) {
+            val id = (m as? Map<*, *>)?.takeIf { it["op"] == "get" }?.let {
+                "${d.deviceIdentifier}|${it["req"]}|${it["k"]}|${it["n"]}"
+            }
+            if (id != null && !sending.add(id)) {
+                _state.update { it.copy(duplicates = it.duplicates + 1) }
+                continue
+            }
             ProtocolHandler.progress(m)?.let { p ->
                 updateDevice(d.deviceIdentifier) { it.copy(cache = p) }
                 if (p.finished) log("Tutti gli appunti sono sull'orologio (${p.version})")
@@ -210,12 +225,35 @@ class WatchLink(
             } catch (e: Exception) {
                 Log.e(TAG, "richiesta non gestita", e)
                 null
-            } ?: continue
+            }
+            if (reply == null) {
+                id?.let { sending.remove(it) }
+                continue
+            }
             if (!reply.chunkSent) log(reply.description)
+            val started = System.currentTimeMillis()
             send(d, reply.message, attempt = 0) { ok ->
-                if (ok && reply.chunkSent) _state.update { it.copy(chunksSent = it.chunksSent + reply.chunks) }
+                id?.let { sending.remove(it) }
+                if (ok && reply.chunkSent) {
+                    val ms = (System.currentTimeMillis() - started).coerceAtLeast(1)
+                    val bytes = payloadBytes(reply.message)
+                    _state.update {
+                        val rate = (bytes * 1000L / ms).toInt()
+                        it.copy(
+                            chunksSent = it.chunksSent + reply.chunks,
+                            lastSendMs = ms,
+                            bytesPerSecond = if (it.bytesPerSecond == 0) rate else (it.bytesPerSecond * 3 + rate) / 4,
+                        )
+                    }
+                }
             }
         }
+    }
+
+    private fun payloadBytes(msg: Map<String, Any>): Int = when (val d = msg["d"]) {
+        is String -> d.toByteArray(Charsets.UTF_8).size
+        is List<*> -> d.sumOf { (it as? String)?.toByteArray(Charsets.UTF_8)?.size ?: 0 }
+        else -> 0
     }
 
     /** Invio con nuovi tentativi (0,5 s, 1 s, 2 s). */

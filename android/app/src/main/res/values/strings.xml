@@ -30,6 +30,7 @@
     <string name="cache_complete">Tutti gli appunti sono sull\'orologio</string>
     <string name="cache_sections">Sull\'orologio: sezioni %1$d/%2$d</string>
     <string name="cache_images">Sull\'orologio: immagini %1$d/%2$d</string>
+    <string name="sync_speed">Velocità: %1$.1f KB/s · ultimo invio: %2$d ms · richieste ripetute ignorate: %3$d</string>
     <string name="sync_stats">Pezzi inviati: %1$d · errori: %2$d · ultima richiesta: %3$s</string>
     <string name="refresh">Aggiorna stato</string>
     <string name="restart_link">Riavvia collegamento</string>

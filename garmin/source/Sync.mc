@@ -35,6 +35,9 @@ class CommListener extends Communications.ConnectionListener {
 class Sync {
     const SCHEMA = 2;
     const TIMEOUT_MS = 10000;
+    // tempo in più per ogni pezzo oltre il primo: una risposta da ~7 KB può
+    // metterci più di 10 s, e ripetere la richiesta raddoppierebbe il traffico
+    const PIECE_MS = 5000;
     const MAX_TRIES = 3;
 
 
@@ -185,7 +188,7 @@ class Sync {
                 msg["c"] = f[6];
             }
         }
-        _ticker.schedule("sync", TIMEOUT_MS, method(:onTimeout), false);
+        _ticker.schedule("sync", TIMEOUT_MS + ((f[6] as Number) - 1) * PIECE_MS, method(:onTimeout), false);
         try {
             Communications.transmit(msg, null, _listener);
         } catch (e) {
@@ -205,6 +208,9 @@ class Sync {
         var f = _inflight as Array;
         f[5] = (f[5] as Number) + 1;
         if ((f[5] as Number) < MAX_TRIES) {
+            // nuovo tentativo con un pezzo solo (stesso req: una risposta multipla
+            // in ritardo resta valida); le callback multiple ricevono un Array
+            f[6] = 1;
             sendCurrent();
             return;
         }

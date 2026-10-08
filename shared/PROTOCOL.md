@@ -64,8 +64,14 @@ una risposta `chunks` diventa più valori nello Storage.
 
 ## Affidabilità
 
-- **Orologio**: timeout di 10 s per richiesta, fino a 3 tentativi, poi
-  "telefono non raggiungibile" (si continua a leggere ciò che è in cache).
+- **Orologio**: timeout di 10 s per richiesta, più 5 s per ogni pezzo oltre il
+  primo in una richiesta multipla; fino a 3 tentativi, dal secondo con un pezzo
+  solo (stesso `req`: una risposta multipla in ritardo resta valida). Poi
+  "telefono non raggiungibile": si continua a leggere ciò che è in cache e, se
+  il download in sottofondo non è finito, l'orologio ripete `hello` ogni 30 s.
+- **Telefono**: una richiesta ripetuta (stesso `req`, `k`, `n`) mentre la sua
+  risposta è ancora in invio viene ignorata, per non raddoppiare il traffico.
+  L'app mostra la velocità misurata degli invii.
 - **Telefono**: se `sendMessage` non riesce, ritenta fino a 3 volte
   (0,5 s, 1 s, 2 s).
 - Gli hash rendono innocui i messaggi duplicati o fuori ordine: l'orologio
