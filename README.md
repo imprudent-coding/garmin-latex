@@ -227,6 +227,10 @@ del keystore. Con il formato PKCS12, quello predefinito di `keytool`, sono ugual
 - **App orologio**: come sopra, con un tag `garmin-vX.Y.Z`. Il workflow allega il
   `.prg` (da installare) e il `.iq` (per l'eventuale pubblicazione nello store).
 
+Le versioni `0.x` (e i tag con `-alpha`/`-beta`) delle app vengono pubblicate come
+*pre-release*. Le Release degli appunti non sono mai pre-release: l'app Android le
+ignorerebbe.
+
 Ogni build lascia comunque i file anche come *artifact*: **Actions** → apri
 l'esecuzione → in fondo, sezione **Artifacts**.
 

@@ -158,6 +158,8 @@ jobs:
         if: steps.check.outputs.ok == 'true' && startsWith(github.ref, 'refs/tags/garmin-v')
         uses: softprops/action-gh-release@v2.3.2
         with:
+          # versioni 0.x (alfa) pubblicate come pre-release
+          prerelease: ${{ startsWith(github.ref_name, 'garmin-v0.') || contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') }}
           name: App orologio ${{ github.ref_name }}
           files: |
             out/appunti-${{ env.DEVICE }}.prg
