@@ -2,7 +2,6 @@ import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.StringUtil;
 import Toybox.System;
-import Toybox.Timer;
 import Toybox.WatchUi;
 
 // Immagini delle formule/figure: pezzi -> base64 -> RLE a 2 bit -> BufferedBitmap.
@@ -29,12 +28,12 @@ class ImageCache {
     private var _decY as Number = 0;
     private var _decW as Number = 0;
     private var _decRef = null;
-    private var _timer as Timer.Timer;
+    private var _ticker as Ticker;
 
-    function initialize(store as Store, sync as Sync) {
+    function initialize(store as Store, sync as Sync, ticker as Ticker) {
         _store = store;
         _sync = sync;
-        _timer = new Timer.Timer();
+        _ticker = ticker;
     }
 
     // Bitmap pronta o null (in quel caso viene avviato il caricamento).
@@ -162,12 +161,12 @@ class ImageCache {
         _decW = w;
         _decRef = ref;
         _sizes[key] = [w, h];
-        _timer.start(method(:onDecodeTick), 30, true);
+        _ticker.schedule("img", 50, method(:onDecodeTick), true);
     }
 
     function onDecodeTick() as Void {
         if (_decKey == null) {
-            _timer.stop();
+            _ticker.cancel("img");
             return;
         }
         var bmp = (_decRef as Graphics.BufferedBitmapReference).get();
@@ -219,7 +218,7 @@ class ImageCache {
         _decX = x;
         _decY = y;
         if (_decPos >= bytes.size()) {
-            _timer.stop();
+            _ticker.cancel("img");
             var key = _decKey as String;
             _refs[key] = _decRef;
             _order.add(key);
@@ -233,7 +232,7 @@ class ImageCache {
     }
 
     private function abortDecode() as Void {
-        _timer.stop();
+        _ticker.cancel("img");
         if (_decKey != null) {
             _failed[_decKey] = true;
         }

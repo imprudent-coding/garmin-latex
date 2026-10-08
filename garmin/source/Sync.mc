@@ -1,7 +1,6 @@
 import Toybox.Communications;
 import Toybox.Lang;
 import Toybox.System;
-import Toybox.Timer;
 import Toybox.WatchUi;
 
 // stato della sincronizzazione
@@ -48,11 +47,11 @@ class Sync {
     private var _queue as Array<Array> = [] as Array<Array>;
     private var _inflight as Array or Null = null;  // [chiave, n, hash, callback, req, tentativi]
     private var _req as Number = 0;
-    private var _timer as Timer.Timer;
+    private var _ticker as Ticker;
     private var _listener as CommListener;
 
-    function initialize() {
-        _timer = new Timer.Timer();
+    function initialize(ticker as Ticker) {
+        _ticker = ticker;
         _listener = new CommListener(self);
     }
 
@@ -153,8 +152,7 @@ class Sync {
         } else {
             msg = {"op" => "get", "k" => f[0], "n" => f[1], "h" => f[2], "req" => f[4]};
         }
-        _timer.stop();
-        _timer.start(method(:onTimeout), TIMEOUT_MS, false);
+        _ticker.schedule("sync", TIMEOUT_MS, method(:onTimeout), false);
         try {
             Communications.transmit(msg, null, _listener);
         } catch (e) {
@@ -164,8 +162,7 @@ class Sync {
 
     function onTransmitError() as Void {
         // trattato come un timeout anticipato
-        _timer.stop();
-        _timer.start(method(:onTimeout), 1000, false);
+        _ticker.schedule("sync", 1000, method(:onTimeout), false);
     }
 
     function onTimeout() as Void {
@@ -217,7 +214,7 @@ class Sync {
             return; // risposta a una richiesta vecchia
         }
         if (op.equals("hello") && (f[0] as String).equals("hello")) {
-            _timer.stop();
+            _ticker.cancel("sync");
             _inflight = null;
             var ok = data["ok"] == true;
             if (ok) {
@@ -238,7 +235,7 @@ class Sync {
             if (k == null || !k.toString().equals(f[0] as String) || Util.toNum(data["n"]) != (f[1] as Number)) {
                 return;
             }
-            _timer.stop();
+            _ticker.cancel("sync");
             _inflight = null;
             if (op.equals("chunk")) {
                 deliver(f, Util.toNum(data["of"]), data["h"].toString(), data["d"]);

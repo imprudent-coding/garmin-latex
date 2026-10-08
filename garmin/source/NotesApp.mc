@@ -9,6 +9,7 @@ function getApp() as NotesApp {
 }
 
 class NotesApp extends Application.AppBase {
+    var ticker as Ticker;
     var store as Store;
     var sync as Sync;
     var images as ImageCache;
@@ -24,10 +25,11 @@ class NotesApp extends Application.AppBase {
 
     function initialize() {
         AppBase.initialize();
+        ticker = new Ticker();
         store = new Store();
-        sync = new Sync();
-        images = new ImageCache(store, sync);
-        prefetch = new Prefetch(store, sync);
+        sync = new Sync(ticker);
+        images = new ImageCache(store, sync, ticker);
+        prefetch = new Prefetch(store, sync, ticker);
         if (Communications has :registerForPhoneAppMessages) {
             Communications.registerForPhoneAppMessages(method(:onPhoneMessage));
         }
@@ -179,6 +181,19 @@ class NotesApp extends Application.AppBase {
             return WatchUi.loadResource(Rez.Strings.Offline) as String;
         }
         return WatchUi.loadResource(Rez.Strings.Syncing) as String;
+    }
+
+    // ------------------------------------------------------------- impostazioni
+    // secondi per pagina dello scorrimento automatico (0 = spento)
+    function autoSeconds() as Number {
+        var v = store.getValue("auto");
+        return (v instanceof Lang.Number) ? v as Number : 0;
+    }
+
+    // pulsante in alto = orologio (di default sì)
+    function clockButton() as Boolean {
+        var v = store.getValue("clockKey");
+        return !(v instanceof Lang.Boolean) || (v as Boolean);
     }
 
     // ------------------------------------------------------------- posizione di lettura

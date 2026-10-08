@@ -1,7 +1,6 @@
 import Toybox.Communications;
 import Toybox.Lang;
 import Toybox.System;
-import Toybox.Timer;
 import Toybox.WatchUi;
 
 class NotifyListener extends Communications.ConnectionListener {
@@ -37,8 +36,7 @@ class Prefetch {
 
     private var _store as Store;
     private var _sync as Sync;
-    private var _timer as Timer.Timer;
-    private var _timerOn as Boolean = false;
+    private var _ticker as Ticker;
     private var _ver as String = "";
     private var _secs as Array<Section> = [] as Array<Section>;
     private var _si as Number = 0;
@@ -50,10 +48,10 @@ class Prefetch {
     private var _sinceNotify as Number = 0;
     private var _listener as NotifyListener;
 
-    function initialize(store as Store, sync as Sync) {
+    function initialize(store as Store, sync as Sync, ticker as Ticker) {
         _store = store;
         _sync = sync;
-        _timer = new Timer.Timer();
+        _ticker = ticker;
         _listener = new NotifyListener();
         sync.idle = method(:onIdle);
     }
@@ -100,26 +98,23 @@ class Prefetch {
     function stop() as Void {
         active = false;
         _waiting = false;
-        _timer.stop();
-        _timerOn = false;
+        _ticker.cancel("pf");
     }
 
     function onIdle() as Void {
-        if (!active || _waiting || _timerOn || _sync.busy() || _sync.state != ST_OK) {
+        if (!active || _waiting || _ticker.isScheduled("pf") || _sync.busy() || _sync.state != ST_OK) {
             return;
         }
         step();
     }
 
     function onTick() as Void {
-        _timerOn = false;
         onIdle();
     }
 
     private function later() as Void {
-        if (!_timerOn) {
-            _timerOn = true;
-            _timer.start(method(:onTick), 50, false);
+        if (!_ticker.isScheduled("pf")) {
+            _ticker.schedule("pf", 50, method(:onTick), false);
         }
     }
 
