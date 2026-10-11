@@ -242,6 +242,8 @@ def test_end_to_end(tmp_path):
     text = "\n".join(sec["chunks"])
     assert text.startswith("P\n") and "\nI" in text  # almeno un'immagine (equazione)
     assert "Moto" in text and "circolare" in text and "∑" in text
+    # le immagini non si spezzano tra due pagine: ogni riga "I" parte dalla riga 0
+    assert all(l[1:].split(",")[4] == "0" for l in text.split("\n") if l.startswith("I"))
     assert (out / "preview").exists() and (out / "notes.pdf").exists()
     assert (out / "preview" / "_elenco.png").exists()
     idx = "\n".join(json.loads(z.read(m["resources"]["idx"]["file"]))["chunks"])
