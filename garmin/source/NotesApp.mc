@@ -20,6 +20,8 @@ class NotesApp extends Application.AppBase {
     var rich as RichText or Null = null;
     var index as Index or Null = null;
     var showMemory as Boolean = false;
+    // ultima chiusura dell'orologio stealth (System.getTimer)
+    var clockClosedAt as Number = -100000;
     var status as String = "";
     // indice in arrivo dal telefono
     private var _idxHash as String = "";

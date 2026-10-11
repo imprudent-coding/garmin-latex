@@ -392,13 +392,12 @@ class QuestionListDelegate extends WatchUi.BehaviorDelegate {
         return _view.tapAt(c[1]);
     }
 
+    // gesto "menu" del sistema (su questo orologio è una pressione prolungata)
     function onMenu() as Boolean {
-        showMainMenu();
-        return true;
+        return holdToClock();
     }
 
     function onHold(evt as WatchUi.ClickEvent) as Boolean {
-        showMainMenu();
-        return true;
+        return holdToClock();
     }
 }
