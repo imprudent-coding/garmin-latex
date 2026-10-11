@@ -4,6 +4,12 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Orologio 1.2.1
+
+- Orologio stealth: si apre anche con una pressione prolungata sullo schermo
+  (elenco, lettura, zoom). Il menu si apre con un tocco sui tre puntini in alto
+  o sul numero di pagina; la voce di menu si chiama ora *Orologio stealth*.
+
 ## Orologio 1.2.0
 
 - Zoom: lo spostamento arriva fino a portare ogni angolo dell'immagine dentro
@@ -11,9 +17,6 @@ automatiche a ogni push su `main`.
   restavano tagliati, es. la ground track).
 - Orologio stealth: per tornare agli appunti serve tenere premuto ~2,5 s
   (prima 0,7 s); sollevare prima il dito annulla.
-- Orologio stealth: si apre anche con una pressione prolungata sullo schermo
-  (elenco, lettura, zoom). Il menu si apre con un tocco sui tre puntini in alto
-  o sul numero di pagina; la voce di menu si chiama ora *Orologio stealth*.
 - Appunti: le figure a griglia (più righe e più colonne di grafici, oggi solo
   la ground track 2×2) si vedono prima intere e poi un grafico per pagina, a
   schermo pieno; le figure a striscia restano intere con lo zoom. Eccezioni in
