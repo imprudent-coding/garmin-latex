@@ -4,6 +4,18 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Orologio 1.2.0
+
+- Zoom: lo spostamento arriva fino a portare ogni angolo dell'immagine dentro
+  il cerchio dello schermo (prima gli angoli in alto a destra e a sinistra
+  restavano tagliati, es. la ground track).
+- Orologio stealth: per tornare agli appunti serve tenere premuto ~2,5 s
+  (prima 0,7 s); sollevare prima il dito annulla.
+- Appunti: le immagini non si spezzano più tra due pagine. Se non entrano nella
+  pagina corrente vanno all'inizio della successiva; le figure grandi hanno una
+  pagina tutta per sé, centrata (sugli appunti attuali: 0 immagini spezzate
+  invece di 55, 27 pagine solo-immagine).
+
 ## Orologio 1.1.1
 
 - Accanto a «Sezioni …/…» compare la fonte: «web» o «tel» (telefono).

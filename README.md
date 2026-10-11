@@ -93,6 +93,10 @@ Il flusso, dalla modifica alla lettura:
   spezzate automaticamente su righe, relazioni (=, ⇒, ...) e operatori.
 - Le **figure** vengono ridimensionate per il cerchio. Quando sono piccole, c'è
   una versione ingrandita da esplorare col dito.
+- Un'immagine **non si spezza mai tra due pagine**: se non entra in quel che resta
+  della pagina va all'inizio della successiva; se non entra nemmeno lì (figure
+  grandi) ha una pagina tutta per sé, centrata, dove si vede per intero. Il
+  testo riprende alla pagina dopo.
 - Tutto viene **già impaginato per lo schermo rotondo**: righe più corte in alto
   e in basso, a capo con le metriche esatte dei font dell'orologio. L'orologio
   deve solo disegnare.
@@ -338,9 +342,9 @@ di pagine (● = già in cache sull'orologio). L'app riparte dall'ultima domanda
 | Lettura | swipe giù / tocco nella metà superiore | pagina precedente |
 | Lettura | tocco su un'immagine con il triangolino verde | zoom |
 | Lettura | tocco sul numero di pagina in basso | menu |
-| Zoom | swipe o trascinamento | sposta l'immagine |
+| Zoom | swipe o trascinamento | sposta l'immagine; arriva fino a mostrare per intero anche gli angoli, che sullo schermo rotondo sarebbero tagliati |
 | Ovunque | pulsante in alto (premuto, non toccando lo schermo) | **orologio** (vedi sotto) |
-| Orologio | pressione prolungata sullo schermo o su un pulsante | torna agli appunti, dove eri |
+| Orologio | tenere premuto lo schermo o un pulsante per ~2,5 s | torna agli appunti, dove eri |
 | Ovunque | pulsante in basso | indietro |
 | Ovunque | pressione prolungata sullo schermo (o il gesto *menu* del dispositivo), oppure i tocchi sopra | menu: riprendi lettura, torna all'elenco, scorrimento automatico, pulsante orologio, sincronizza, svuota cache, test velocità, mostra memoria |
 
@@ -355,7 +359,8 @@ ancora arrivata dal telefono, aspetta che arrivi.
 **Orologio.** Il pulsante in alto copre subito gli appunti con una schermata
 orologio (ora, data, batteria), senza animazione. Swipe, tocchi e pulsante
 indietro non fanno nulla. Per tornare agli appunti tieni premuto lo schermo (o
-un pulsante) per almeno 0,7 s: ritrovi la pagina dov'eri. Lo scorrimento
+un pulsante) per circa 2,5 s: ritrovi la pagina dov'eri. Se sollevi prima il
+dito (o lasci il pulsante) resta l'orologio. Lo scorrimento
 automatico resta in pausa finché l'orologio è aperto. Si disattiva dal menu
 (*Pulsante orologio*): in quel caso il pulsante in alto torna a girare pagina
 in lettura e ad aprire la domanda nell'elenco. Alcune pressioni prolungate dei
