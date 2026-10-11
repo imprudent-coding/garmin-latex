@@ -25,6 +25,14 @@ macros:
 # box_titles:
 #   keyf: "Formule chiave"
 
+# Figure divise in pannelli, una pagina per pannello dopo la figura intera.
+# Di default (auto) solo le griglie con più righe E più colonne di grafici,
+# di dimensioni simili (es. la ground track 2x2); le figure a striscia restano
+# intere e si leggono con lo zoom. Eccezioni per nome del file, senza estensione:
+# figure_panels:
+#   zvc_cases: split    # dividi anche se non è una griglia
+#   geosync: whole      # non dividere
+
 # Titolo del capitolo che raccoglie ciò che precede il primo capitolo.
 front_title: Introduzione
 

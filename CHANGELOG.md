@@ -11,6 +11,10 @@ automatiche a ogni push su `main`.
   restavano tagliati, es. la ground track).
 - Orologio stealth: per tornare agli appunti serve tenere premuto ~2,5 s
   (prima 0,7 s); sollevare prima il dito annulla.
+- Appunti: le figure a griglia (più righe e più colonne di grafici, oggi solo
+  la ground track 2×2) si vedono prima intere e poi un grafico per pagina, a
+  schermo pieno; le figure a striscia restano intere con lo zoom. Eccezioni in
+  `rules.yaml` (`figure_panels`).
 - Appunti: le immagini non si spezzano più tra due pagine. Se non entrano nella
   pagina corrente vanno all'inizio della successiva; le figure grandi hanno una
   pagina tutta per sé, centrata (sugli appunti attuali: 0 immagini spezzate

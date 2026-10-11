@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from . import eqsplit, images
+from . import eqsplit, images, panels
 from .bundle import short_hash
 from .render import Raster, render_figure, render_latex_jobs
 
@@ -18,6 +18,8 @@ class Asset:
     ascent: int | None           # baseline (formule inline)
     zoom: Image.Image | None     # versione grande (pan sull'orologio) o None
     kind: str
+    # figure a griglia: un Asset per pannello, mostrati dopo la figura intera
+    panels: list | None = None
 
 
 @dataclass
@@ -57,6 +59,7 @@ class AssetBuilder:
         self.workdir = workdir
         self.warn = warn
         self.stats = {"split": 0, "scaled": 0, "zoom": 0}
+        self.divided: list[str] = []   # "nome (n)" delle figure divise in pannelli
 
     def build(self, jobs: dict) -> dict[str, Asset]:
         latex_jobs = [j for j in jobs.values() if j.type in ("math", "snippet")]
@@ -85,8 +88,13 @@ class AssetBuilder:
                     continue
                 gray = r.gray
                 lv = images.trim(_levels(gray))
-                # ritaglia anche la versione in grigi sullo stesso riquadro
-                assets[j.rid] = self._fit_levels(lv, "figure")
+                asset = self._fit_levels(lv, "figure")
+                mode = str(self.rules.figure_panels.get(j.path.stem, "auto"))
+                boxes = panels.grid_panels(lv, mode)
+                if boxes:
+                    asset.panels = [self._fit_levels(images.trim(lv.crop(b)), "figure") for b in boxes]
+                    self.divided.append(f"{j.path.stem} ({len(boxes)})")
+                assets[j.rid] = asset
         return assets
 
     # ----------------------------------------------------------- equazioni larghe

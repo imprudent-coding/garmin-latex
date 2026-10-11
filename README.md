@@ -93,6 +93,11 @@ Il flusso, dalla modifica alla lettura:
   spezzate automaticamente su righe, relazioni (=, ⇒, ...) e operatori.
 - Le **figure** vengono ridimensionate per il cerchio. Quando sono piccole, c'è
   una versione ingrandita da esplorare col dito.
+- Le **figure a griglia** (più righe e più colonne di grafici, come la ground
+  track 2×2) vengono mostrate prima intere e poi un grafico per pagina, a
+  schermo pieno. Le figure a striscia restano intere e si leggono con lo zoom.
+  Il report del workflow elenca le figure divise; eccezioni in
+  `pipeline/rules.yaml` (`figure_panels`).
 - Un'immagine **non si spezza mai tra due pagine**: se non entra in quel che resta
   della pagina va all'inizio della successiva; se non entra nemmeno lì (figure
   grandi) ha una pagina tutta per sé, centrata, dove si vede per intero. Il

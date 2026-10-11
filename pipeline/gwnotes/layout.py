@@ -439,8 +439,15 @@ class SectionLayout:
             xb, _ = self.p.band(y, y + h)
             self._bars(y - gap, h + gap * 2, xb)
             self.y = y + h + gap + self.p.para_gap
-            return
-        # pagina dedicata, immagine al centro dello schermo
+        else:
+            self._image_page(w, h, key, zoom)
+        # figure a griglia: dopo la figura intera, un pannello per pagina
+        for pi, pa in enumerate(a.panels or []):
+            pk, pz = self.L.keys[f"{blk.rid}#{pi}"]
+            self._image_page(pa.normal.width, pa.normal.height, pk, pz)
+
+    def _image_page(self, w: int, h: int, key: str, zoom: str):
+        """Pagina con la sola immagine, al centro dello schermo; il testo riprende dopo."""
         if not self.at_top() or self.page.items:
             self.new_page()
         self.page.items.append(ImageItem(int(self.p.r - w / 2), int(self.p.r - h / 2), w, h, 0, key, zoom))
