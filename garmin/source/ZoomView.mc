@@ -125,6 +125,12 @@ class ZoomDelegate extends WatchUi.InputDelegate {
         return true;
     }
 
+    // pressione prolungata: orologio (vedi holdToClock)
+    function onHold(evt as WatchUi.ClickEvent) as Boolean {
+        _last = null;
+        return holdToClock();
+    }
+
     function onDrag(evt as WatchUi.DragEvent) as Boolean {
         var c = evt.getCoordinates();
         var t = evt.getType();

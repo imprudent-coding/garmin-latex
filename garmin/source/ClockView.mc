@@ -6,8 +6,8 @@ import Toybox.Time.Gregorian;
 import Toybox.WatchUi;
 
 // Schermata orologio che copre gli appunti: si apre all'istante con il
-// pulsante in alto e si chiude solo tenendo premuto lo schermo o un pulsante
-// per ~2,5 s. Gli altri gesti non fanno nulla, come su un quadrante.
+// pulsante in alto o con una pressione prolungata sullo schermo, e si chiude
+// solo tenendo premuto lo schermo o un pulsante per ~2,5 s. Gli altri gesti non fanno nulla, come su un quadrante.
 class ClockView extends WatchUi.View {
     function initialize() {
         View.initialize();
@@ -77,6 +77,7 @@ class ClockDelegate extends WatchUi.BehaviorDelegate {
     }
 
     function unlock() as Void {
+        getApp().clockClosedAt = System.getTimer();
         WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
     }
 
@@ -145,6 +146,25 @@ class ClockDelegate extends WatchUi.BehaviorDelegate {
 // tocco genera anche onSelect, quindi l'orologio non può stare su onSelect).
 function isClockKey(evt as WatchUi.KeyEvent) as Boolean {
     return evt.getKey() == WatchUi.KEY_ENTER && getApp().clockButton();
+}
+
+// Pressione prolungata sullo schermo (elenco, lettura, zoom): orologio se è
+// attivo "Pulsante orologio", altrimenti il menu come prima. Il menu resta
+// raggiungibile con un tocco (tre puntini in alto nell'elenco, numero di
+// pagina in lettura).
+function holdToClock() as Boolean {
+    var app = getApp();
+    if (!app.clockButton()) {
+        showMainMenu();
+        return true;
+    }
+    // appena tornati dall'orologio il dito può essere ancora sullo schermo:
+    // niente rientro immediato
+    if (System.getTimer() - app.clockClosedAt < 1500) {
+        return true;
+    }
+    showClock();
+    return true;
 }
 
 // Apre l'orologio sopra la vista corrente, senza animazione.

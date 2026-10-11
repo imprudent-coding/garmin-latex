@@ -318,14 +318,13 @@ class ReaderDelegate extends WatchUi.BehaviorDelegate {
         return true;
     }
 
+    // gesto "menu" del sistema (su questo orologio è una pressione prolungata)
     function onMenu() as Boolean {
-        showMainMenu();
-        return true;
+        return holdToClock();
     }
 
-    // pressione prolungata sullo schermo: stesso menu
+    // pressione prolungata sullo schermo: orologio stealth (o menu, vedi holdToClock)
     function onHold(evt as WatchUi.ClickEvent) as Boolean {
-        showMainMenu();
-        return true;
+        return holdToClock();
     }
 }

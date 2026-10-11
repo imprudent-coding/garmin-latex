@@ -13,8 +13,8 @@
     <string id="OldApp">Aggiorna l'app dell'orologio</string>
     <string id="MenuTitle">Opzioni</string>
     <string id="MenuAuto">Scorrimento automatico</string>
-    <string id="MenuClockKey">Pulsante orologio</string>
-    <string id="MenuClockKeySub">Tieni premuto per tornare</string>
+    <string id="MenuClockKey">Orologio stealth</string>
+    <string id="MenuClockKeySub">Pulsante in alto o tieni premuto</string>
     <string id="Off">No</string>
     <string id="MenuSpeed">Test velocità</string>
     <string id="MenuSpeedSub">Richieste web tramite il telefono</string>
