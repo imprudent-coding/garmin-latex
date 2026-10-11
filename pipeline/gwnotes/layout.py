@@ -417,46 +417,50 @@ class SectionLayout:
 
     # ---------------------------------------------------------- immagini
     def image(self, blk: ImageBlock, base_indent: int):
+        """Un'immagine non si spezza mai tra due pagine:
+        1. se entra intera in quel che resta della pagina, va lì;
+        2. altrimenti, se entra intera in una pagina nuova (dall'alto), va lì;
+        3. altrimenti ha una pagina tutta per sé, centrata sullo schermo: le
+           immagini sono ridotte in modo che il rettangolo stia nel cerchio
+           (assets.circle_scale), quindi lì si vede sempre per intero.
+        Il testo che segue riprende sulla pagina successiva."""
         a = self.L.assets.get(blk.rid)
         if a is None:
             return
         key, zoom = self.L.keys[blk.rid]
-        img = a.normal
-        w, h = img.width, img.height
-        blank = _blank_rows(img)
-        sy = 0
+        w, h = a.normal.width, a.normal.height
         gap = 4
-        while sy < h:
-            remaining = h - sy
-            # cerca la prima posizione y in cui (una parte del)l'immagine entra
-            placed = False
-            y = self.y + gap
-            splittable = blk.kind == "equation"
-            while y + 16 <= self.p.bottom:
-                hmax = self._fit_height(y, w, min(remaining, self.p.bottom - y))
-                need = remaining if (remaining < 40 or not splittable) else 40
-                if hmax >= need:
-                    take = remaining if hmax >= remaining else _cut(blank, sy, sy + hmax)
-                    if take <= 0:
-                        take = hmax
-                    x = int(self.p.r - w / 2)
-                    self.page.items.append(ImageItem(x, y, w, take, sy, key, zoom))
-                    xb, _ = self.p.band(y, y + take)
-                    self._bars(y - gap, take + gap * 2, xb)
-                    sy += take
-                    self.y = y + take + gap
-                    placed = True
-                    break
-                y += 6
-            if not placed:
-                if self.at_top():
-                    # non entra nemmeno su una pagina vuota: forza (non dovrebbe succedere)
-                    take = min(remaining, self.p.bottom - self.p.top)
-                    self.page.items.append(ImageItem(int(self.p.r - w / 2), self.y, w, take, sy, key, zoom))
-                    sy += take
-                    self.y += take
-                self.new_page()
-        self.y += self.p.para_gap
+        y = self._place_whole(self.y + gap, w, h)
+        if y is None and not self.at_top():
+            self.new_page()
+            y = self._place_whole(self.y + gap, w, h)
+        if y is not None:
+            self.page.items.append(ImageItem(int(self.p.r - w / 2), y, w, h, 0, key, zoom))
+            xb, _ = self.p.band(y, y + h)
+            self._bars(y - gap, h + gap * 2, xb)
+            self.y = y + h + gap + self.p.para_gap
+        else:
+            self._image_page(w, h, key, zoom)
+        # figure a griglia: dopo la figura intera, un pannello per pagina
+        for pi, pa in enumerate(a.panels or []):
+            pk, pz = self.L.keys[f"{blk.rid}#{pi}"]
+            self._image_page(pa.normal.width, pa.normal.height, pk, pz)
+
+    def _image_page(self, w: int, h: int, key: str, zoom: str):
+        """Pagina con la sola immagine, al centro dello schermo; il testo riprende dopo."""
+        if not self.at_top() or self.page.items:
+            self.new_page()
+        self.page.items.append(ImageItem(int(self.p.r - w / 2), int(self.p.r - h / 2), w, h, 0, key, zoom))
+        self.new_page()
+
+    def _place_whole(self, y0: int, w: int, h: int) -> int | None:
+        """Prima posizione y >= y0 in cui l'immagine (w x h) entra intera, o None."""
+        y = y0
+        while y + h <= self.p.bottom:
+            if self._fit_height(y, w, h) >= h:
+                return y
+            y += 6
+        return None
 
     def _fit_height(self, y, w, hmax) -> int:
         """Massima altezza h<=hmax tale che un'immagine larga w entri a partire da y."""
@@ -496,20 +500,6 @@ class SectionLayout:
         while len(self.pages) > 1 and not self.pages[-1].items:
             self.pages.pop()
         return self.pages
-
-
-def _blank_rows(img) -> list[bool]:
-    w, h = img.size
-    data = img.tobytes()
-    return [not any(data[r * w:(r + 1) * w]) for r in range(h)]
-
-
-def _cut(blank, start, end) -> int:
-    """Taglio preferibilmente su una riga vuota tra start e end (ritorna l'altezza presa)."""
-    for r in range(end - 1, start + (end - start) // 3, -1):
-        if blank[r]:
-            return r - start + 1
-    return end - start
 
 
 def encode_title_lines(lay: Layouter, nodes, width: int, max_lines: int = 2):

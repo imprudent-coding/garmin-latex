@@ -6,8 +6,8 @@ import Toybox.Time.Gregorian;
 import Toybox.WatchUi;
 
 // Schermata orologio che copre gli appunti: si apre all'istante con il
-// pulsante in alto e si chiude solo con una pressione prolungata (schermo o
-// pulsante). Gli altri gesti non fanno nulla, come su un quadrante.
+// pulsante in alto e si chiude solo tenendo premuto lo schermo o un pulsante
+// per ~2,5 s. Gli altri gesti non fanno nulla, come su un quadrante.
 class ClockView extends WatchUi.View {
     function initialize() {
         View.initialize();
@@ -19,6 +19,7 @@ class ClockView extends WatchUi.View {
 
     function onHide() as Void {
         getApp().ticker.cancel("clock");
+        getApp().ticker.cancel("unlock");
     }
 
     function tick() as Void {
@@ -53,42 +54,61 @@ class ClockView extends WatchUi.View {
 }
 
 class ClockDelegate extends WatchUi.BehaviorDelegate {
-    const HOLD_MS = 700;
-
-    private var _pressedAt as Number or Null = null;
+    // tempo di pressione per tornare agli appunti
+    const UNLOCK_MS = 2500;
+    // il sistema segnala la pressione prolungata sullo schermo (onHold) dopo
+    // circa mezzo secondo-un secondo: da lì mancano ~2 s
+    const AFTER_HOLD_MS = 2000;
 
     function initialize() {
         BehaviorDelegate.initialize();
     }
 
-    private function close() as Boolean {
-        WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
+    // Parte il conto alla rovescia: se la pressione dura fino alla fine, si
+    // torna agli appunti; un rilascio prima lo annulla.
+    private function arm(ms as Number) as Boolean {
+        getApp().ticker.schedule("unlock", ms, method(:unlock), false);
         return true;
+    }
+
+    private function disarm() as Boolean {
+        getApp().ticker.cancel("unlock");
+        return true;
+    }
+
+    function unlock() as Void {
+        WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
     }
 
     // pressione prolungata sullo schermo
     function onHold(evt as WatchUi.ClickEvent) as Boolean {
-        return close();
+        return arm(AFTER_HOLD_MS);
     }
 
     // il gesto "menu" del dispositivo è anch'esso una pressione prolungata
     function onMenu() as Boolean {
-        return close();
+        return arm(AFTER_HOLD_MS);
     }
 
-    // pressione prolungata di un pulsante: misurata tra pressione e rilascio
-    function onKeyPressed(evt as WatchUi.KeyEvent) as Boolean {
-        _pressedAt = System.getTimer();
+    // dito sollevato (anche dopo un trascinamento): annulla
+    function onRelease(evt as WatchUi.ClickEvent) as Boolean {
+        return disarm();
+    }
+
+    function onDrag(evt as WatchUi.DragEvent) as Boolean {
+        if (evt.getType() == WatchUi.DRAG_TYPE_STOP) {
+            disarm();
+        }
         return true;
+    }
+
+    // pulsante: tenuto premuto per UNLOCK_MS
+    function onKeyPressed(evt as WatchUi.KeyEvent) as Boolean {
+        return arm(UNLOCK_MS);
     }
 
     function onKeyReleased(evt as WatchUi.KeyEvent) as Boolean {
-        var at = _pressedAt;
-        _pressedAt = null;
-        if (at != null && System.getTimer() - (at as Number) >= HOLD_MS) {
-            return close();
-        }
-        return true;
+        return disarm();
     }
 
     // tutto il resto viene ignorato (anche il pulsante indietro)

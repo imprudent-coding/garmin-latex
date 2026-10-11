@@ -180,12 +180,16 @@ def build(args) -> int:
 
     print(f"[3/5] Rendering di {len(all_jobs)} formule/figure…")
     assets = {}
+    divided: list[str] = []
     for conv, doc in converters:
         jobs = {rid: j for rid, j in all_jobs.items() if rid in conv.jobs}
         ab = AssetBuilder(doc, rules, profile, work / ("assets-" + doc.main.stem), warn)
         assets.update(ab.build(jobs))
         print(f"      equazioni spezzate: {ab.stats['split']}, ridotte: {ab.stats['scaled']}, "
               f"con zoom: {ab.stats['zoom']}")
+        divided += ab.divided
+        if ab.divided:
+            print(f"      figure divise in pannelli: {', '.join(ab.divided)}")
     _replace_missing(book, assets, all_jobs)
     for ch in book.chapters:
         for s in ch.sections:
@@ -202,6 +206,10 @@ def build(args) -> int:
         k = bb.image(images.encode_resource(a.normal))
         z = bb.image(images.encode_resource(a.zoom)) if a.zoom is not None else ""
         keys[rid] = (k, z)
+        for pi, pa in enumerate(a.panels or []):
+            pk = bb.image(images.encode_resource(pa.normal))
+            pz = bb.image(images.encode_resource(pa.zoom)) if pa.zoom is not None else ""
+            keys[f"{rid}#{pi}"] = (pk, pz)
 
     print("[4/5] Impaginazione…")
     lay = Layouter(metrics, profile, assets, keys, warn)
@@ -315,12 +323,14 @@ def build(args) -> int:
         f"- Dati: testo {sizes['text'] / 1024:.0f} KB, immagini {sizes['images'] / 1024:.0f} KB, "
         f"indice {sizes['index'] / 1024:.1f} KB, pezzi da {rules.chunk_bytes} byte",
         f"- Sezione più grande: `{largest.key}` ({largest.bytes / 1024:.1f} KB)",
+        f"- Figure divise in pannelli (una pagina per pannello dopo la figura intera): "
+        f"{', '.join(divided) if divided else 'nessuna'}",
         f"- Tempo: {time.time() - t0:.0f} s, anteprime: {count} sezioni in `preview/`\n",
         "## Avvisi\n",
         warn.markdown(),
     ]
     (out / "report.md").write_text("\n".join(report), encoding="utf-8")
-    print("\n".join(report[:6]))
+    print("\n".join(report[:7]))
     print(f"Avvisi: {warn.count()} (dettagli in {out / 'report.md'})")
     shutil.rmtree(work, ignore_errors=True)
     return 0

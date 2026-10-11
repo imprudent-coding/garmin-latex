@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from gwnotes import bundle, eqsplit, images, lz  # noqa: E402
+from gwnotes import bundle, eqsplit, images, lz, panels  # noqa: E402
 from gwnotes.mathconv import Unconvertible, convert  # noqa: E402
 from gwnotes.prepare import prepare  # noqa: E402
 from gwnotes.profile import VIVOACTIVE5  # noqa: E402
@@ -99,6 +99,29 @@ def test_image_resource_is_compressed_and_lossless():
     head = enc.split("|", 1)[0].split(",")
     assert len(head) == 4 and head[2] == "2"
     assert images.decode_resource(enc).tobytes() == img.tobytes()
+
+
+def _grid_figure(rows, cols, pw=120, ph=90, gap=30, label=False):
+    img = Image.new("L", (cols * pw + (cols - 1) * gap, rows * ph + (rows - 1) * gap + (40 if label else 0)), 0)
+    d = ImageDraw.Draw(img)
+    for r in range(rows):
+        for c in range(cols):
+            x, y = c * (pw + gap), r * (ph + gap)
+            d.rectangle([x, y, x + pw - 1, y + ph - 1], outline=3)
+            d.line([x + 5, y + ph - 10, x + pw - 5, y + 10], fill=2)
+    if label:  # didascalia sottile staccata sotto la griglia
+        d.rectangle([10, img.height - 8, 60, img.height - 4], fill=3)
+    return img
+
+
+def test_grid_figures_are_split_strips_are_not():
+    boxes = panels.grid_panels(_grid_figure(2, 2))
+    assert boxes is not None and len(boxes) == 4
+    assert boxes[0][1] < boxes[2][1] and boxes[0][0] < boxes[1][0]  # ordine: righe, poi colonne
+    assert panels.grid_panels(_grid_figure(1, 3)) is None            # striscia: resta intera
+    assert panels.grid_panels(_grid_figure(2, 2, label=True)) is None  # didascalia staccata: intera
+    assert panels.grid_panels(_grid_figure(2, 2), mode="whole") is None
+    assert len(panels.grid_panels(_grid_figure(1, 3), mode="split")) == 3
 
 
 def test_to_levels_inverts_white_background():
@@ -242,6 +265,8 @@ def test_end_to_end(tmp_path):
     text = "\n".join(sec["chunks"])
     assert text.startswith("P\n") and "\nI" in text  # almeno un'immagine (equazione)
     assert "Moto" in text and "circolare" in text and "∑" in text
+    # le immagini non si spezzano tra due pagine: ogni riga "I" parte dalla riga 0
+    assert all(l[1:].split(",")[4] == "0" for l in text.split("\n") if l.startswith("I"))
     assert (out / "preview").exists() and (out / "notes.pdf").exists()
     assert (out / "preview" / "_elenco.png").exists()
     idx = "\n".join(json.loads(z.read(m["resources"]["idx"]["file"]))["chunks"])

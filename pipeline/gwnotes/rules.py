@@ -35,6 +35,9 @@ class Rules:
     # risoluzione di rendering: pixel per em del testo LaTeX (≈ dimensione del font body)
     math_px_per_em: float = 25.0
     figure_zoom_dpi: int = 130
+    # figure da dividere in pannelli: nome del file (senza estensione) -> auto | split | whole
+    # (auto: solo le griglie con più righe e più colonne di grafici, vedi panels.py)
+    figure_panels: dict = field(default_factory=dict)
 
     @classmethod
     def load(cls, path: Path | None = None) -> "Rules":
