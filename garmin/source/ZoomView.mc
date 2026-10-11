@@ -3,16 +3,41 @@ import Toybox.Lang;
 import Toybox.WatchUi;
 
 // Versione ingrandita di una figura/equazione, spostabile con swipe o trascinamento.
+// Lo schermo è rotondo: gli angoli del quadrato 390x390 non si vedono. Lo
+// spostamento arriva quindi fino a portare ogni bordo dell'immagine dentro il
+// quadrato inscritto nel cerchio (margine MARGIN per lato), così ogni angolo
+// dell'immagine si può vedere per intero.
 class ZoomView extends WatchUi.View {
     private var _key as String;
-    var ox as Number = 0;
-    var oy as Number = 0;
+    // spostamento: punto dell'immagine nell'angolo in alto a sinistra dello schermo
+    // (negativo = immagine spostata verso destra/basso); parte dall'angolo in alto a sinistra
+    var ox as Number = -100000;
+    var oy as Number = -100000;
     var iw as Number = 0;
     var ih as Number = 0;
+    private var _w as Number = 390;
 
     function initialize(key as String) {
         View.initialize();
         _key = key;
+    }
+
+    // margine tra il quadrato dello schermo e quello inscritto nel cerchio (~57 px a 390)
+    private function margin() as Number {
+        return _w / 2 - _w * 707 / 2000;
+    }
+
+    function minX() as Number {
+        return -margin();
+    }
+
+    private function maxOff(n as Number) as Number {
+        return n - _w + margin();
+    }
+
+    // l'immagine entra nel quadrato inscritto: centrata, niente spostamento
+    private function fits(n as Number) as Boolean {
+        return n <= _w - 2 * margin();
     }
 
     function onUpdate(dc as Dc) as Void {
@@ -22,6 +47,7 @@ class ZoomView extends WatchUi.View {
         var bmp = app.images.get(_key);
         var w = dc.getWidth();
         var h = dc.getHeight();
+        _w = w;
         if (bmp == null) {
             var msg = app.images.isFailed(_key) ? (WatchUi.loadResource(Rez.Strings.Missing) as String)
                                                  : (WatchUi.loadResource(Rez.Strings.Loading) as String);
@@ -31,33 +57,41 @@ class ZoomView extends WatchUi.View {
         var b = bmp as Graphics.BufferedBitmap;
         iw = b.getWidth();
         ih = b.getHeight();
-        clamp(w, h);
-        // immagine più piccola dello schermo: centrata
-        var x = iw < w ? (w - iw) / 2 : -ox;
-        var y = ih < h ? (h - ih) / 2 : -oy;
+        clamp();
+        var x = fits(iw) ? (w - iw) / 2 : -ox;
+        var y = fits(ih) ? (h - ih) / 2 : -oy;
         dc.drawBitmap(x, y, b);
-        // barre di posizione
+        // barre di posizione (dentro il quadrato inscritto, visibili)
+        var m = margin();
+        var side = w - 2 * m;
         dc.setColor(Palette.color(4), Graphics.COLOR_TRANSPARENT);
-        if (iw > w) {
-            var bw = w * w / iw / 2;
-            dc.fillRectangle(w / 4 + (w / 2 - bw) * ox / (iw - w), h - 24, bw, 4);
+        if (!fits(iw)) {
+            var bw = side * side / iw;
+            var range = maxOff(iw) - minX();
+            dc.fillRectangle(m + (side - bw) * (ox - minX()) / (range > 0 ? range : 1), h - m - 6, bw, 4);
         }
-        if (ih > h) {
-            var bh = h * h / ih / 2;
-            dc.fillRectangle(w - 24, h / 4 + (h / 2 - bh) * oy / (ih - h), 4, bh);
+        if (!fits(ih)) {
+            var bh = side * side / ih;
+            var range = maxOff(ih) - minX();
+            dc.fillRectangle(w - m - 6, m + (side - bh) * (oy - minX()) / (range > 0 ? range : 1), 4, bh);
         }
     }
 
-    function clamp(w as Number, h as Number) as Void {
-        var mx = iw - w;
-        var my = ih - h;
+    function clamp() as Void {
+        var mx = maxOff(iw);
+        var my = maxOff(ih);
         if (ox > mx) { ox = mx; }
         if (oy > my) { oy = my; }
-        if (ox < 0) { ox = 0; }
-        if (oy < 0) { oy = 0; }
+        if (ox < minX()) { ox = minX(); }
+        if (oy < minX()) { oy = minX(); }
+    }
+
+    function atLeft() as Boolean {
+        return fits(iw) || ox <= minX();
     }
 
     function pan(dx as Number, dy as Number) as Void {
+        clamp();
         ox += dx;
         oy += dy;
         WatchUi.requestUpdate();
@@ -78,7 +112,7 @@ class ZoomDelegate extends WatchUi.InputDelegate {
         if (d == WatchUi.SWIPE_LEFT) {
             _view.pan(150, 0);
         } else if (d == WatchUi.SWIPE_RIGHT) {
-            if (_view.ox <= 0) {
+            if (_view.atLeft()) {
                 WatchUi.popView(WatchUi.SLIDE_DOWN);
             } else {
                 _view.pan(-150, 0);
