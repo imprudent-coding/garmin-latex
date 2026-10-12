@@ -554,32 +554,59 @@ $\partial(\Delta v_k)^2/\partial e_T=2e_T\mu/p_T>0$: at fixed $p_T$ the cost gro
 feasible region $d(\Delta v_1+\Delta v_2)/de_T>0$ too. Hence the minimum is at the corner point $H$ where both constraints
 are active, the bitangent ellipse: the Hohmann transfer is the \textbf{globally optimal two-impulse} transfer.
 
-With $\sigma=R_f/R_i$:
-$\dfrac{\Delta v^{(H)}_{tot}}{\sqrt{\mu/R_i}}=\sqrt{\dfrac{2\sigma}{1+\sigma}}-1+\dfrac{1}{\sqrt\sigma}-\sqrt{\dfrac{2}{\sigma(1+\sigma)}}$;
-it has a \textbf{maximum at $\sigma\simeq15.58$} and the asymptote $\sqrt2-1$ (transfer to a parabola) as $\sigma\to\infty$.
+In non-dimensional form (see the comparison below) the Hohmann cost depends only on $\sigma=R_f/R_i$; it has a
+\textbf{maximum at $\sigma\simeq15.58$} and the asymptote $\sqrt2-1$ (transfer to a parabola) as $\sigma\to\infty$.
 
-\paragraph{Bielliptic transfer.} Three impulses and two half-ellipses with a common apoapsis $r_A^{\max}\ge R_f$:
+\paragraph{Bielliptic transfer.} Three impulses and two half-ellipses with a common apoapsis $r_A^{\max}\ge R_f$.
+
+\emph{First impulse}, at $R_i$, along the motion (enters the first ellipse, $R_i\to r_A^{\max}$):
 \begin{equation}
-\sys{\Delta v_{1}^{(BE)}&=\sqrt{\tfrac{2\mu}{R_{i}+r_{A}^{\max}}\tfrac{r_{A}^{\max}}{R_{i}}}-\sqrt{\tfrac{\mu}{R_{i}}}
-&&\text{(at $R_i$, along the motion)}\\
-\Delta v_{2}^{(BE)}&=\sqrt{\tfrac{2\mu}{R_{f}+r_{A}^{\max}}\tfrac{R_{f}}{r_{A}^{\max}}}-\sqrt{\tfrac{2\mu}{R_{i}+r_{A}^{\max}}\tfrac{R_{i}}{r_{A}^{\max}}}
-&&\text{(at $r_A^{\max}$: raises the periapsis to $R_f$)}\\
-\Delta v_{3}^{(BE)}&=\sqrt{\tfrac{2\mu}{R_{f}+r_{A}^{\max}}\tfrac{r_{A}^{\max}}{R_{f}}}-\sqrt{\tfrac{\mu}{R_{f}}}
-&&\text{(at $R_f$, \emph{opposite} to the motion: circularises)}}
+\Delta v_{1}^{(BE)}=\sqrt{\frac{2\mu\,r_{A}^{\max}}{R_{i}\,(R_{i}+r_{A}^{\max})}}-\sqrt{\frac{\mu}{R_{i}}} .
 \end{equation}
+\emph{Second impulse}, at $r_A^{\max}$, along the motion (raises the periapsis from $R_i$ to $R_f$):
 \begin{equation}
-\Delta t=\pi\sqrt{\frac{a_{T1}^{3}}{\mu}}+\pi\sqrt{\frac{a_{T2}^{3}}{\mu}},\qquad a_{T1}=\frac{R_i+r_A^{\max}}{2},\ a_{T2}=\frac{R_f+r_A^{\max}}{2}.
+\Delta v_{2}^{(BE)}=\sqrt{\frac{2\mu\,R_{f}}{r_{A}^{\max}\,(R_{f}+r_{A}^{\max})}}-\sqrt{\frac{2\mu\,R_{i}}{r_{A}^{\max}\,(R_{i}+r_{A}^{\max})}} .
+\end{equation}
+\emph{Third impulse}, at $R_f$, \emph{opposite} to the motion (circularises):
+\begin{equation}
+\Delta v_{3}^{(BE)}=\sqrt{\frac{2\mu\,r_{A}^{\max}}{R_{f}\,(R_{f}+r_{A}^{\max})}}-\sqrt{\frac{\mu}{R_{f}}} .
+\end{equation}
+Time of flight, two half periods:
+\begin{equation}
+\Delta t=\pi\sqrt{\frac{a_{T1}^{3}}{\mu}}+\pi\sqrt{\frac{a_{T2}^{3}}{\mu}},\qquad a_{T1}=\frac{R_i+r_A^{\max}}{2},\qquad a_{T2}=\frac{R_f+r_A^{\max}}{2}.
 \end{equation}
 As $r_A^{\max}$ increases $\Delta v_{tot}$ decreases but $\Delta t$ increases. The limit $r_A^{\max}\to\infty$ is the
 \textbf{biparabolic transfer}: $\Delta v_1=(\sqrt2-1)\sqrt{\mu/R_i}$, $\Delta v_2=0$, $\Delta v_3=(\sqrt2-1)\sqrt{\mu/R_f}$,
-$\Delta t=\infty$ (best of all bielliptic transfers, but infeasible). The idea: the expensive part of the plane-raising is done
+$\Delta t=\infty$ (best of all bielliptic transfers, but infeasible). The idea: the expensive part of the orbit raising is done
 far away, where the velocity is small and a small $\Delta v_2$ raises the periapsis a lot.
 
 \begin{center}
 \includegraphics[width=0.9\linewidth]{hoh_be_geom}
 \end{center}
 
-\paragraph{Comparison.} With $\sigma=R_f/R_i$ and $\rho=r_A^{\max}/R_i\ge\sigma$ both costs are functions of $(\sigma,\rho)$ only:
+\paragraph{Comparison.} With $\sigma=R_f/R_i$ and $\rho=r_A^{\max}/R_i\ge\sigma$, dividing by the initial circular velocity
+$\sqrt{\mu/R_i}$, both costs are functions of $(\sigma,\rho)$ only. Hohmann:
+\begin{equation}
+\frac{\Delta v^{(H)}_{tot}}{\sqrt{\mu/R_i}}=(\sigma-1)\sqrt{\frac{2}{\sigma(1+\sigma)}}+\frac{1}{\sqrt\sigma}-1 .
+\end{equation}
+Bielliptic, impulse by impulse:
+\begin{equation}
+\frac{\Delta v_{1}^{(BE)}}{\sqrt{\mu/R_i}}=\sqrt{\frac{2\rho}{1+\rho}}-1 ,
+\end{equation}
+\begin{equation}
+\frac{\Delta v_{2}^{(BE)}}{\sqrt{\mu/R_i}}=\sqrt{\frac{2\sigma}{\rho(\sigma+\rho)}}-\sqrt{\frac{2}{\rho(1+\rho)}} ,
+\end{equation}
+\begin{equation}
+\frac{\Delta v_{3}^{(BE)}}{\sqrt{\mu/R_i}}=\sqrt{\frac{2\rho}{\sigma(\sigma+\rho)}}-\frac{1}{\sqrt\sigma} ,
+\end{equation}
+and in total
+\begin{equation}
+\frac{\Delta v^{(BE)}_{tot}}{\sqrt{\mu/R_i}}=(\rho-1)\sqrt{\frac{2}{\rho(1+\rho)}}+\sqrt{\frac{2(\sigma+\rho)}{\sigma\rho}}-1-\frac{1}{\sqrt\sigma} .
+\end{equation}
+Checks: for $\rho=\sigma$ it reduces to the Hohmann cost; for $\rho\to\infty$ (biparabolic)
+\begin{equation}
+\frac{\Delta v^{(BP)}_{tot}}{\sqrt{\mu/R_i}}=(\sqrt2-1)\left(1+\frac{1}{\sqrt\sigma}\right).
+\end{equation}
 \begin{center}
 \includegraphics[width=0.72\linewidth]{hoh_be_dv}\\
 {\footnotesize $\Delta v_{tot}/\sqrt{\mu/R_i}$ computed from the formulas above; bielliptic curves exist only for $\sigma\le\rho$.}
@@ -617,6 +644,7 @@ practical use & almost always (e.g.\ LEO$\to$GEO: $\sigma\approx6.3$) & rare: la
 $a_T=\dfrac{R_i+R_f}{2}$, \ $\Delta v_1=\sqrt{\dfrac{2\mu R_f}{R_i(R_i+R_f)}}-\sqrt{\dfrac{\mu}{R_i}}$, \
 $\Delta v_2=\sqrt{\dfrac{\mu}{R_f}}-\sqrt{\dfrac{2\mu R_i}{R_f(R_i+R_f)}}$, \ $\Delta t=\pi\sqrt{a_T^3/\mu}$;
 thresholds $\sigma=11.94$ and $15.58$; biparabolic $\Delta v=(\sqrt2-1)(\sqrt{\mu/R_i}+\sqrt{\mu/R_f})$.
+Bielliptic ($\sigma=R_f/R_i$, $\rho=r_A^{\max}/R_i$): $\dfrac{\Delta v^{(BE)}_{tot}}{\sqrt{\mu/R_i}}=(\rho-1)\sqrt{\dfrac{2}{\rho(1+\rho)}}+\sqrt{\dfrac{2(\sigma+\rho)}{\sigma\rho}}-1-\dfrac{1}{\sqrt\sigma}$.
 \end{keyf}
 
 \pitfalls
