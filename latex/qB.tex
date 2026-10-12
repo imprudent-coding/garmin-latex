@@ -63,9 +63,17 @@ escape route.}
 \answer
 \paragraph{Model.} The CR3BP studies a third body (spacecraft) of negligible mass, $m\ll m_2<m_1$, attracted by two
 \emph{primaries} (Earth and Moon) that move on circular orbits about their centre of mass with angular velocity
-$\omega=\sqrt{G(m_1+m_2)/R^3}$; the spacecraft does not affect the primaries. In the \textbf{synodic frame} (origin at the centre of
-mass, $\hat\imath$ from $m_1$ towards $m_2$, $\hat k$ along the angular momentum of the primaries, rotating with $\omega$) the primaries are
-fixed at $x_1=-\mu$, $x_2=1-\mu$ (DU $=R$, TU $=1/\omega$), and the motion obeys
+$\omega=\sqrt{G(m_1+m_2)/R^3}$, where $R$ is their (constant) distance; the spacecraft does not affect the primaries. In the
+\textbf{synodic frame} (origin at the centre of mass, $\hat\imath$ from $m_1$ towards $m_2$, $\hat k$ along the angular momentum of the
+primaries, rotating with $\omega$) the spacecraft has coordinates $(x,y,z)$.
+
+\emph{Notation.} The only parameter of the problem is the \textbf{mass parameter}
+\begin{equation}
+\mu=\frac{m_2}{m_1+m_2}\in\left(0,\tfrac12\right],\qquad \text{Earth--Moon: }\mu=\frac{1}{82.27}=0.01216,
+\end{equation}
+i.e.\ the fraction of the total mass carried by the smaller primary. Canonical units: the distance unit is DU $=R$, the time unit is
+TU $=1/\omega$, so that $\omega=1$ and $G(m_1+m_2)=1$. Then the primaries are fixed at $x_1=-\mu$ (Earth) and $x_2=1-\mu$ (Moon),
+and their gravitational parameters are $Gm_1=1-\mu$ and $Gm_2=\mu$. The motion obeys
 \begin{equation}
 \ddot{x}-2\omega\dot{y}=\frac{\partial\Omega}{\partial x},\qquad
 \ddot{y}+2\omega\dot{x}=\frac{\partial\Omega}{\partial y},\qquad
@@ -75,6 +83,9 @@ fixed at $x_1=-\mu$, $x_2=1-\mu$ (DU $=R$, TU $=1/\omega$), and the motion obeys
 \Omega=\frac{\omega^{2}}{2}(x^{2}+y^{2})+\frac{1-\mu}{r_1}+\frac{\mu}{r_2},\qquad
 r_1=\sqrt{(x+\mu)^{2}+y^{2}+z^{2}},\ \ r_2=\sqrt{(x+\mu-1)^{2}+y^{2}+z^{2}} .
 \end{equation}
+Here $\Omega$ is the \emph{pseudo-potential}: the first term gives the centrifugal acceleration, the other two the gravity of
+$m_1$ and $m_2$; $r_1$ and $r_2$ are the distances of the spacecraft from $m_1$ and $m_2$. The terms $2\omega\dot y$, $2\omega\dot x$
+are the Coriolis accelerations ($\omega$ is kept for clarity; it equals 1 in canonical units).
 
 \paragraph{Jacobi integral (definition).} Multiplying the three equations by $\dot x$, $\dot y$, $\dot z$ and adding, the Coriolis terms
 cancel and, since $\Omega$ depends only on the position, $\frac12\frac{d}{dt}(\dot x^2+\dot y^2+\dot z^2)=\frac{d\Omega}{dt}$. Hence
@@ -93,7 +104,7 @@ libration points}.
 
 \paragraph{Critical values of $C$.} At a libration point $L_i$ (equilibrium in the synodic frame) the velocity is zero, so $L_i$
 lies on the zero-velocity curve with $C_i=2\Omega(L_i)$. For Earth--Moon:
-$C_1=3.18838>C_2=3.17220>C_3=3.01215>C_{4,5}=2.98799$ (canonical units). The topology changes exactly at these values:
+$C_1=3.18838>C_2=3.17220>C_3=3.01215>C_{4,5}=2.98799$ (canonical units, i.e.\ DU$^2$/TU$^2$, computed with $\mu=0.01216$). The topology changes exactly at these values:
 \begin{itemize}
 \item $C>C_1$: three separate regions (around the Earth, around the Moon, outside): no transfer possible;
 \item $C_2<C<C_1$: the neck at $L_1$ opens;
@@ -128,6 +139,7 @@ Hatch the ring between the inner peanut and the outer oval. Write $C_2<C<C_1$.
 \end{fig2draw}
 
 \begin{keyf}
+$\mu=\frac{m_2}{m_1+m_2}$ (mass parameter; Earth--Moon $0.01216$), $r_1$, $r_2$ distances from $m_1$ (at $x=-\mu$) and $m_2$ (at $x=1-\mu$); \
 $C=2\Omega-(\dot x^2+\dot y^2+\dot z^2)$, \ $\Omega=\frac{\omega^2}{2}(x^2+y^2)+\frac{1-\mu}{r_1}+\frac{\mu}{r_2}$, \
 Hill region $2\Omega\ge C$, \ $C_i=2\Omega(L_i)$, \ $C_1>C_2>C_3>C_{4,5}$, \ no-escape transfer: $C_2<C<C_1$.
 \end{keyf}
@@ -174,10 +186,21 @@ $\{\hat c_1,\hat c_2,\hat c_3\}$ (coincident at $t=0$)
 \begin{bmatrix}\cos\omega t&\sin\omega t&0\\-\sin\omega t&\cos\omega t&0\\0&0&1\end{bmatrix}
 \begin{bmatrix}\hat c_1\\ \hat c_2\\ \hat c_3\end{bmatrix}.
 \end{equation}
-In canonical units (DU $=R$, TU $=1/\omega$, so $G(m_1+m_2)=1$) the primaries are \emph{fixed} at $x_1=-\mu$, $x_2=1-\mu$,
-with $\mu=m_2/(m_1+m_2)<1/2$. The spacecraft position is $\underline r=x\hat\imath+y\hat\jmath+z\hat k$ and its equations of motion
-are $\ddot x-2\omega\dot y=\Omega_x$, $\ddot y+2\omega\dot x=\Omega_y$, $\ddot z=\Omega_z$ with
-$\Omega=\frac{\omega^2}{2}(x^2+y^2)+\frac{1-\mu}{r_1}+\frac{\mu}{r_2}$.
+\emph{Mass parameter and canonical units.} The problem depends only on
+\begin{equation}
+\mu=\frac{m_2}{m_1+m_2}\le\frac12,
+\end{equation}
+the fraction of the total mass carried by the smaller primary (Earth--Moon: $\mu=1/82.27=0.01216$). With the distance unit
+DU $=R$ and the time unit TU $=1/\omega$ (so $\omega=1$ and $G(m_1+m_2)=1$) the primaries are \emph{fixed} at $x_1=-\mu$ and
+$x_2=1-\mu$, with gravitational parameters $Gm_1=1-\mu$ and $Gm_2=\mu$.
+
+The spacecraft position is $\underline r=x\hat\imath+y\hat\jmath+z\hat k$ and its equations of motion are
+$\ddot x-2\omega\dot y=\Omega_x$, $\ddot y+2\omega\dot x=\Omega_y$, $\ddot z=\Omega_z$, where $\Omega_x=\partial\Omega/\partial x$
+(and so on) and $\Omega$ is the pseudo-potential (centrifugal + gravity of the primaries)
+\begin{equation}
+\Omega=\frac{\omega^2}{2}(x^2+y^2)+\frac{1-\mu}{r_1}+\frac{\mu}{r_2},
+\end{equation}
+with $r_1=\sqrt{(x+\mu)^2+y^2+z^2}$ and $r_2=\sqrt{(x+\mu-1)^2+y^2+z^2}$ the distances from $m_1$ and $m_2$.
 
 \paragraph{Libration (Lagrange) points.} Equilibrium points in the synodic frame, where the spacecraft can stay indefinitely if
 placed with zero velocity. They lie in the $x$--$y$ plane and require $\dot x=\dot y=\ddot x=\ddot y=0$, i.e.\ $\Omega_x=\Omega_y=0$:
@@ -194,7 +217,8 @@ primaries), $L_2$ (beyond $m_2$) -- see \qref{B3};
 $\Omega$ is stationary at every $L_i$: only stationary (saddle) at $L_{1,2,3}$, a minimum at $L_{4,5}$ with
 $2\Omega_{\min}=3-\mu(1-\mu)$.
 
-\paragraph{Zero-velocity curves.} The Jacobi integral $C=2\Omega-v^2$ is constant; motion is allowed only where $2\Omega\ge C$.
+\paragraph{Zero-velocity curves.} The Jacobi integral $C=2\Omega-v^2$, with $v^2=\dot x^2+\dot y^2+\dot z^2$ the squared velocity
+relative to the synodic frame, is constant along the motion; since $v^2\ge0$, motion is allowed only where $2\Omega\ge C$.
 At $L_i$ the velocity is zero, so the curve through $L_i$ corresponds to $C_i=2\Omega(L_i)$, with
 $C_1>C_2>C_3>C_{4,5}$ (Earth--Moon: 3.18838, 3.17220, 3.01215, 2.98799).
 
@@ -230,7 +254,7 @@ $L_2$ ($C_2<C<C_1$) and hatched horseshoe open at $L_2$ ($C_3<C<C_2$).
 \end{fig2draw}
 
 \begin{keyf}
-Synodic: origin c.m., $\hat\imath$ $m_1\!\to\! m_2$, $\hat k\parallel\underline H$, rotation $\omega t$; $x_1=-\mu$, $x_2=1-\mu$; \
+$\mu=\frac{m_2}{m_1+m_2}$ (mass parameter); synodic: origin c.m., $\hat\imath$ $m_1\!\to\! m_2$, $\hat k\parallel\underline H$, rotation $\omega t$; $x_1=-\mu$, $x_2=1-\mu$; \
 $L_{4,5}$: $r_1=r_2=1$; \ $C=2\Omega-v^2$; \ no escape $C_2<C<C_1$; escape through $L_2$: $C_3<C<C_2$.
 \end{keyf}
 
@@ -266,7 +290,19 @@ distances to the primaries).
 \end{outline}
 
 \answer
-\paragraph{Libration points.} With canonical units ($\omega=1$), primaries at $x_1=-\mu$ (mass $1-\mu$) and $x_2=1-\mu$ (mass $\mu$).
+\paragraph{Notation.} Two primaries $m_1>m_2$ at constant distance $R$, rotating with angular velocity $\omega$ about their centre of
+mass; $(x,y,z)$ are the coordinates in the synodic frame (origin at the centre of mass, $x$-axis from $m_1$ to $m_2$, rotating with
+the primaries). The \textbf{mass parameter}
+\begin{equation}
+\mu=\frac{m_2}{m_1+m_2}\le\frac12
+\end{equation}
+is the fraction of the total mass carried by the smaller primary (Earth--Moon: $\mu=0.01216$). In canonical units (DU $=R$,
+TU $=1/\omega$, so $\omega=1$ and $G(m_1+m_2)=1$) the primaries are fixed at $x_1=-\mu$ and $x_2=1-\mu$, with gravitational
+parameters $Gm_1=1-\mu$ and $Gm_2=\mu$: these are the coefficients of $1/r_1$ and $1/r_2$ in $\Omega$. $\Omega$ is the pseudo-potential
+(centrifugal term $\frac{x^2+y^2}{2}$ + gravity of the primaries), $\Omega_x=\partial\Omega/\partial x$ and so on, and
+$r_1$, $r_2$ are the distances of the spacecraft from $m_1$ and $m_2$.
+
+\paragraph{Libration points.}
 Libration points are equilibrium points in the synodic frame: a spacecraft placed there with zero velocity remains there.
 \begin{center}\includegraphics[width=0.5\linewidth]{lagrange}\end{center}
 
@@ -309,6 +345,7 @@ $r_1=r_2=1$; inserted in (A): $x-(1-\mu)(x+\mu)-\mu(x+\mu-1)=0$ identically. Hen
 equilateral triangles built on the primaries.
 
 \begin{keyf}
+$\mu=\frac{m_2}{m_1+m_2}$, primaries at $x_1=-\mu$, $x_2=1-\mu$; \
 Equilibrium $\Leftrightarrow\nabla\Omega=\underline 0$ ($z=0$); collinear ($y=0$): $x-\dfrac{(1-\mu)(x+\mu)}{r_1^3}-\dfrac{\mu(x+\mu-1)}{r_2^3}=0$,
 $r_1=|x+\mu|$, $r_2=|x+\mu-1|$; intervals $x<-\mu$ ($L_3$), $-\mu<x<1-\mu$ ($L_1$), $x>1-\mu$ ($L_2$).
 \end{keyf}
@@ -361,15 +398,18 @@ $\omega=\sqrt{G(m_1+m_2)/R^3}$. The \textbf{synodic frame} $\{\hat\imath,\hat\jm
 primaries (normal to their orbit plane); $\hat\jmath=\hat k\times\hat\imath$;
 \item it \textbf{rotates} with angular velocity $\underline\omega=\omega\hat k$ with respect to the inertial frame, so the primaries are fixed.
 \end{itemize}
-Canonical units: DU $=R$, TU $=1/\omega$ (so $\omega=1$ and $G(m_1+m_2)=1$); $\mu=m_2/(m_1+m_2)$, $m_1$ at $x=-\mu$, $m_2$ at
-$x=1-\mu$. The coordinates $(x,y,z)$ are the components of $\underline r=x\hat\imath+y\hat\jmath+z\hat k$ in this rotating frame, and
+Canonical units: DU $=R$, TU $=1/\omega$ (so $\omega=1$ and $G(m_1+m_2)=1$). The \textbf{mass parameter}
+$\mu=m_2/(m_1+m_2)\le\frac12$ is the fraction of the total mass carried by the smaller primary (Earth--Moon: $\mu=0.01216$); in
+these units $m_1$ is at $x=-\mu$, $m_2$ at $x=1-\mu$, and their gravitational parameters are $Gm_1=1-\mu$, $Gm_2=\mu$ (the
+coefficients of $1/r_1$ and $1/r_2$ in $\Omega$). The coordinates $(x,y,z)$ are the components of $\underline r=x\hat\imath+y\hat\jmath+z\hat k$ in this rotating frame, and
 $r_1=\sqrt{(x+\mu)^2+y^2+z^2}$, $r_2=\sqrt{(x+\mu-1)^2+y^2+z^2}$ are the distances from the primaries.
 
 \paragraph{Where the equations come from.} Differentiating $\underline r=x\hat\imath+y\hat\jmath+z\hat k$ twice with
 $\dot{\hat\imath}=\omega\hat\jmath$, $\dot{\hat\jmath}=-\omega\hat\imath$:
 $\ddot{\underline r}=(\ddot x-2\omega\dot y-\omega^2x)\hat\imath+(\ddot y+2\omega\dot x-\omega^2y)\hat\jmath+\ddot z\hat k$
 (Coriolis and centrifugal terms). Equating to the gravitational acceleration of the two primaries and moving the centrifugal terms
-to the right-hand side gives the given equations with the pseudo-potential $\Omega$ (centrifugal + gravitational).
+to the right-hand side gives the given equations with the pseudo-potential $\Omega$: $\frac{x^2+y^2}{2}$ is the centrifugal
+term, $\frac{1-\mu}{r_1}+\frac{\mu}{r_2}$ the gravity of the primaries; $\Omega_x=\partial\Omega/\partial x$ and so on.
 
 \paragraph{Proof.} Multiply the three equations by $\dot x$, $\dot y$, $\dot z$ respectively and add:
 \begin{equation}
@@ -401,6 +441,7 @@ inertial energy, which is not conserved because the primaries move. Since $v^2=2
 \textbf{zero-velocity surfaces} $2\Omega=C$, which bound the regions of possible motion (Hill's regions); see \qref{B1}.
 
 \begin{keyf}
+$\mu=\frac{m_2}{m_1+m_2}$, $r_{1,2}$ distances from $m_{1,2}$; \
 $\ddot x-2\dot y=\Omega_x$, $\ddot y+2\dot x=\Omega_y$, $\ddot z=\Omega_z$; \ $\times(\dot x,\dot y,\dot z)$ and sum $\Rightarrow$
 $\frac12\frac{d}{dt}v^2=\frac{d\Omega}{dt}$; \ $C=2\Omega-(\dot x^2+\dot y^2+\dot z^2)$, $\Omega=\frac{x^2+y^2}{2}+\frac{1-\mu}{r_1}+\frac{\mu}{r_2}$.
 \end{keyf}
