@@ -9,6 +9,8 @@ function showMainMenu() as Void {
         :auto, null));
     m.addItem(new WatchUi.ToggleMenuItem(WatchUi.loadResource(Rez.Strings.MenuClockKey) as String,
         WatchUi.loadResource(Rez.Strings.MenuClockKeySub) as String, :clockKey, getApp().clockButton(), null));
+    m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuMotion) as String,
+        motionLabel(getApp().motionThreshold()), :motion, null));
     var winfo = getApp().store.getValue("winfo");
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuSync) as String,
         getApp().status + ((winfo instanceof Lang.String) ? " · " + winfo : ""), :sync, null));
@@ -57,6 +59,17 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
             var next = AUTO_STEPS[(i + 1) % AUTO_STEPS.size()] as Number;
             app.store.setValue("auto", next);
             item.setSubLabel(autoLabel(next));
+            WatchUi.requestUpdate();
+            return;
+        }
+        if (id == :motion) {
+            // come lo scorrimento automatico: ogni tocco passa al valore successivo
+            var curT = app.motionThreshold();
+            var j = MOTION_STEPS.indexOf(curT);
+            var nextT = MOTION_STEPS[(j + 1) % MOTION_STEPS.size()] as Number;
+            app.store.setValue("motion", nextT);
+            app.motion.apply(nextT);
+            item.setSubLabel(motionLabel(nextT));
             WatchUi.requestUpdate();
             return;
         }

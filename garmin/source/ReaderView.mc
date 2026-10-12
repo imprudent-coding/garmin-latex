@@ -22,6 +22,7 @@ class ReaderView extends WatchUi.View {
 
     function onShow() as Void {
         var app = getApp();
+        app.motion.target = true;
         app.store.pinned = ["idx", section.key()] as Array<String>;
         if (app.sync.state == ST_OFFLINE) {
             // riprova: il telefono potrebbe essere tornato raggiungibile
@@ -32,6 +33,7 @@ class ReaderView extends WatchUi.View {
     }
 
     function onHide() as Void {
+        getApp().motion.target = false;
         getApp().ticker.cancel("auto");
         getApp().savePosition(section.id, page);
     }

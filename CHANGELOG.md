@@ -4,6 +4,14 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Orologio 1.3.0
+
+- Movimento: con l'accelerometro uno scatto deciso del polso vale come una
+  pressione prolungata sullo schermo (elenco, lettura, zoom), quindi apre
+  l'orologio stealth (o il menu se è disattivato). Voce di menu *Movimento*:
+  No (di default), Scatto forte, Scatto medio, Scatto lieve. Nuovo permesso
+  `Sensor` nel manifest.
+
 ## Orologio 1.2.1
 
 - Orologio stealth: si apre anche con una pressione prolungata sullo schermo

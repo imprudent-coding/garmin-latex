@@ -17,6 +17,7 @@ class NotesApp extends Application.AppBase {
     var images as ImageCache;
     var prefetch as Prefetch;
     var speed as SpeedTest;
+    var motion as Motion;
     var rich as RichText or Null = null;
     var index as Index or Null = null;
     var showMemory as Boolean = false;
@@ -36,6 +37,7 @@ class NotesApp extends Application.AppBase {
         images = new ImageCache(store, sync, ticker);
         prefetch = new Prefetch(store, sync, ticker);
         speed = new SpeedTest();
+        motion = new Motion();
         if (Communications has :registerForPhoneAppMessages) {
             Communications.registerForPhoneAppMessages(method(:onPhoneMessage));
         }
@@ -52,9 +54,11 @@ class NotesApp extends Application.AppBase {
         loadCachedIndex();
         Mem.log("indice in cache caricato");
         startSync();
+        motion.apply(motionThreshold());
     }
 
     function onStop(state as Dictionary or Null) as Void {
+        motion.stop();
         store.save();
     }
 
@@ -214,6 +218,12 @@ class NotesApp extends Application.AppBase {
     function clockButton() as Boolean {
         var v = store.getValue("clockKey");
         return !(v instanceof Lang.Boolean) || (v as Boolean);
+    }
+
+    // soglia dell'accelerometro in milli-g (0 = spento, di default)
+    function motionThreshold() as Number {
+        var v = store.getValue("motion");
+        return (v instanceof Lang.Number) ? v as Number : 0;
     }
 
     // ------------------------------------------------------------- posizione di lettura

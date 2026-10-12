@@ -34,8 +34,13 @@ class QuestionListView extends WatchUi.View {
     }
 
     function onShow() as Void {
+        getApp().motion.target = true;
         rebuild();
         WatchUi.requestUpdate();
+    }
+
+    function onHide() as Void {
+        getApp().motion.target = false;
     }
 
     // Ricostruisce le righe se l'indice è cambiato.
