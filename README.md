@@ -349,9 +349,10 @@ di pagine (● = già in cache sull'orologio). L'app riparte dall'ultima domanda
 | Lettura | tocco sul numero di pagina in basso | menu |
 | Zoom | swipe o trascinamento | sposta l'immagine; arriva fino a mostrare per intero anche gli angoli, che sullo schermo rotondo sarebbero tagliati |
 | Ovunque | pulsante in alto (premuto, non toccando lo schermo) o pressione prolungata sullo schermo | **orologio** (vedi sotto) |
+| Elenco / Lettura / Zoom | scatto deciso del polso (se *Movimento* è attivo) | come la pressione prolungata sullo schermo |
 | Orologio | tenere premuto lo schermo o un pulsante per ~2,5 s | torna agli appunti, dove eri |
 | Ovunque | pulsante in basso | indietro |
-| Elenco / Lettura | tocco sui tre puntini in alto / sul numero di pagina (oppure pressione prolungata, se l'orologio stealth è disattivato) | menu: riprendi lettura, torna all'elenco, scorrimento automatico, orologio stealth, sincronizza, svuota cache, test velocità, mostra memoria |
+| Elenco / Lettura | tocco sui tre puntini in alto / sul numero di pagina (oppure pressione prolungata, se l'orologio stealth è disattivato) | menu: riprendi lettura, torna all'elenco, scorrimento automatico, orologio stealth, movimento, sincronizza, svuota cache, test velocità, mostra memoria |
 
 **Scorrimento automatico.** Dal menu, *Scorrimento automatico* cambia a ogni
 tocco: No, 5, 10, 15, 20, 30, 45, 60 secondi per pagina (il menu resta aperto).
@@ -373,6 +374,17 @@ in lettura e ad aprire la domanda nell'elenco, e la pressione prolungata
 riapre il menu. Alcune pressioni prolungate dei
 pulsanti sono riservate al sistema (ad esempio quella del pulsante in alto
 apre i controlli): se quella del pulsante non arriva all'app, usa lo schermo.
+
+**Movimento.** Dal menu, *Movimento* cambia a ogni tocco: No (di default),
+Scatto forte, Scatto medio, Scatto lieve. Se attivo, l'accelerometro legge il
+polso 25 volte al secondo e uno scatto deciso (nell'elenco, in lettura e nello
+zoom) vale come una pressione prolungata sullo schermo: apre l'orologio
+stealth, o il menu se l'orologio stealth è disattivato. Servono almeno due
+letture oltre soglia nello stesso secondo (un urto singolo non basta) e dopo
+uno scatto ne passano 3 s prima del successivo. Nell'orologio il movimento non
+fa nulla: per tornare agli appunti serve sempre tenere premuto. Con *Scatto
+lieve* anche gesti bruschi o la corsa possono farlo scattare; spento, il
+sensore non viene usato.
 
 Nell'elenco, in basso, ci sono l'identificativo e la posizione (`B3 · 21/61`);
 l'arco sul bordo destro indica dove sei nell'elenco. In lettura, in basso c'è il

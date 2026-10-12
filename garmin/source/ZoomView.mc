@@ -22,6 +22,14 @@ class ZoomView extends WatchUi.View {
         _key = key;
     }
 
+    function onShow() as Void {
+        getApp().motion.target = true;
+    }
+
+    function onHide() as Void {
+        getApp().motion.target = false;
+    }
+
     // margine tra il quadrato dello schermo e quello inscritto nel cerchio (~57 px a 390)
     private function margin() as Number {
         return _w / 2 - _w * 707 / 2000;

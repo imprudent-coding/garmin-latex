@@ -15,6 +15,10 @@
     <string id="MenuAuto">Scorrimento automatico</string>
     <string id="MenuClockKey">Orologio stealth</string>
     <string id="MenuClockKeySub">Pulsante in alto o tieni premuto</string>
+    <string id="MenuMotion">Movimento</string>
+    <string id="MotionStrong">Scatto forte</string>
+    <string id="MotionMedium">Scatto medio</string>
+    <string id="MotionLight">Scatto lieve</string>
     <string id="Off">No</string>
     <string id="MenuSpeed">Test velocità</string>
     <string id="MenuSpeedSub">Richieste web tramite il telefono</string>
