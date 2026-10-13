@@ -441,24 +441,43 @@ Symbols: $\mu_E=GM_E$ is the Earth's gravitational parameter and $R_E$ its equat
 $U_K$ is the Keplerian potential of a spherical Earth, $U_Z$ collects the zonal harmonics (coefficients $J_l=J_{l0}$, no longitude
 dependence) and $U_T$ the sectoral and tesseral ones (coefficients $J_{lm}$ and reference longitudes $\lambda_{lm}$, $m\ge1$).
 
+The Legendre functions are obtained from (Rodrigues' formula)
+\begin{equation}
+P_{lm}(x)=\frac{1}{2^{l}\,l!}\left(1-x^{2}\right)^{m/2}\frac{d^{\,l+m}}{dx^{\,l+m}}\left[(x^{2}-1)^{l}\right],\qquad x=s_\phi ,
+\end{equation}
+so that $(1-x^2)^{m/2}=c_\phi^{\,m}$ ($c_\phi=\cos\phi$).
+
 The coefficients $J_l$, $J_{lm}$, $\lambda_{lm}$ are estimated from satellite tracking (WGS-84, EGM-96, JGM-2, EGM2008). The perturbing
 acceleration is $\underline g=\nabla U$.
 
 \paragraph{The three types.}
 \begin{enumerate}[label=(\alph*)]
 \item \textbf{Zonal harmonics} ($m=0$, coefficients $J_l$): $P_{l0}(s_\phi)$ \textbf{depends only on latitude}. They vanish at $l$ values of latitude:
-the nodal lines are \textbf{$l$ parallels} and the Earth is divided in latitude bands (zones). Example: $J_2$ vanishes at $\pm35.3^\circ$
+the nodal lines are \textbf{$l$ parallels} and the Earth is divided in latitude bands (zones). Example: $J_2$ ($l=2$, $m=0$), with
+\begin{equation}
+P_{20}(x)=\frac{1}{8}\frac{d^2}{dx^2}(x^2-1)^2=\frac{3x^2-1}{2},
+\end{equation}
+so the term is proportional to $\frac{3s_\phi^2-1}{2}$ and vanishes at $s_\phi=\pm1/\sqrt3$, i.e.\ at $\phi=\pm35.3^\circ$: 2 parallels
 (oblateness).
 \item \textbf{Sectoral harmonics} ($l=m$, coefficients $J_{ll}$): $P_{ll}\propto c_\phi^{\,l}$ does not vanish except at the poles, so the sign of the
 term changes only with longitude: they \textbf{depend (in sign) only on longitude}. Nodal lines: \textbf{$m$ meridians}, which split the Earth
-into $2m$ sectors. Example: $J_{22}$, zero at $\lambda_g=30.1^\circ,120.1^\circ,210.1^\circ,300.1^\circ$ (ellipticity of the equator).
+into $2m$ sectors. Example: $J_{22}$ ($l=m=2$), with
+\begin{equation}
+P_{22}(x)=\frac{1}{8}(1-x^2)\frac{d^4}{dx^4}(x^2-1)^2=3(1-x^2),
+\end{equation}
+so the term is proportional to $3c_\phi^2\cos[2(\lambda_g-\lambda_{22})]$: $c_\phi^2$ vanishes only at the poles, and the term is
+zero on the 2 meridians $\lambda_g=\lambda_{22}\pm45^\circ$, $\lambda_{22}\pm135^\circ$, i.e.\ $\lambda_g=30.1^\circ,120.1^\circ,210.1^\circ,300.1^\circ$
+(ellipticity of the equator).
 \item \textbf{Tesseral harmonics} ($0<m<l$, coefficients $J_{lm}$): \textbf{depend on both latitude and longitude}; they vanish at given latitudes
 \emph{and} longitudes, so the nodal lines (\textbf{$l-m$ parallels and $m$ meridians}) divide the Earth into tiles ("tesserae").
 \end{enumerate}
 General rule: \textbf{$J_{lm}$ has $l-m$ parallels and $m$ meridians as equipotential lines} (zonal: $m=0$; sectoral: $l-m=0$).
 
 \paragraph{The $J_{32}$ harmonic.} $l=3$, $m=2$: \textbf{tesseral}. From the definition,
-$P_{32}(x)=\frac{1}{48}(1-x^2)\frac{d^5}{dx^5}(x^2-1)^3=15x(1-x^2)$, so the term is proportional to
+\begin{equation}
+P_{32}(x)=\frac{1}{48}(1-x^2)\frac{d^5}{dx^5}(x^2-1)^3=15x(1-x^2),
+\end{equation}
+so the term is proportional to
 \begin{equation}
 15\,s_\phi c_\phi^2\cos\!\left[2(\lambda_g-\lambda_{32})\right],
 \end{equation}
@@ -492,7 +511,8 @@ Three circles (globes). Zonal: two horizontal lines (parallels) symmetric about 
 \begin{keyf}
 $U=U_K+U_Z+U_T$: Keplerian $\dfrac{\mu_E}{r}$, zonal ($J_l$, latitude only), sectoral/tesseral
 $U_{lm}\propto J_{lm}P_{lm}(s_\phi)\cos m(\lambda_g-\lambda_{lm})$; \
-$J_{lm}$: $l-m$ parallels, $m$ meridians; \ $J_{32}$: 1 parallel (equator) + 2 meridians.
+$J_{lm}$: $l-m$ parallels, $m$ meridians; \ $P_{20}=\frac{3x^2-1}{2}$, $P_{22}=3(1-x^2)$, $P_{32}=15x(1-x^2)$ with $x=s_\phi$; \
+$J_{32}$: 1 parallel (equator) + 2 meridians.
 \end{keyf}
 
 \pitfalls
@@ -501,7 +521,7 @@ $J_{lm}$: $l-m$ parallels, $m$ meridians; \ $J_{32}$: 1 parallel (equator) + 2 m
 \item "Sectoral depends only on longitude" refers to the sign / nodal lines; the magnitude still decreases towards the poles.
 \end{itemize}
 
-\source{cap08.tex l.728--836 (harmonics, $P_{lm}$, types, nodal-line rule, EGM2008 coefficients). $P_{32}$ computed from the formula of the notes.}
+\source{cap08.tex l.728--836 (harmonics, $P_{lm}$, types, nodal-line rule, EGM2008 coefficients). $P_{20}$, $P_{22}$, $P_{32}$ computed from the formula of the notes.}
 
 % ---------------------------------------------------------------------
 \question{C6}{Sun-synchronous orbits}
