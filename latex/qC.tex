@@ -211,11 +211,24 @@ depends on geographic latitude and/or longitude.
 
 \answer
 \paragraph{Physical nature.} The Earth is not a sphere with spherical mass distribution: its potential is expanded in harmonics
-(Legendre polynomials $P_{lm}$),
+(Legendre functions $P_{lm}$), as the sum of three parts:
 \begin{equation}
-U=\frac{\mu_E}{r}-\frac{\mu_E}{r}\sum_{l=2}^{\infty}\left(\frac{R_E}{r}\right)^{l}J_lP_{l0}(s_\phi)
-+\frac{\mu_E}{r}\sum_{l=2}^{\infty}\sum_{m=1}^{l}\left(\frac{R_E}{r}\right)^{l}J_{lm}P_{lm}(s_\phi)\cos\!\left[m(\lambda_g-\lambda_{lm})\right].
+U=U_K+U_Z+U_T,\qquad U_K=\frac{\mu_E}{r},
 \end{equation}
+\begin{equation}
+U_Z=-\frac{\mu_E}{r}\sum_{l=2}^{\infty}\left(\frac{R_E}{r}\right)^{l}J_l\,P_{l0}(s_\phi),
+\end{equation}
+\begin{equation}
+U_T=\sum_{l=2}^{\infty}\sum_{m=1}^{l}U_{lm},
+\end{equation}
+\begin{equation}
+U_{lm}=\frac{\mu_E}{r}\left(\frac{R_E}{r}\right)^{l}J_{lm}\,P_{lm}(s_\phi)\cdot\cos\!\left[m(\lambda_g-\lambda_{lm})\right].
+\end{equation}
+Symbols: $\mu_E=GM_E$ is the Earth's gravitational parameter and $R_E$ its equatorial radius; $r$, $\phi$ (latitude) and $\lambda_g$
+(geographic longitude) locate the satellite, with $s_\phi=\sin\phi$; $P_{lm}$ are the Legendre functions of degree $l$ and order $m$.
+$U_K$ is the Keplerian potential of a spherical Earth, $U_Z$ collects the zonal harmonics (coefficients $J_l=J_{l0}$, no longitude
+dependence) and $U_T$ the sectoral and tesseral ones (coefficients $J_{lm}$ and reference longitudes $\lambda_{lm}$, $m\ge1$).
+
 The first term is the Keplerian potential; $J_2$ (zonal harmonic of degree 2, $P_{20}=\frac{3s_\phi^2-1}{2}$) represents the
 \textbf{oblateness} of the Earth, i.e.\ the equatorial bulge due to its rotation:
 \begin{equation}
@@ -227,12 +240,32 @@ MEO (at 1000\,km, $a_{J2}\simeq10^{-2}a_0$), decreasing rapidly with altitude ($
 
 \paragraph{Dependence on latitude and longitude.} $U_{J2}$ depends only on $r$ and on the \textbf{latitude} $\phi$; it does \textbf{not depend on the
 longitude} ($\partial U_{J2}/\partial\lambda_g=0$): the field is axially symmetric about the polar axis (zonal harmonic). Hence
-the perturbing acceleration has only radial and northward components:
+the perturbing acceleration $\underline f_{J2}=\nabla U_{J2}$ has only radial and northward components. With the common factor
 \begin{equation}
-\underline f_{J2}=\frac{3\mu_E}{r^4}R_E^2J_2\left[\frac{3s_\phi^2-1}{2}\,\hat r-s_\phi c_\phi\,\hat N_L\right]
-=\frac{3\mu_{E}}{r^{4}}R_{E}^{2}J_{2}\left[\frac{3s_{\theta_t}^{2}s_{i}^{2}-1}{2}\ \ \ -s_{i}^{2}s_{\theta_t}c_{\theta_t}\ \ \ -s_{i}c_{i}s_{\theta_t}\right]^{\!T}
+K=\frac{3\mu_E R_E^2J_2}{r^4}\qquad(\text{decreases as }1/r^4),
 \end{equation}
-(components along $\hat r,\hat\theta,\hat h$). Through the orbit the satellite sweeps latitudes $|\phi|\le i$, so the effect depends on
+in the local frame ($\hat r$ radial, $\hat N_L$ towards the local north):
+\begin{equation}
+\underline f_{J2}=f_r\,\hat r+f_N\,\hat N_L,
+\end{equation}
+\begin{equation}
+f_r=K\,\frac{3s_\phi^2-1}{2},\qquad f_N=-K\,s_\phi c_\phi .
+\end{equation}
+In the orbital frame ($\hat r$ radial, $\hat\theta$ in the orbit plane along the motion, $\hat h$ along the angular momentum), using
+$s_\phi=s_i\,s_{\theta_t}$ with $i$ the inclination and $\theta_t=\omega+\theta_*$ the argument of latitude:
+\begin{equation}
+\underline f_{J2}=f_r\,\hat r+f_\theta\,\hat\theta+f_h\,\hat h,
+\end{equation}
+\begin{equation}
+f_r=K\,\frac{3s_i^2s_{\theta_t}^2-1}{2},
+\end{equation}
+\begin{equation}
+f_\theta=-K\,s_i^2\,s_{\theta_t}c_{\theta_t},
+\end{equation}
+\begin{equation}
+f_h=-K\,s_i c_i\,s_{\theta_t}.
+\end{equation}
+Here $s_x=\sin x$ and $c_x=\cos x$. Through the orbit the satellite sweeps latitudes $|\phi|\le i$, so the effect depends on
 the inclination.
 
 \paragraph{Averaging.} The osculating elements show short-period oscillations, long-period oscillations and secular drifts. Averaging
@@ -264,7 +297,8 @@ where the apsidal line is "frozen" in space (used by highly elliptic Molniya orb
 Application: the nodal precession can be tuned to $360^\circ$/year to obtain \textbf{sun-synchronous orbits} (\qref{C6}).
 
 \begin{keyf}
-$U_{J2}=-\dfrac{\mu_E}{r}\left(\dfrac{R_E}{r}\right)^2J_2\dfrac{3s_\phi^2-1}{2}$; \ $\langle\dot a\rangle=\langle\dot e\rangle=\langle\dot i\rangle=0$; \
+$U_{J2}=-\dfrac{\mu_E}{r}\left(\dfrac{R_E}{r}\right)^2J_2\dfrac{3s_\phi^2-1}{2}$; \
+$K=\dfrac{3\mu_ER_E^2J_2}{r^4}$, $f_r=K\dfrac{3s_i^2s_{\theta_t}^2-1}{2}$, $f_\theta=-Ks_i^2s_{\theta_t}c_{\theta_t}$, $f_h=-Ks_ic_is_{\theta_t}$; \ $\langle\dot a\rangle=\langle\dot e\rangle=\langle\dot i\rangle=0$; \
 $\langle\dot\Omega\rangle=-\dfrac{3R_E^2J_2\sqrt{\mu_E}}{2a^{7/2}(1-e^2)^2}c_i$; \
 $\langle\dot\omega\rangle=-\dfrac{3R_E^2J_2\sqrt{\mu_E}}{2a^{7/2}(1-e^2)^2}\left(\frac52s_i^2-2\right)$; \ $i_{crit}=63.4^\circ,\,116.6^\circ$.
 \end{keyf}
@@ -297,11 +331,24 @@ State the physical nature of $J_2$ and $J_{22}$ and how many meridians/parallels
 \end{outline}
 
 \answer
-\paragraph{Geopotential.} The Earth's gravitational potential is written as a series of harmonics:
+\paragraph{Geopotential.} The Earth's gravitational potential is written as a series of harmonics, in three parts:
 \begin{equation}
-U=\frac{\mu_E}{r}-\frac{\mu_E}{r}\sum_{l\ge2}\left(\frac{R_E}{r}\right)^{l}J_lP_{l0}(s_\phi)
-+\frac{\mu_E}{r}\sum_{l\ge2}\sum_{m=1}^{l}\left(\frac{R_E}{r}\right)^{l}J_{lm}P_{lm}(s_\phi)\cos\!\left[m(\lambda_g-\lambda_{lm})\right],
+U=U_K+U_Z+U_T,\qquad U_K=\frac{\mu_E}{r},
 \end{equation}
+\begin{equation}
+U_Z=-\frac{\mu_E}{r}\sum_{l=2}^{\infty}\left(\frac{R_E}{r}\right)^{l}J_l\,P_{l0}(s_\phi),
+\end{equation}
+\begin{equation}
+U_T=\sum_{l=2}^{\infty}\sum_{m=1}^{l}U_{lm},
+\end{equation}
+\begin{equation}
+U_{lm}=\frac{\mu_E}{r}\left(\frac{R_E}{r}\right)^{l}J_{lm}\,P_{lm}(s_\phi)\cdot\cos\!\left[m(\lambda_g-\lambda_{lm})\right].
+\end{equation}
+Symbols: $\mu_E=GM_E$ is the Earth's gravitational parameter and $R_E$ its equatorial radius; $r$, $\phi$ (latitude) and $\lambda_g$
+(geographic longitude) locate the satellite, with $s_\phi=\sin\phi$; $P_{lm}$ are the Legendre functions of degree $l$ and order $m$.
+$U_K$ is the Keplerian potential of a spherical Earth, $U_Z$ collects the zonal harmonics (coefficients $J_l=J_{l0}$, no longitude
+dependence) and $U_T$ the sectoral and tesseral ones (coefficients $J_{lm}$ and reference longitudes $\lambda_{lm}$, $m\ge1$).
+The Legendre functions are
 \begin{equation}
 P_{lm}(x)=\frac{1}{2^{l}l!}\left(1-x^{2}\right)^{m/2}\frac{d^{\,l+m}}{dx^{\,l+m}}\left[(x^{2}-1)^{l}\right],\qquad x=s_\phi .
 \end{equation}
@@ -376,14 +423,25 @@ number and type of equipotential lines for the $J_{32}$ harmonic.
 
 \answer
 \paragraph{Expansion of the geopotential.} The potential of the Earth, $U=G\int_{Earth}dm/r$, is written in terms of Legendre polynomials
-(latitude $\phi$, geographical longitude $\lambda_g$):
+(latitude $\phi$, geographical longitude $\lambda_g$), in three parts:
 \begin{equation}
-U=\underbrace{\frac{\mu_E}{r}}_{U_K}
--\frac{\mu_E}{r}\sum_{l=2}^{\infty}\left(\frac{R_E}{r}\right)^{l}J_lP_{l0}(s_\phi)
-+\frac{\mu_E}{r}\sum_{l=2}^{\infty}\sum_{m=1}^{l}\left(\frac{R_E}{r}\right)^{l}J_{lm}P_{lm}(s_\phi)\cos\!\left[m(\lambda_g-\lambda_{lm})\right].
+U=U_K+U_Z+U_T,\qquad U_K=\frac{\mu_E}{r},
 \end{equation}
-$U_K=\mu_E/r$ is the potential of a body with spherical symmetry (Keplerian motion); the other terms are the harmonics, with
-coefficients $J_l$, $J_{lm}$, $\lambda_{lm}$ estimated from satellite tracking (WGS-84, EGM-96, JGM-2, EGM2008). The perturbing
+\begin{equation}
+U_Z=-\frac{\mu_E}{r}\sum_{l=2}^{\infty}\left(\frac{R_E}{r}\right)^{l}J_l\,P_{l0}(s_\phi),
+\end{equation}
+\begin{equation}
+U_T=\sum_{l=2}^{\infty}\sum_{m=1}^{l}U_{lm},
+\end{equation}
+\begin{equation}
+U_{lm}=\frac{\mu_E}{r}\left(\frac{R_E}{r}\right)^{l}J_{lm}\,P_{lm}(s_\phi)\cdot\cos\!\left[m(\lambda_g-\lambda_{lm})\right].
+\end{equation}
+Symbols: $\mu_E=GM_E$ is the Earth's gravitational parameter and $R_E$ its equatorial radius; $r$, $\phi$ (latitude) and $\lambda_g$
+(geographic longitude) locate the satellite, with $s_\phi=\sin\phi$; $P_{lm}$ are the Legendre functions of degree $l$ and order $m$.
+$U_K$ is the Keplerian potential of a spherical Earth, $U_Z$ collects the zonal harmonics (coefficients $J_l=J_{l0}$, no longitude
+dependence) and $U_T$ the sectoral and tesseral ones (coefficients $J_{lm}$ and reference longitudes $\lambda_{lm}$, $m\ge1$).
+
+The coefficients $J_l$, $J_{lm}$, $\lambda_{lm}$ are estimated from satellite tracking (WGS-84, EGM-96, JGM-2, EGM2008). The perturbing
 acceleration is $\underline g=\nabla U$.
 
 \paragraph{The three types.}
@@ -432,7 +490,8 @@ Three circles (globes). Zonal: two horizontal lines (parallels) symmetric about 
 \end{fig2draw}
 
 \begin{keyf}
-$U=\dfrac{\mu_E}{r}-\dfrac{\mu_E}{r}\displaystyle\sum_l\left(\frac{R_E}{r}\right)^lJ_lP_{l0}+\dfrac{\mu_E}{r}\sum_{l,m}\left(\frac{R_E}{r}\right)^lJ_{lm}P_{lm}\cos m(\lambda_g-\lambda_{lm})$; \
+$U=U_K+U_Z+U_T$: Keplerian $\dfrac{\mu_E}{r}$, zonal ($J_l$, latitude only), sectoral/tesseral
+$U_{lm}\propto J_{lm}P_{lm}(s_\phi)\cos m(\lambda_g-\lambda_{lm})$; \
 $J_{lm}$: $l-m$ parallels, $m$ meridians; \ $J_{32}$: 1 parallel (equator) + 2 meridians.
 \end{keyf}
 
