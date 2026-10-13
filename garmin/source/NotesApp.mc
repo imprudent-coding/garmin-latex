@@ -220,6 +220,12 @@ class NotesApp extends Application.AppBase {
         return !(v instanceof Lang.Boolean) || (v as Boolean);
     }
 
+    // elenco: tocchi sopra/sotto la voce selezionata per scorrere (di default no)
+    function listArrows() as Boolean {
+        var v = store.getValue("arrows");
+        return (v instanceof Lang.Boolean) && (v as Boolean);
+    }
+
     // soglia dell'accelerometro in milli-g (0 = spento, di default)
     function motionThreshold() as Number {
         var v = store.getValue("motion");

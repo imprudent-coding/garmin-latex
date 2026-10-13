@@ -9,6 +9,8 @@ function showMainMenu() as Void {
         :auto, null));
     m.addItem(new WatchUi.ToggleMenuItem(WatchUi.loadResource(Rez.Strings.MenuClockKey) as String,
         WatchUi.loadResource(Rez.Strings.MenuClockKeySub) as String, :clockKey, getApp().clockButton(), null));
+    m.addItem(new WatchUi.ToggleMenuItem(WatchUi.loadResource(Rez.Strings.MenuArrows) as String,
+        WatchUi.loadResource(Rez.Strings.MenuArrowsSub) as String, :arrows, getApp().listArrows(), null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuMotion) as String,
         motionLabel(getApp().motionThreshold()), :motion, null));
     var winfo = getApp().store.getValue("winfo");
@@ -86,6 +88,10 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
         }
         if (id == :clockKey) {
             app.store.setValue("clockKey", (item as WatchUi.ToggleMenuItem).isEnabled());
+            return;
+        }
+        if (id == :arrows) {
+            app.store.setValue("arrows", (item as WatchUi.ToggleMenuItem).isEnabled());
             return;
         }
         if (id == :memory) {
