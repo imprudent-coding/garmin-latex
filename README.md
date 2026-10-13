@@ -342,6 +342,7 @@ di pagine (● = già in cache sull'orologio). L'app riparte dall'ultima domanda
 | Elenco | trascinare il dito su/giù | scorrimento veloce (una voce ogni 30 px) |
 | Elenco | swipe a sinistra / a destra | gruppo successivo / inizio del gruppo (o gruppo precedente) |
 | Elenco | tocco su una riga | la seleziona; secondo tocco la apre |
+| Elenco (con *Frecce nell'elenco*) | tocco sopra / sotto la voce selezionata (frecce ▲▼ ai lati) | voce precedente / successiva; tocco sulla voce la apre |
 | Elenco | tocco sulla riga di stato in alto (con i tre puntini **···**) | menu |
 | Lettura | swipe su / tocco nella metà inferiore | pagina successiva |
 | Lettura | swipe giù / tocco nella metà superiore | pagina precedente |
@@ -352,7 +353,7 @@ di pagine (● = già in cache sull'orologio). L'app riparte dall'ultima domanda
 | Elenco / Lettura / Zoom | scatto deciso del polso (se *Movimento* è attivo) | come la pressione prolungata sullo schermo |
 | Orologio | tenere premuto lo schermo o un pulsante per ~2,5 s | torna agli appunti, dove eri |
 | Ovunque | pulsante in basso | indietro |
-| Elenco / Lettura | tocco sui tre puntini in alto / sul numero di pagina (oppure pressione prolungata, se l'orologio stealth è disattivato) | menu: riprendi lettura, torna all'elenco, scorrimento automatico, orologio stealth, movimento, sincronizza, svuota cache, test velocità, mostra memoria |
+| Elenco / Lettura | tocco sui tre puntini in alto / sul numero di pagina (oppure pressione prolungata, se l'orologio stealth è disattivato) | menu: riprendi lettura, torna all'elenco, scorrimento automatico, orologio stealth, frecce nell'elenco, movimento, sincronizza, svuota cache, test velocità, mostra memoria |
 
 **Scorrimento automatico.** Dal menu, *Scorrimento automatico* cambia a ogni
 tocco: No, 5, 10, 15, 20, 30, 45, 60 secondi per pagina (il menu resta aperto).

@@ -4,6 +4,13 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Orologio 1.4.0
+
+- Elenco: opzione *Frecce nell'elenco* nel menu (di default spenta). Se
+  attiva, ai lati compaiono due frecce ▲▼: un tocco sopra la voce selezionata
+  passa alla precedente, sotto alla successiva, sulla voce la apre. Swipe e
+  trascinamento continuano a funzionare.
+
 ## Orologio 1.3.1
 
 - Orologio stealth: lo sblocco con la pressione prolungata è più affidabile.

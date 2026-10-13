@@ -9,7 +9,9 @@ import Toybox.WatchUi;
 // - la voce selezionata è al centro, espansa con il titolo completo;
 // - swipe su/giù: voce precedente/successiva; trascinamento: scorrimento veloce;
 // - swipe sinistra/destra: gruppo successivo/precedente;
-// - tocco su una voce: la seleziona, secondo tocco (o pulsante): la apre.
+// - tocco su una voce: la seleziona, secondo tocco (o pulsante): la apre;
+// - con "Frecce nell'elenco" attivo: tocco sopra/sotto la voce selezionata
+//   (frecce ai lati) per la precedente/successiva, tocco sulla voce per aprirla.
 // Disposizione identica all'anteprima pipeline/gwnotes/preview.py (render_index).
 // tocchi sopra questa y (riga di stato con i tre puntini) aprono il menu
 const MENU_AREA = 44;
@@ -18,6 +20,7 @@ class QuestionListView extends WatchUi.View {
     const ROW_H = 30;
     const HEAD_H = 30;
     const NARROW_DY = 95;
+    const ARROW_DY = 85;
     const T_HEAD = 0;
     const T_SEC = 1;
 
@@ -180,9 +183,26 @@ class QuestionListView extends WatchUi.View {
         dc.setColor(Palette.color(1), Graphics.COLOR_TRANSPARENT);
         dc.drawArc(cx, cy, cx - 3, Graphics.ARC_COUNTER_CLOCKWISE, a - 3, a + 3);
         dc.setPenWidth(1);
+        if (app.listArrows()) {
+            drawArrows(dc, w, cy);
+        }
         if (app.showMemory) {
             dc.setColor(Palette.color(6), Graphics.COLOR_TRANSPARENT);
             dc.drawText(cx, 30, rt.small, Mem.label(), Graphics.TEXT_JUSTIFY_CENTER);
+        }
+    }
+
+    // frecce ai due lati: in alto = voce precedente, in basso = successiva
+    // (tutta la metà dello schermo è toccabile, vedi tapArrow)
+    private function drawArrows(dc as Dc, w as Number, cy as Number) as Void {
+        dc.setColor(Palette.color(2), Graphics.COLOR_TRANSPARENT);
+        var xs = [30, w - 30] as Array<Number>;
+        for (var i = 0; i < xs.size(); i++) {
+            var x = xs[i];
+            var up = cy - ARROW_DY;
+            var dn = cy + ARROW_DY;
+            dc.fillPolygon([[x - 8, up + 5], [x + 8, up + 5], [x, up - 6]]);
+            dc.fillPolygon([[x - 8, dn - 5], [x + 8, dn - 5], [x, dn + 6]]);
         }
     }
 
@@ -270,6 +290,25 @@ class QuestionListView extends WatchUi.View {
         var sec = _rows[_selectable[sel]][1] as Section;
         getApp().store.setValue("sel", sec.id);
         openReader(sec, 0);
+    }
+
+    // Modalità frecce: tocco sulla voce selezionata = apre; sopra = precedente;
+    // sotto = successiva.
+    function tapArrow(y as Number) as Boolean {
+        if (_selectable.size() == 0) {
+            return false;
+        }
+        // _hits[0] è sempre la voce selezionata (disegnata per prima)
+        if (_hits.size() > 0) {
+            var r = _hits[0];
+            if (y >= r[0] && y < r[1]) {
+                openSelected();
+                return true;
+            }
+            move(y < r[0] ? -1 : 1);
+            return true;
+        }
+        return false;
     }
 
     function tapAt(y as Number) as Boolean {
@@ -393,6 +432,9 @@ class QuestionListDelegate extends WatchUi.BehaviorDelegate {
         if (c[1] < MENU_AREA) {
             showMainMenu();
             return true;
+        }
+        if (getApp().listArrows()) {
+            return _view.tapArrow(c[1]);
         }
         return _view.tapAt(c[1]);
     }
