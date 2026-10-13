@@ -57,59 +57,77 @@ class ClockDelegate extends WatchUi.BehaviorDelegate {
     // tempo di pressione per tornare agli appunti
     const UNLOCK_MS = 2500;
     // il sistema segnala la pressione prolungata sullo schermo (onHold) dopo
-    // circa mezzo secondo-un secondo: da lì mancano ~2 s
-    const AFTER_HOLD_MS = 2000;
+    // circa mezzo secondo dall'appoggio del dito
+    const HOLD_LAG_MS = 500;
+    const MIN_MS = 50;
+
+    // inizio della pressione in corso (System.getTimer); null = dito sollevato
+    private var _downAt as Number or Null = null;
 
     function initialize() {
         BehaviorDelegate.initialize();
     }
 
-    // Parte il conto alla rovescia: se la pressione dura fino alla fine, si
-    // torna agli appunti; un rilascio prima lo annulla.
-    private function arm(ms as Number) as Boolean {
-        getApp().ticker.schedule("unlock", ms, method(:unlock), false);
+    // Conto alla rovescia dall'inizio della pressione: se dura fino a
+    // UNLOCK_MS si torna agli appunti; un rilascio prima lo annulla. Più
+    // segnali della stessa pressione (inizio del trascinamento, onHold,
+    // onMenu) non allungano l'attesa: conta il primo.
+    private function press(startedAt as Number) as Boolean {
+        if (_downAt == null || startedAt < (_downAt as Number)) {
+            _downAt = startedAt;
+        }
+        var left = UNLOCK_MS - (System.getTimer() - (_downAt as Number));
+        getApp().ticker.schedule("unlock", left < MIN_MS ? MIN_MS : left, method(:unlock), false);
         return true;
     }
 
-    private function disarm() as Boolean {
+    private function lift() as Boolean {
+        _downAt = null;
         getApp().ticker.cancel("unlock");
         return true;
     }
 
     function unlock() as Void {
+        _downAt = null;
         getApp().clockClosedAt = System.getTimer();
         WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
     }
 
-    // pressione prolungata sullo schermo
+    // pressione prolungata sullo schermo: il dito è giù da ~HOLD_LAG_MS
     function onHold(evt as WatchUi.ClickEvent) as Boolean {
-        return arm(AFTER_HOLD_MS);
+        return press(System.getTimer() - HOLD_LAG_MS);
     }
 
     // il gesto "menu" del dispositivo è anch'esso una pressione prolungata
     function onMenu() as Boolean {
-        return arm(AFTER_HOLD_MS);
+        return press(System.getTimer() - HOLD_LAG_MS);
     }
 
     // dito sollevato (anche dopo un trascinamento): annulla
     function onRelease(evt as WatchUi.ClickEvent) as Boolean {
-        return disarm();
+        return lift();
     }
 
+    // Se il dito si muove un poco il sistema può non segnalare onHold (lo
+    // tratta come un trascinamento): l'inizio del trascinamento fa partire lo
+    // stesso conto, così la pressione vale anche con il dito non fermo.
     function onDrag(evt as WatchUi.DragEvent) as Boolean {
-        if (evt.getType() == WatchUi.DRAG_TYPE_STOP) {
-            disarm();
+        var t = evt.getType();
+        if (t == WatchUi.DRAG_TYPE_START) {
+            press(System.getTimer());
+        } else if (t == WatchUi.DRAG_TYPE_STOP) {
+            lift();
         }
         return true;
     }
 
     // pulsante: tenuto premuto per UNLOCK_MS
     function onKeyPressed(evt as WatchUi.KeyEvent) as Boolean {
-        return arm(UNLOCK_MS);
+        return press(System.getTimer());
     }
 
     function onKeyReleased(evt as WatchUi.KeyEvent) as Boolean {
-        return disarm();
+        return lift();
     }
 
     // tutto il resto viene ignorato (anche il pulsante indietro)

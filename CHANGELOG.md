@@ -4,6 +4,15 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Orologio 1.3.1
+
+- Orologio stealth: lo sblocco con la pressione prolungata è più affidabile.
+  Il conto dei ~2,5 s parte dall'appoggio del dito e non ricomincia quando il
+  sistema segnala la stessa pressione due volte (pressione prolungata e gesto
+  *menu*: prima l'attesa poteva allungarsi oltre i 3 s). Vale anche se il dito
+  si muove un poco: prima il sistema la trattava come un trascinamento e lo
+  sblocco non partiva.
+
 ## Orologio 1.3.0
 
 - Movimento: con l'accelerometro uno scatto deciso del polso vale come una
