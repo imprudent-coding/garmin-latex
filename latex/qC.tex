@@ -631,25 +631,77 @@ The first term is the (indirect) acceleration of the Earth towards body 2, the s
 spacecraft. The formula is exact; to use it in the Gauss equations, $\underline r_{12}$ (Moon or Sun position w.r.t.\ the Earth) and
 $\underline r_{1S}=\frac{p}{1+ec_{\theta_*}}\hat r$ are projected on $(\hat r,\hat\theta,\hat h)$.
 
-\paragraph{Effect on the angular momentum of a circular orbit.}
-\begin{enumerate}
-\item Since $r=r_{1S}\ll r_{12}$, the acceleration is approximated by the \textbf{gravity gradient} (\qref{C8}):
-$\underline f_{3B}\simeq\frac{\mu_2}{r_{12}^5}\left[3\underline r_{12}\underline r_{12}^T-r_{12}^2\underrightarrow{1}\right]\cdot\underline r$.
-\item $\dot{\underline h}=\underline r\times\underline f_{3B}$; the term in $\underrightarrow{1}$ gives $\underline r\times\underline r=\underline 0$:
+\paragraph{Effect on the angular momentum of a circular orbit.} The spacecraft is on a circular orbit of radius $R$; in this part
+$\underline r=\underline r_{1S}$ ($r=R$). In the orbit plane $\hat r=\hat N\,c_{\theta_t}+\hat M\,s_{\theta_t}$, where $(\hat N,\hat M,\hat h)$ is an
+orthonormal triad ($\hat N$ towards the ascending node, $\hat h$ along the angular momentum), $\theta_t$ is the argument of latitude and
+$\dot\theta_t=\sqrt{\mu_1/R^3}$ is constant.
+
+\emph{Step 1: gravity gradient.} Since $r\ll r_{12}$ (the spacecraft is much closer to the Earth than the third body), the
+acceleration is linearised about $\underline r_{21}$ (derivation in \qref{C8}):
 \begin{equation}
-\frac{d\underline h}{dt}=\frac{3\mu_2}{r_{12}^5}(\underline r\times\underline r_{12})(\underline r_{12}\cdot\underline r)=-\frac{3\mu_2}{r_{12}^5}\,\underline r_{12}\times\left(\underline r\,\underline r^T\right)\underline r_{12}.
+\underline f_{3B}\simeq\underrightarrow{D}\cdot\underline r,
 \end{equation}
-\item \textbf{First averaging} over one spacecraft period ($r_{12}$ frozen, $\hat r=\hat Nc_{\theta_t}+\hat Ms_{\theta_t}$ in the orbit plane, $r=R$):
-$\langle c^2_{\theta_t}\rangle=\langle s^2_{\theta_t}\rangle=\frac12$, $\langle c_{\theta_t}s_{\theta_t}\rangle=0$ $\Rightarrow$
-$\langle\underline r\,\underline r^T\rangle=R^2\left[\frac12\underrightarrow{1}-\frac12\hat h\hat h^T\right]$, hence
-$\left\langle\dot{\underline h}\right\rangle=\frac{3\mu_2R^2}{2r_{12}^5}(\underline r_{12}\times\hat h)(\hat h\cdot\underline r_{12})$.
-\item \textbf{Second averaging} over one period of the perturbing body (circular relative orbit with normal $\hat h_{3B}$):
-$\langle\underline r_{12}\underline r_{12}^T\rangle=r_{12}^2\left[\frac12\underrightarrow{1}-\frac12\hat h_{3B}\hat h_{3B}^T\right]$, which gives
 \begin{equation}
-\left\langle\!\left\langle\frac{d\underline{h}}{dt}\right\rangle\!\right\rangle=\underline\omega_h\times\underline h,\qquad
-\underline{\omega}_{h}=-\frac{3}{4}\frac{\mu_{2}R^{2}}{r_{12}^{3}\,h}\left(\hat{h}\cdot\hat{h}_{3B}\right)\hat{h}_{3B},\qquad h=\sqrt{\mu_1R}.
+\underrightarrow{D}=\frac{\mu_2}{r_{12}^5}\left[3\,\underline r_{12}\underline r_{12}^T-r_{12}^2\,\underrightarrow{1}\right],
 \end{equation}
-\end{enumerate}
+where $\underline r_{12}\underline r_{12}^T$ is the outer product (a dyad) and $\underrightarrow{1}$ the unit dyad.
+
+\emph{Step 2: equation for $\underline h$.} In general $\dot{\underline h}=\underline r\times\underline f$. Inserting $\underline f_{3B}$, the term in
+$\underrightarrow{1}$ gives $\underline r\times\underline r=\underline 0$, and $\underline r_{12}\underline r_{12}^T\cdot\underline r=\underline r_{12}(\underline r_{12}\cdot\underline r)$:
+\begin{equation}
+\frac{d\underline h}{dt}=\frac{3\mu_2}{r_{12}^5}\,(\underline r\times\underline r_{12})(\underline r_{12}\cdot\underline r).
+\end{equation}
+Using $\underline r\times\underline r_{12}=-\underline r_{12}\times\underline r$ and $\underline r\,(\underline r\cdot\underline r_{12})=(\underline r\,\underline r^T)\,\underline r_{12}$,
+the spacecraft position appears only in the dyad $\underline r\,\underline r^T$:
+\begin{equation}
+\frac{d\underline h}{dt}=-\frac{3\mu_2}{r_{12}^5}\,\underline r_{12}\times\left(\underline r\,\underline r^T\right)\underline r_{12}.
+\end{equation}
+
+\emph{Step 3: first averaging}, over one orbital period of the spacecraft. In this interval $\underline r_{12}$, $\hat N$, $\hat M$ can be taken
+as constant: only $\underline r\,\underline r^T$ has to be averaged. Expanding,
+\begin{equation}
+\underline r\,\underline r^T=R^2\left(\hat N\hat N^T c_{\theta_t}^2+\hat M\hat M^T s_{\theta_t}^2\right)
++R^2\left(\hat N\hat M^T+\hat M\hat N^T\right)c_{\theta_t}s_{\theta_t},
+\end{equation}
+and over one revolution
+\begin{equation}
+\langle c_{\theta_t}^2\rangle=\langle s_{\theta_t}^2\rangle=\frac12,\qquad \langle c_{\theta_t}s_{\theta_t}\rangle=0,
+\end{equation}
+so that
+\begin{equation}
+\left\langle\underline r\,\underline r^T\right\rangle=\frac{R^2}{2}\left(\hat N\hat N^T+\hat M\hat M^T\right).
+\end{equation}
+For any orthonormal triad the unit dyad is $\underrightarrow{1}=\hat N\hat N^T+\hat M\hat M^T+\hat h\hat h^T$, hence
+\begin{equation}
+\left\langle\underline r\,\underline r^T\right\rangle=\frac{R^2}{2}\left(\underrightarrow{1}-\hat h\hat h^T\right).
+\end{equation}
+Inserting it in Step 2, the term in $\underrightarrow{1}$ gives $\underline r_{12}\times\underline r_{12}=\underline 0$:
+\begin{equation}
+\left\langle\frac{d\underline h}{dt}\right\rangle=\frac{3\mu_2R^2}{2r_{12}^5}\,(\underline r_{12}\times\hat h)(\hat h\cdot\underline r_{12}).
+\end{equation}
+
+\emph{Step 4: second averaging}, over one orbital period of the perturbing body, assumed on a circular orbit about the Earth with unit
+normal $\hat h_{3B}$. Now $\hat h$ is (nearly) constant and $\underline r_{12}$ rotates. As before, the position of the third body is
+collected in a dyad: $\underline r_{12}(\underline r_{12}\cdot\hat h)=(\underline r_{12}\underline r_{12}^T)\,\hat h$, so
+\begin{equation}
+(\underline r_{12}\times\hat h)(\hat h\cdot\underline r_{12})=\left[(\underline r_{12}\underline r_{12}^T)\,\hat h\right]\times\hat h .
+\end{equation}
+By the same argument as in Step 3, with the triad of the third-body orbit,
+\begin{equation}
+\left\langle\underline r_{12}\underline r_{12}^T\right\rangle=\frac{r_{12}^2}{2}\left(\underrightarrow{1}-\hat h_{3B}\hat h_{3B}^T\right),
+\end{equation}
+and with $\underrightarrow{1}\cdot\hat h=\hat h$, $\hat h\times\hat h=\underline 0$:
+\begin{equation}
+\left\langle\left(\underline r_{12}\underline r_{12}^T\right)\hat h\right\rangle\times\hat h=-\frac{r_{12}^2}{2}\,(\hat h_{3B}\cdot\hat h)\,\hat h_{3B}\times\hat h .
+\end{equation}
+Multiplying by $3\mu_2R^2/(2r_{12}^5)$ and writing $\hat h=\underline h/h$:
+\begin{equation}
+\left\langle\!\left\langle\frac{d\underline{h}}{dt}\right\rangle\!\right\rangle=\underline\omega_h\times\underline h,
+\end{equation}
+\begin{equation}
+\underline{\omega}_{h}=-\frac{3}{4}\,\frac{\mu_{2}R^{2}}{r_{12}^{3}\,h}\left(\hat{h}\cdot\hat{h}_{3B}\right)\hat{h}_{3B},\qquad h=\sqrt{\mu_1R}.
+\end{equation}
+
 \textbf{Result}: on average $\underline h$ only \textbf{rotates} about $\hat h_{3B}$ (normal to the orbit of the third body: ecliptic pole for the Sun),
 \textbf{its magnitude does not change} (orbit size unchanged, $\dot{\underline h}\perp\underline h$), while the orbit plane precesses with
 period $T_{prec}=2\pi/|\underline\omega_h|$; clockwise if $\hat h\cdot\hat h_{3B}>0$, counter-clockwise if $<0$. The inclination with respect to
