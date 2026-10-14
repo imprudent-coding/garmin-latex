@@ -450,21 +450,45 @@ $\underline\sigma=\underline R_C+\underline r$.
 \end{equation}
 i.e.\ the inertia about $P$ equals the inertia about $C$ plus the inertia of a point mass $M$ placed at $C$.
 
-\paragraph{Proof.} Substituting $\underline\sigma=\underline R_C+\underline r$:
+\paragraph{Proof.} Substitute $\underline\sigma=\underline R_C+\underline r$ in the two terms of the integrand.
+
+\emph{Step 1: expand.}
 \begin{equation}
-\begin{aligned}
-\underrightarrow{I}_{P}&=\int_{\mathcal{B}}\left[\left(\underline{R}_{C}+\underline{r}\right)\cdot\left(\underline{R}_{C}+\underline{r}\right)\underrightarrow{1}-\left(\underline{R}_{C}+\underline{r}\right)\left(\underline{R}_{C}+\underline{r}\right)^T\right]dm\\
-&=MR_{C}^{2}\,\underrightarrow{1}+2\,\underline{R}_{C}\cdot\left(\int_{\mathcal{B}}\underline{r}\,dm\right)\underrightarrow{1}+\int_{\mathcal{B}}r^{2}\,\underrightarrow{1}\,dm
--M\underline{R}_{C}\underline{R}_{C}^T\\
-&\quad-\int_{\mathcal{B}}\underline{r}\,\underline{r}^T dm
--\underline{R}_{C}\int_{\mathcal{B}}\underline{r}^T dm-\int_{\mathcal{B}}\underline{r}\,dm\,\underline{R}_{C}^T .
-\end{aligned}
+\sigma^2=R_C^2+2\,\underline R_C\cdot\underline r+r^2,
 \end{equation}
-$\underline R_C$ is the same for all $dm$ and can be taken out of the integrals. Since $\underline r$ is measured from the centre of mass,
-$\int_{\mathcal B}\underline r\,dm=\underline 0$: the three mixed terms vanish. What remains is
 \begin{equation}
-\underrightarrow{I}_{P}=M\left(R_{C}^{2}\,\underrightarrow{1}-\underline{R}_{C}\underline{R}_{C}^T\right)+\int_{\mathcal{B}}\left(r^{2}\,\underrightarrow{1}-\underline{r}\,\underline{r}^T\right)dm
-=\underrightarrow{I}_{C}+M\left(R_{C}^{2}\,\underrightarrow{1}-\underline{R}_{C}\underline{R}_{C}^T\right).\qquad\blacksquare
+\underline\sigma\,\underline\sigma^T=\underline R_C\underline R_C^T+\underline R_C\,\underline r^T+\underline r\,\underline R_C^T+\underline r\,\underline r^T .
+\end{equation}
+
+\emph{Step 2: integrate over the body.} $\underline R_C$ is the same for all $dm$ and comes out of the integrals:
+\begin{equation}
+\int_{\mathcal B}\sigma^2\,dm=MR_C^2+2\,\underline R_C\cdot\int_{\mathcal B}\underline r\,dm+\int_{\mathcal B}r^2\,dm,
+\end{equation}
+\begin{equation}
+\int_{\mathcal B}\underline\sigma\,\underline\sigma^T dm=M\underline R_C\underline R_C^T+\underline R_C\!\int_{\mathcal B}\underline r^T dm
++\int_{\mathcal B}\underline r\,dm\;\underline R_C^T+\int_{\mathcal B}\underline r\,\underline r^T dm .
+\end{equation}
+
+\emph{Step 3: use the centre of mass.} Since $\underline r$ is measured from $C$,
+\begin{equation}
+\int_{\mathcal B}\underline r\,dm=\underline 0,
+\end{equation}
+so the three mixed terms vanish:
+\begin{equation}
+\int_{\mathcal B}\sigma^2\,dm=MR_C^2+\int_{\mathcal B}r^2\,dm,
+\end{equation}
+\begin{equation}
+\int_{\mathcal B}\underline\sigma\,\underline\sigma^T dm=M\underline R_C\underline R_C^T+\int_{\mathcal B}\underline r\,\underline r^T dm .
+\end{equation}
+
+\emph{Step 4: recombine.} Putting the two results in $\underrightarrow I_P=\int\sigma^2dm\,\underrightarrow1-\int\underline\sigma\,\underline\sigma^Tdm$:
+\begin{equation}
+\underrightarrow{I}_{P}=\int_{\mathcal{B}}\left(r^{2}\,\underrightarrow{1}-\underline{r}\,\underline{r}^T\right)dm
++M\left(R_{C}^{2}\,\underrightarrow{1}-\underline{R}_{C}\underline{R}_{C}^T\right),
+\end{equation}
+and the integral is, by definition, the inertia dyad about $C$:
+\begin{equation}
+\underrightarrow{I}_{P}=\underrightarrow{I}_{C}+M\left(R_{C}^{2}\,\underrightarrow{1}-\underline{R}_{C}\underline{R}_{C}^T\right).\qquad\blacksquare
 \end{equation}
 
 \paragraph{Matrix form.} Projecting on body axes $(\hat b_1,\hat b_2,\hat b_3)$ (pre- and post-multiplying by the basis), with
