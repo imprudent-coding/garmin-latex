@@ -561,25 +561,9 @@ and $\underline r=x\hat b_1+y\hat b_2+z\hat b_3$. The dyad is expanded as
 \end{equation}
 where the \textbf{inertia matrix} is
 \begin{equation}
-\underline{\underline{I}}_{C}^{(B)}=\begin{bmatrix}I_{11}&I_{12}&I_{13}\\I_{12}&I_{22}&I_{23}\\I_{13}&I_{23}&I_{33}\end{bmatrix},
+\underline{\underline{I}}_{C}^{(B)}=\int_{\mathcal{B}}\begin{bmatrix}y^{2}+z^{2}&-xy&-xz\\-yx&x^{2}+z^{2}&-yz\\-zx&-zy&x^{2}+y^{2}\end{bmatrix}dm .
 \end{equation}
-with the \textbf{moments of inertia} (diagonal)
-\begin{equation}
-I_{11}=\int_{\mathcal B}(y^2+z^2)\,dm,
-\end{equation}
-\begin{equation}
-I_{22}=\int_{\mathcal B}(x^2+z^2)\,dm,
-\end{equation}
-\begin{equation}
-I_{33}=\int_{\mathcal B}(x^2+y^2)\,dm,
-\end{equation}
-and the \textbf{products of inertia} (off-diagonal)
-\begin{equation}
-I_{12}=-\int_{\mathcal B}xy\,dm,\qquad I_{13}=-\int_{\mathcal B}xz\,dm,
-\end{equation}
-\begin{equation}
-I_{23}=-\int_{\mathcal B}yz\,dm .
-\end{equation}
+Diagonal terms: \textbf{moments of inertia}; off-diagonal terms: \textbf{products of inertia}.
 The inertia matrix is the projection (matrix of components) of the dyad on the basis $B$:
 \begin{equation}
 \underline{\underline I}_C^{(B)}=[\hat b]^T\cdot\underrightarrow I_C\cdot[\hat b],
