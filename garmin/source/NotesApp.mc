@@ -232,6 +232,12 @@ class NotesApp extends Application.AppBase {
         return (v instanceof Lang.Number) ? v as Number : 0;
     }
 
+    // pressione per tornare agli appunti dall'orologio stealth, in ms (di default 2,5 s)
+    function unlockMs() as Number {
+        var v = store.getValue("unlock");
+        return (v instanceof Lang.Number && UNLOCK_STEPS.indexOf(v) >= 0) ? v as Number : 2500;
+    }
+
     // ms di orologio verticale prima di aprire l'orologio stealth (0 = spento, di default)
     function verticalDelay() as Number {
         var v = store.getValue("vert");

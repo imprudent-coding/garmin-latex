@@ -54,8 +54,6 @@ class ClockView extends WatchUi.View {
 }
 
 class ClockDelegate extends WatchUi.BehaviorDelegate {
-    // tempo di pressione per tornare agli appunti
-    const UNLOCK_MS = 2500;
     // il sistema segnala la pressione prolungata sullo schermo (onHold) dopo
     // circa mezzo secondo dall'appoggio del dito
     const HOLD_LAG_MS = 500;
@@ -69,14 +67,14 @@ class ClockDelegate extends WatchUi.BehaviorDelegate {
     }
 
     // Conto alla rovescia dall'inizio della pressione: se dura fino a
-    // UNLOCK_MS si torna agli appunti; un rilascio prima lo annulla. Più
-    // segnali della stessa pressione (inizio del trascinamento, onHold,
-    // onMenu) non allungano l'attesa: conta il primo.
+    // unlockMs() (menu "Sblocco orologio") si torna agli appunti; un rilascio
+    // prima lo annulla. Più segnali della stessa pressione (inizio del
+    // trascinamento, onHold, onMenu) non allungano l'attesa: conta il primo.
     private function press(startedAt as Number) as Boolean {
         if (_downAt == null || startedAt < (_downAt as Number)) {
             _downAt = startedAt;
         }
-        var left = UNLOCK_MS - (System.getTimer() - (_downAt as Number));
+        var left = getApp().unlockMs() - (System.getTimer() - (_downAt as Number));
         getApp().ticker.schedule("unlock", left < MIN_MS ? MIN_MS : left, method(:unlock), false);
         return true;
     }
@@ -121,7 +119,7 @@ class ClockDelegate extends WatchUi.BehaviorDelegate {
         return true;
     }
 
-    // pulsante: tenuto premuto per UNLOCK_MS
+    // pulsante: tenuto premuto per unlockMs()
     function onKeyPressed(evt as WatchUi.KeyEvent) as Boolean {
         return press(System.getTimer());
     }
