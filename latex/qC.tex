@@ -832,16 +832,24 @@ retro-burn at perigee, it lowers the \textbf{apogee} altitude, while the perigee
 \paragraph{Approximate analysis for near-circular orbits.} With $a\simeq R$, $v\simeq\sqrt{\mu/a}\,\hat\theta$ and $\underline v_R\simeq\underline v$:
 $f_\theta^{(D)}=-\frac12C_D\frac Sm\rho\frac\mu a$, $f_r=f_h=0$, hence
 \begin{equation}
-\dot{a}=\frac{2a^{3/2}}{\sqrt{\mu}}f_{\theta}^{(D)}=-C_{D}\frac{S}{m}\rho\sqrt{\mu a}
-\;\xrightarrow{\ \rho\simeq\text{const}\ }\;
-a_{\text{fin}}^{1/2}-a_{\text{ini}}^{1/2}=-\frac{C_{D}S}{2m}\rho\sqrt{\mu}\,(t_{\text{fin}}-t_{\text{ini}}),
+\dot{a}=\frac{2a^{3/2}}{\sqrt{\mu}}f_{\theta}^{(D)}=-C_{D}\frac{S}{m}\rho\sqrt{\mu a}.
+\end{equation}
+Separating the variables, $\dfrac{da}{2\sqrt a}=d\!\left(a^{1/2}\right)$:
+\begin{equation}
+\frac{d\left(a^{1/2}\right)}{dt}=-\frac{C_DS}{2m}\,\rho\sqrt{\mu},
+\end{equation}
+and, taking $\rho\simeq$ const, the integration between the initial and the final time gives the
+\textbf{final semi-major axis}:
+\begin{equation}
+a_{\text{fin}}^{1/2}-a_{\text{ini}}^{1/2}=-\frac{C_{D}S}{2m}\,\rho\sqrt{\mu}\,\left(t_{\text{fin}}-t_{\text{ini}}\right)
 \end{equation}
 valid for small variations of $a$ (otherwise $\rho$ changes). Note that as $a$ decreases the orbital speed $\sqrt{\mu/a}$ \emph{increases}:
 drag removes energy but the satellite speeds up while spiralling down \notinnotes.
 
 \begin{keyf}
 $\underline a_D=-\frac12C_D\dfrac Sm\rho v_R^2\hat v_R$, \ $\underline v_R=\underline v-\underline\omega_E\times\underline r$, \ ballistic coeff.\ $C_DS/m$, \
-$a\downarrow$, $e\downarrow$; \ $\dot a=-C_D\dfrac Sm\rho\sqrt{\mu a}$.
+$a\downarrow$, $e\downarrow$; \ $\dot a=-C_D\dfrac Sm\rho\sqrt{\mu a}$; \
+$a_{\text{fin}}^{1/2}-a_{\text{ini}}^{1/2}=-\dfrac{C_DS}{2m}\rho\sqrt{\mu}\,(t_{\text{fin}}-t_{\text{ini}})$.
 \end{keyf}
 
 \pitfalls
