@@ -68,8 +68,8 @@ class ClockDelegate extends WatchUi.BehaviorDelegate {
 
     // Conto alla rovescia dall'inizio della pressione: se dura fino a
     // unlockMs() (menu "Sblocco orologio") si torna agli appunti; un rilascio
-    // prima lo annulla. Più segnali della stessa pressione (inizio del trascinamento, onHold,
-    // onMenu) non allungano l'attesa: conta il primo.
+    // prima lo annulla. Più segnali della stessa pressione (inizio del
+    // trascinamento, onHold, onMenu) non allungano l'attesa: conta il primo.
     private function press(startedAt as Number) as Boolean {
         if (_downAt == null || startedAt < (_downAt as Number)) {
             _downAt = startedAt;
