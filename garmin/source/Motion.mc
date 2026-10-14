@@ -167,6 +167,11 @@ function verticalLabel(ms as Number) as String {
     if (ms == 0) {
         return WatchUi.loadResource(Rez.Strings.Off) as String;
     }
+    return secondsLabel(ms);
+}
+
+// "2 s", "2,5 s"
+function secondsLabel(ms as Number) as String {
     if (ms % 1000 == 0) {
         return (ms / 1000).toString() + " s";
     }

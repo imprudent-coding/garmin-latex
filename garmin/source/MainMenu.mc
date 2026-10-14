@@ -9,6 +9,8 @@ function showMainMenu() as Void {
         :auto, null));
     m.addItem(new WatchUi.ToggleMenuItem(WatchUi.loadResource(Rez.Strings.MenuClockKey) as String,
         WatchUi.loadResource(Rez.Strings.MenuClockKeySub) as String, :clockKey, getApp().clockButton(), null));
+    m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuUnlock) as String,
+        secondsLabel(getApp().unlockMs()), :unlock, null));
     m.addItem(new WatchUi.ToggleMenuItem(WatchUi.loadResource(Rez.Strings.MenuArrows) as String,
         WatchUi.loadResource(Rez.Strings.MenuArrowsSub) as String, :arrows, getApp().listArrows(), null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuMotion) as String,
@@ -27,6 +29,9 @@ function showMainMenu() as Void {
         getApp().showMemory, null));
     WatchUi.pushView(m, new MainMenuDelegate(), WatchUi.SLIDE_UP);
 }
+
+// durata della pressione per tornare agli appunti dall'orologio stealth (ms)
+const UNLOCK_STEPS = [1000, 1500, 2000, 2500, 3000, 4000];
 
 // valori dello scorrimento automatico, in secondi per pagina (0 = spento)
 const AUTO_STEPS = [0, 5, 10, 15, 20, 30, 45, 60];
@@ -74,6 +79,15 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
             app.store.setValue("motion", nextT);
             app.motion.apply();
             item.setSubLabel(motionLabel(nextT));
+            WatchUi.requestUpdate();
+            return;
+        }
+        if (id == :unlock) {
+            var curU = app.unlockMs();
+            var u = UNLOCK_STEPS.indexOf(curU);
+            var nextU = UNLOCK_STEPS[(u + 1) % UNLOCK_STEPS.size()] as Number;
+            app.store.setValue("unlock", nextU);
+            item.setSubLabel(secondsLabel(nextU));
             WatchUi.requestUpdate();
             return;
         }

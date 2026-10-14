@@ -352,9 +352,9 @@ di pagine (● = già in cache sull'orologio). L'app riparte dall'ultima domanda
 | Ovunque | pulsante in alto (premuto, non toccando lo schermo) o pressione prolungata sullo schermo | **orologio** (vedi sotto) |
 | Elenco / Lettura / Zoom | scatto deciso del polso (se *Movimento* è attivo) | come la pressione prolungata sullo schermo |
 | Elenco / Lettura / Zoom | orologio da orizzontale a verticale (se *Orologio se verticale* è attivo) | come la pressione prolungata sullo schermo |
-| Orologio | tenere premuto lo schermo o un pulsante per ~2,5 s | torna agli appunti, dove eri |
+| Orologio | tenere premuto lo schermo o un pulsante per ~2,5 s (regolabile dal menu, *Sblocco orologio*) | torna agli appunti, dove eri |
 | Ovunque | pulsante in basso | indietro |
-| Elenco / Lettura | tocco sui tre puntini in alto / sul numero di pagina (oppure pressione prolungata, se l'orologio stealth è disattivato) | menu: riprendi lettura, torna all'elenco, scorrimento automatico, orologio stealth, frecce nell'elenco, movimento, orologio se verticale, sincronizza, svuota cache, test velocità, mostra memoria |
+| Elenco / Lettura | tocco sui tre puntini in alto / sul numero di pagina (oppure pressione prolungata, se l'orologio stealth è disattivato) | menu: riprendi lettura, torna all'elenco, scorrimento automatico, orologio stealth, sblocco orologio, frecce nell'elenco, movimento, orologio se verticale, sincronizza, svuota cache, test velocità, mostra memoria |
 
 **Scorrimento automatico.** Dal menu, *Scorrimento automatico* cambia a ogni
 tocco: No, 5, 10, 15, 20, 30, 45, 60 secondi per pagina (il menu resta aperto).
@@ -368,7 +368,9 @@ ancora arrivata dal telefono, aspetta che arrivi.
 schermo (nell'elenco, in lettura e nello zoom), copre subito gli appunti con
 una schermata orologio (ora, data, batteria), senza animazione. Swipe, tocchi e pulsante
 indietro non fanno nulla. Per tornare agli appunti tieni premuto lo schermo (o
-un pulsante) per circa 2,5 s: ritrovi la pagina dov'eri. Se sollevi prima il
+un pulsante) per circa 2,5 s: ritrovi la pagina dov'eri. La durata si cambia
+dal menu, *Sblocco orologio*, a ogni tocco: 1, 1,5, 2, 2,5 (di default), 3 o
+4 s. Se sollevi prima il
 dito (o lasci il pulsante) resta l'orologio. Lo scorrimento
 automatico resta in pausa finché l'orologio è aperto. Si disattiva dal menu
 (*Orologio stealth*): in quel caso il pulsante in alto torna a girare pagina

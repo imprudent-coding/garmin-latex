@@ -12,6 +12,9 @@ automatiche a ogni push su `main`.
   il tempo scelto vale come una pressione prolungata sullo schermo (elenco,
   lettura, zoom). Dopo lo sblocco serve tornare orizzontali prima che scatti
   di nuovo.
+- Orologio stealth: opzione *Sblocco orologio* nel menu per scegliere quanto
+  tenere premuto lo schermo (o un pulsante) per tornare agli appunti: 1, 1,5,
+  2, 2,5 (di default), 3 o 4 s.
 
 ## Orologio 1.4.0
 
