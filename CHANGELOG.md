@@ -4,6 +4,15 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Orologio 1.5.0
+
+- Orologio stealth: opzione *Orologio se verticale* nel menu (No di default,
+  0,5 s, 1 s, 2 s). Con l'accelerometro, il passaggio da orizzontale (schermo
+  verso l'alto) a verticale (braccio abbassato o polso girato) mantenuto per
+  il tempo scelto vale come una pressione prolungata sullo schermo (elenco,
+  lettura, zoom). Dopo lo sblocco serve tornare orizzontali prima che scatti
+  di nuovo.
+
 ## Orologio 1.4.0
 
 - Elenco: opzione *Frecce nell'elenco* nel menu (di default spenta). Se
