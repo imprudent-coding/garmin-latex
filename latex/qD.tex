@@ -450,21 +450,45 @@ $\underline\sigma=\underline R_C+\underline r$.
 \end{equation}
 i.e.\ the inertia about $P$ equals the inertia about $C$ plus the inertia of a point mass $M$ placed at $C$.
 
-\paragraph{Proof.} Substituting $\underline\sigma=\underline R_C+\underline r$:
+\paragraph{Proof.} Substitute $\underline\sigma=\underline R_C+\underline r$ in the two terms of the integrand.
+
+\emph{Step 1: expand.}
 \begin{equation}
-\begin{aligned}
-\underrightarrow{I}_{P}&=\int_{\mathcal{B}}\left[\left(\underline{R}_{C}+\underline{r}\right)\cdot\left(\underline{R}_{C}+\underline{r}\right)\underrightarrow{1}-\left(\underline{R}_{C}+\underline{r}\right)\left(\underline{R}_{C}+\underline{r}\right)^T\right]dm\\
-&=MR_{C}^{2}\,\underrightarrow{1}+2\,\underline{R}_{C}\cdot\left(\int_{\mathcal{B}}\underline{r}\,dm\right)\underrightarrow{1}+\int_{\mathcal{B}}r^{2}\,\underrightarrow{1}\,dm
--M\underline{R}_{C}\underline{R}_{C}^T\\
-&\quad-\int_{\mathcal{B}}\underline{r}\,\underline{r}^T dm
--\underline{R}_{C}\int_{\mathcal{B}}\underline{r}^T dm-\int_{\mathcal{B}}\underline{r}\,dm\,\underline{R}_{C}^T .
-\end{aligned}
+\sigma^2=R_C^2+2\,\underline R_C\cdot\underline r+r^2,
 \end{equation}
-$\underline R_C$ is the same for all $dm$ and can be taken out of the integrals. Since $\underline r$ is measured from the centre of mass,
-$\int_{\mathcal B}\underline r\,dm=\underline 0$: the three mixed terms vanish. What remains is
 \begin{equation}
-\underrightarrow{I}_{P}=M\left(R_{C}^{2}\,\underrightarrow{1}-\underline{R}_{C}\underline{R}_{C}^T\right)+\int_{\mathcal{B}}\left(r^{2}\,\underrightarrow{1}-\underline{r}\,\underline{r}^T\right)dm
-=\underrightarrow{I}_{C}+M\left(R_{C}^{2}\,\underrightarrow{1}-\underline{R}_{C}\underline{R}_{C}^T\right).\qquad\blacksquare
+\underline\sigma\,\underline\sigma^T=\underline R_C\underline R_C^T+\underline R_C\,\underline r^T+\underline r\,\underline R_C^T+\underline r\,\underline r^T .
+\end{equation}
+
+\emph{Step 2: integrate over the body.} $\underline R_C$ is the same for all $dm$ and comes out of the integrals:
+\begin{equation}
+\int_{\mathcal B}\sigma^2\,dm=MR_C^2+2\,\underline R_C\cdot\int_{\mathcal B}\underline r\,dm+\int_{\mathcal B}r^2\,dm,
+\end{equation}
+\begin{equation}
+\int_{\mathcal B}\underline\sigma\,\underline\sigma^T dm=M\underline R_C\underline R_C^T+\underline R_C\!\int_{\mathcal B}\underline r^T dm
++\int_{\mathcal B}\underline r\,dm\;\underline R_C^T+\int_{\mathcal B}\underline r\,\underline r^T dm .
+\end{equation}
+
+\emph{Step 3: use the centre of mass.} Since $\underline r$ is measured from $C$,
+\begin{equation}
+\int_{\mathcal B}\underline r\,dm=\underline 0,
+\end{equation}
+so the three mixed terms vanish:
+\begin{equation}
+\int_{\mathcal B}\sigma^2\,dm=MR_C^2+\int_{\mathcal B}r^2\,dm,
+\end{equation}
+\begin{equation}
+\int_{\mathcal B}\underline\sigma\,\underline\sigma^T dm=M\underline R_C\underline R_C^T+\int_{\mathcal B}\underline r\,\underline r^T dm .
+\end{equation}
+
+\emph{Step 4: recombine.} Putting the two results in $\underrightarrow I_P=\int\sigma^2dm\,\underrightarrow1-\int\underline\sigma\,\underline\sigma^Tdm$:
+\begin{equation}
+\underrightarrow{I}_{P}=\int_{\mathcal{B}}\left(r^{2}\,\underrightarrow{1}-\underline{r}\,\underline{r}^T\right)dm
++M\left(R_{C}^{2}\,\underrightarrow{1}-\underline{R}_{C}\underline{R}_{C}^T\right),
+\end{equation}
+and the integral is, by definition, the inertia dyad about $C$:
+\begin{equation}
+\underrightarrow{I}_{P}=\underrightarrow{I}_{C}+M\left(R_{C}^{2}\,\underrightarrow{1}-\underline{R}_{C}\underline{R}_{C}^T\right).\qquad\blacksquare
 \end{equation}
 
 \paragraph{Matrix form.} Projecting on body axes $(\hat b_1,\hat b_2,\hat b_3)$ (pre- and post-multiplying by the basis), with
@@ -514,44 +538,84 @@ matrix in two reference frames.
 \paragraph{Inertia dyad.} For a rigid body with centre of mass $C$, $\underline r$ = position of $dm$ from $C$ (fixed in the body frame, so
 $\dot{\underline r}=\underline\omega\times\underline r$), the angular momentum about $C$ is
 \begin{equation}
-\underline H_C=\int_{\mathcal B}\underline r\times(\underline\omega\times\underline r)\,dm=\left(\int_{\mathcal B}\left[r^2\underrightarrow{1}-\underline r\,\underline r^T\right]dm\right)\cdot\underline\omega
-=\underrightarrow{I}_C\cdot\underline\omega,
+\underline H_C=\int_{\mathcal B}\underline r\times(\underline\omega\times\underline r)\,dm .
+\end{equation}
+With the triple product $\underline r\times(\underline\omega\times\underline r)=r^2\underline\omega-\underline r\,(\underline r\cdot\underline\omega)$:
+\begin{equation}
+\underline r\times(\underline\omega\times\underline r)=\left[r^2\,\underrightarrow{1}-\underline r\,\underline r^T\right]\cdot\underline\omega,
+\end{equation}
+and since $\underline\omega$ is the same for all $dm$ it comes out of the integral:
+\begin{equation}
+\underline H_C=\underrightarrow{I}_C\cdot\underline\omega,
 \end{equation}
 \begin{equation}
-\boxed{\;\underrightarrow{I}_C=\int_{\mathcal B}\left[r^2\,\underrightarrow{1}-\underline r\,\underline r^T\right]dm\;}\qquad
-\underrightarrow1=\hat b_1\hat b_1+\hat b_2\hat b_2+\hat b_3\hat b_3 .
+\boxed{\;\underrightarrow{I}_C=\int_{\mathcal B}\left[r^2\,\underrightarrow{1}-\underline r\,\underline r^T\right]dm\;}
 \end{equation}
-The inertia dyad is a second-order tensor, independent of any frame, that depends only on the mass distribution; acting on
-$\underline\omega$ it gives $\underline H_C$.
+with $\underrightarrow1=\hat b_1\hat b_1+\hat b_2\hat b_2+\hat b_3\hat b_3$ the unit dyad. The inertia dyad is a second-order tensor,
+independent of any frame, that depends only on the mass distribution; acting on $\underline\omega$ it gives $\underline H_C$.
 
-\paragraph{Relation with the inertia matrix.} Writing $\underline r=x\hat b_1+y\hat b_2+z\hat b_3$ in a frame $B$:
+\paragraph{Relation with the inertia matrix.} Write $[\hat b]=[\hat b_1\ \hat b_2\ \hat b_3]$ for the row of the unit vectors of a frame $B$
+and $\underline r=x\hat b_1+y\hat b_2+z\hat b_3$. The dyad is expanded as
 \begin{equation}
-\underrightarrow{I}_C=[\hat b_1\ \hat b_2\ \hat b_3]\;\underline{\underline I}_C^{(B)}\;[\hat b_1\ \hat b_2\ \hat b_3]^T,\qquad
-\underline{\underline{I}}_{C}^{(B)}=\int_{\mathcal{B}}\begin{bmatrix}y^{2}+z^{2}&-xy&-xz\\-yx&x^{2}+z^{2}&-yz\\-zx&-zy&x^{2}+y^{2}\end{bmatrix}dm .
+\underrightarrow{I}_C=[\hat b]\;\underline{\underline I}_C^{(B)}\;[\hat b]^T,
 \end{equation}
-The \textbf{inertia matrix} is the projection (matrix of components) of the dyad on the basis $B$:
-$\underline{\underline I}_C^{(B)}=[\hat b]^T\cdot\underrightarrow I_C\cdot[\hat b]$, since $[\hat b]^T\cdot[\hat b]=\underline{\underline I}_{3\times3}$. Diagonal terms: moments
-of inertia; off-diagonal terms: products of inertia. In components, $\underline H_C^{(B)}=\underline{\underline I}_C^{(B)}\underline\omega^{(B)}$. The
-same dyad has different matrices in different frames.
+where the \textbf{inertia matrix} is
+\begin{equation}
+\underline{\underline{I}}_{C}^{(B)}=\begin{bmatrix}I_{11}&I_{12}&I_{13}\\I_{12}&I_{22}&I_{23}\\I_{13}&I_{23}&I_{33}\end{bmatrix},
+\end{equation}
+with the \textbf{moments of inertia} (diagonal)
+\begin{equation}
+I_{11}=\int_{\mathcal B}(y^2+z^2)\,dm,
+\end{equation}
+\begin{equation}
+I_{22}=\int_{\mathcal B}(x^2+z^2)\,dm,
+\end{equation}
+\begin{equation}
+I_{33}=\int_{\mathcal B}(x^2+y^2)\,dm,
+\end{equation}
+and the \textbf{products of inertia} (off-diagonal)
+\begin{equation}
+I_{12}=-\int_{\mathcal B}xy\,dm,\qquad I_{13}=-\int_{\mathcal B}xz\,dm,
+\end{equation}
+\begin{equation}
+I_{23}=-\int_{\mathcal B}yz\,dm .
+\end{equation}
+The inertia matrix is the projection (matrix of components) of the dyad on the basis $B$:
+\begin{equation}
+\underline{\underline I}_C^{(B)}=[\hat b]^T\cdot\underrightarrow I_C\cdot[\hat b],
+\end{equation}
+since $[\hat b]^T\cdot[\hat b]=\underline{\underline I}_{3\times3}$. In components, $\underline H_C^{(B)}=\underline{\underline I}_C^{(B)}\underline\omega^{(B)}$.
+The same dyad has different matrices in different frames.
 
 \paragraph{Inertia matrix in two frames (derivation).} Let $\underline{\underline I}_C^{(B)}$ be known and $A$ another frame, with
+$[\hat a]=[\hat a_1\ \hat a_2\ \hat a_3]$ and rotation matrix $\underset{B\leftarrow A}{\underline{\underline{R}}}$:
 \begin{equation}
-\begin{bmatrix}\hat b_1\\ \hat b_2\\ \hat b_3\end{bmatrix}=\underset{B\leftarrow A}{\underline{\underline{R}}}\begin{bmatrix}\hat a_1\\ \hat a_2\\ \hat a_3\end{bmatrix}
-\iff [\hat b_1\ \hat b_2\ \hat b_3]=[\hat a_1\ \hat a_2\ \hat a_3]\,\underset{B\leftarrow A}{\underline{\underline{R}}}^{T}.
+[\hat b]^T=\underset{B\leftarrow A}{\underline{\underline{R}}}\,[\hat a]^T,
 \end{equation}
-Inserting in the expression of the dyad:
+or, transposing,
 \begin{equation}
-\underrightarrow{I}_C=[\hat b]\,\underline{\underline I}_C^{(B)}[\hat b]^T
-=[\hat a_1\ \hat a_2\ \hat a_3]\;\underbrace{\underset{B\leftarrow A}{\underline{\underline{R}}}^{T}\underline{\underline I}_C^{(B)}\underset{B\leftarrow A}{\underline{\underline{R}}}}_{\underline{\underline I}_C^{(A)}}\;
-\begin{bmatrix}\hat a_1\\ \hat a_2\\ \hat a_3\end{bmatrix},
+[\hat b]=[\hat a]\,\underset{B\leftarrow A}{\underline{\underline{R}}}^{T}.
 \end{equation}
-and since the dyad is unique, the matrix in brackets is its component matrix in $A$:
+Inserting both in the expansion of the dyad:
 \begin{equation}
-\boxed{\;\underline{\underline{I}}_{C}^{(A)}=\underset{B\leftarrow A}{\underline{\underline{R}}}^{T}\,\underline{\underline{I}}_{C}^{(B)}\,\underset{B\leftarrow A}{\underline{\underline{R}}}
-=\underset{A\leftarrow B}{\underline{\underline{R}}}\,\underline{\underline{I}}_{C}^{(B)}\,\underset{B\leftarrow A}{\underline{\underline{R}}}\;}
+\underrightarrow{I}_C=[\hat b]\,\underline{\underline I}_C^{(B)}[\hat b]^T,
+\end{equation}
+\begin{equation}
+\underrightarrow{I}_C=[\hat a]\left(\underset{B\leftarrow A}{\underline{\underline{R}}}^{T}\,\underline{\underline I}_C^{(B)}\,\underset{B\leftarrow A}{\underline{\underline{R}}}\right)[\hat a]^T .
+\end{equation}
+Since the dyad is unique, the matrix in brackets is its component matrix in $A$:
+\begin{equation}
+\boxed{\;\underline{\underline{I}}_{C}^{(A)}=\underset{B\leftarrow A}{\underline{\underline{R}}}^{T}\,\underline{\underline{I}}_{C}^{(B)}\,\underset{B\leftarrow A}{\underline{\underline{R}}}\;}
+\end{equation}
+or equivalently, with $\underset{B\leftarrow A}{\underline{\underline{R}}}^{T}=\underset{A\leftarrow B}{\underline{\underline{R}}}$,
+\begin{equation}
+\underline{\underline{I}}_{C}^{(A)}=\underset{A\leftarrow B}{\underline{\underline{R}}}\,\underline{\underline{I}}_{C}^{(B)}\,\underset{B\leftarrow A}{\underline{\underline{R}}}.
 \end{equation}
 The two matrices are \textbf{similar} ($\underline{\underline R}^T=\underline{\underline R}^{-1}$): same eigenvalues (principal moments), same trace and
-determinant. Check: $\underline H^{(A)}=\underline{\underline R}^T\underline H^{(B)}=\underline{\underline R}^T\underline{\underline I}^{(B)}\underline{\underline R}\,\underline\omega^{(A)}$.
+determinant. Check:
+\begin{equation}
+\underline H^{(A)}=\underline{\underline R}^T\underline H^{(B)}=\underline{\underline R}^T\underline{\underline I}^{(B)}\underline{\underline R}\,\underline\omega^{(A)}.
+\end{equation}
 
 \paragraph{Properties and principal axes.}
 \begin{itemize}
@@ -559,8 +623,13 @@ determinant. Check: $\underline H^{(A)}=\underline{\underline R}^T\underline H^{
 \item \textbf{Triangular inequalities}: $I_{11}\le I_{22}+I_{33}$ (and cyclic).
 \item \textbf{Positive (semi)definite}: $\underline v^T\underline{\underline I}\underline v=\int v^2r^2(1-\cos^2\phi)dm\ge0$.
 \item With $\underline{\underline T}$ = matrix of the eigenvectors ($\det\underline{\underline T}=1$, a rotation matrix), the similarity transformation gives a diagonal matrix:
-$\underline{\underline I}_C^{(E)}=\underline{\underline T}^{-1}\underline{\underline I}_C^{(B)}\underline{\underline T}=\mathrm{diag}(\lambda_1,\lambda_2,\lambda_3)$: the eigenvectors are the
-\textbf{principal axes of inertia}, $\underset{E\leftarrow B}{\underline{\underline R}}=\underline{\underline T}^T$.
+\begin{equation}
+\underline{\underline I}_C^{(E)}=\underline{\underline T}^{-1}\underline{\underline I}_C^{(B)}\underline{\underline T},
+\end{equation}
+\begin{equation}
+\underline{\underline I}_C^{(E)}=\mathrm{diag}(\lambda_1,\lambda_2,\lambda_3):
+\end{equation}
+the eigenvectors are the \textbf{principal axes of inertia}, $\underset{E\leftarrow B}{\underline{\underline R}}=\underline{\underline T}^T$.
 \end{itemize}
 
 \begin{keyf}
