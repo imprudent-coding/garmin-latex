@@ -13,6 +13,8 @@ function showMainMenu() as Void {
         WatchUi.loadResource(Rez.Strings.MenuArrowsSub) as String, :arrows, getApp().listArrows(), null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuMotion) as String,
         motionLabel(getApp().motionThreshold()), :motion, null));
+    m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuVertical) as String,
+        verticalLabel(getApp().verticalDelay()), :vertical, null));
     var winfo = getApp().store.getValue("winfo");
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuSync) as String,
         getApp().status + ((winfo instanceof Lang.String) ? " · " + winfo : ""), :sync, null));
@@ -70,8 +72,18 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
             var j = MOTION_STEPS.indexOf(curT);
             var nextT = MOTION_STEPS[(j + 1) % MOTION_STEPS.size()] as Number;
             app.store.setValue("motion", nextT);
-            app.motion.apply(nextT);
+            app.motion.apply();
             item.setSubLabel(motionLabel(nextT));
+            WatchUi.requestUpdate();
+            return;
+        }
+        if (id == :vertical) {
+            var curV = app.verticalDelay();
+            var k = VERTICAL_STEPS.indexOf(curV);
+            var nextV = VERTICAL_STEPS[(k + 1) % VERTICAL_STEPS.size()] as Number;
+            app.store.setValue("vert", nextV);
+            app.motion.apply();
+            item.setSubLabel(verticalLabel(nextV));
             WatchUi.requestUpdate();
             return;
         }

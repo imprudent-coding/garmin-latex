@@ -54,7 +54,7 @@ class NotesApp extends Application.AppBase {
         loadCachedIndex();
         Mem.log("indice in cache caricato");
         startSync();
-        motion.apply(motionThreshold());
+        motion.apply();
     }
 
     function onStop(state as Dictionary or Null) as Void {
@@ -229,6 +229,12 @@ class NotesApp extends Application.AppBase {
     // soglia dell'accelerometro in milli-g (0 = spento, di default)
     function motionThreshold() as Number {
         var v = store.getValue("motion");
+        return (v instanceof Lang.Number) ? v as Number : 0;
+    }
+
+    // ms di orologio verticale prima di aprire l'orologio stealth (0 = spento, di default)
+    function verticalDelay() as Number {
+        var v = store.getValue("vert");
         return (v instanceof Lang.Number) ? v as Number : 0;
     }
 
