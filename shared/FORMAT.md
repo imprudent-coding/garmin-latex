@@ -191,6 +191,25 @@ watchdog), `android/…/render/Lz.kt` (anteprima).
 Palette dei livelli: `#000000`, `#555555`, `#AAAAAA`, `#FFFFFF`.
 La chiave è l'hash del contenuto: immagini identiche sono condivise.
 
+### Immagine a colori
+
+Per figure e schemi con linee colorate (oggi le figure delle simulazioni d'esame):
+
+```
+<w>,<h>,4,<n>|<base64 di LZ(dati)>
+```
+
+`dati` (n byte dopo la decompressione LZ) = `K` (1–15), poi `K` colori `R G B`,
+poi l'RLE a 4 bit: ogni byte è `(indice << 4) | (lunghezza − 1)`, lunghezza 1–16,
+in ordine raster. L'indice 0 è lo sfondo nero (non si disegna), 1..K i colori.
+La palette sta nei dati e non nell'intestazione, che resta fatta di soli numeri:
+un'app che non conosce il formato mostra un'immagine sbagliata ma non si blocca.
+La pipeline (`images.encode_color`) usa 8 grigi più fino a 7 colori scelti fra i
+soli pixel colorati, così le linee sottili non si perdono; negli schemi lo sfondo
+bianco diventa nero mantenendo la tinta (una linea rossa resta rossa), le
+fotografie restano come sono. Lettura: `garmin/source/ImageCache.mc`,
+`android/…/render/PageRenderer.kt`, `pipeline/gwnotes/images.py`.
+
 ## Simulazioni d'esame
 
 Con `gwnotes build --exams <cartella>` la pipeline aggiunge un capitolo per ogni

@@ -160,11 +160,27 @@ class PageRenderer(context: Context) {
         val rle = if (head.size >= 4) Lz.decompress(packed, head[3]) else packed
         val px = IntArray(w * h)
         var i = 0
-        for (b in rle) {
-            val v = (b.toInt() shr 6) and 3
-            val len = (b.toInt() and 63) + 1
-            val col = LEVELS[v]
-            for (k in 0 until len) if (i < px.size) px[i++] = col
+        if (head.size >= 4 && head[2] == 4) {
+            // immagine a colori (shared/FORMAT.md): K, K colori RGB, poi RLE a 4 bit; 0 = sfondo nero
+            val k = rle[0].toInt() and 0xFF
+            val pal = IntArray(k + 1)
+            pal[0] = Color.BLACK
+            for (c in 0 until k) {
+                val o = 1 + 3 * c
+                pal[c + 1] = Color.rgb(rle[o].toInt() and 0xFF, rle[o + 1].toInt() and 0xFF, rle[o + 2].toInt() and 0xFF)
+            }
+            for (j in 1 + 3 * k until rle.size) {
+                val b = rle[j].toInt() and 0xFF
+                val col = pal[minOf(b shr 4, k)]
+                for (n in 0..(b and 15)) if (i < px.size) px[i++] = col
+            }
+        } else {
+            for (b in rle) {
+                val v = (b.toInt() shr 6) and 3
+                val len = (b.toInt() and 63) + 1
+                val col = LEVELS[v]
+                for (k in 0 until len) if (i < px.size) px[i++] = col
+            }
         }
         val bmp = Bitmap.createBitmap(px, w, h, Bitmap.Config.ARGB_8888)
         images[key] = bmp

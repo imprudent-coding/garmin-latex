@@ -70,6 +70,9 @@ class Renderer:
             if s is None:
                 return None
             lv = images.decode_resource(s)
+            if lv.mode == "RGB":  # immagine a colori
+                self._cache[key] = lv
+                return lv
             rgb = Image.new("RGB", lv.size)
             rgb.putdata([IMG_LEVELS[v] for v in lv.getdata()])
             self._cache[key] = rgb

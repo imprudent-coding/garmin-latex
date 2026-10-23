@@ -76,15 +76,14 @@ def column_cm(info: dict[str, str]) -> tuple[float, float]:
 
 def rasterize(pdf: Path, dpi: float) -> list[Image.Image]:
     with tempfile.TemporaryDirectory(prefix="gwstrips-") as tmp:
-        subprocess.run(["pdftoppm", "-r", f"{dpi:.3f}", "-gray", "-png", str(pdf), str(Path(tmp) / "p")],
-                       check=True)
+        subprocess.run(["pdftoppm", "-r", f"{dpi:.3f}", "-png", str(pdf), str(Path(tmp) / "p")], check=True)
         files = sorted(Path(tmp).glob("p-*.png"), key=lambda f: int(f.stem.split("-")[-1]))
-        return [Image.open(f).convert("L").copy() for f in files]
+        return [Image.open(f).convert("RGB").copy() for f in files]
 
 
 def ink_blocks(page: Image.Image, page_no: int) -> list[Block]:
     """Blocchi di righe con inchiostro (separati da almeno una riga vuota)."""
-    mask = page.point(lambda v: 255 if v < INK else 0)
+    mask = page.convert("L").point(lambda v: 255 if v < INK else 0)
     _, rows = mask.getprojection()
     blocks, start = [], None
     for y, inked in enumerate(list(rows) + [0]):
@@ -157,7 +156,7 @@ def compose(pages: list[Image.Image], blocks: list[Block], x0: int, x1: int | No
         parts.append((_gap(prev, b) * scale, im))
         prev = b
     w = width * scale if width is not None else max(im.width for _, im in parts)
-    out = Image.new("L", (w, sum(g + im.height for g, im in parts) + 2 * PAD * scale), 255)
+    out = Image.new(parts[0][1].mode, (w, sum(g + im.height for g, im in parts) + 2 * PAD * scale), "white")
     y = PAD * scale
     for g, im in parts:
         y += g
@@ -166,16 +165,29 @@ def compose(pages: list[Image.Image], blocks: list[Block], x0: int, x1: int | No
     return out
 
 
-def is_photo(gray: Image.Image) -> bool:
+def is_photo(img: Image.Image) -> bool:
     """Fotografia (molti grigi intermedi): non si inverte, resta come nella stampa."""
+    gray = img.convert("L")
     hist = gray.histogram()
     return sum(hist[50:200]) > 0.25 * gray.width * gray.height
 
 
 @dataclass
 class StripPage:
-    normal: Image.Image          # livelli 0..3
+    """Una pagina: striscia di testo (livelli di grigio) o figura/tabella (livelli di
+    grigio o, se colorata, a colori: shared/FORMAT.md)."""
+    normal: Image.Image          # livelli 0..3, o RGB se color
     zoom: Image.Image | None
+    color: bool = False
+    invert: bool = True          # solo per color: sfondo bianco -> nero
+
+    def encode(self) -> tuple[str, str]:
+        """Stringhe trasmesse (normale, zoom o "")."""
+        if self.color:
+            return (images.encode_color(self.normal, self.invert),
+                    images.encode_color(self.zoom, self.invert) if self.zoom is not None else "")
+        return (images.encode_resource(self.normal),
+                images.encode_resource(self.zoom) if self.zoom is not None else "")
 
 
 def build_pages(pdf: Path, profile) -> tuple[list[StripPage], dict]:
@@ -224,7 +236,11 @@ def build_pages(pdf: Path, profile) -> tuple[list[StripPage], dict]:
             if zimg.width > profile.zoom_max:
                 zimg = images.resize_levels(zimg, profile.zoom_max)
             inv = not is_photo(img)
-            out.append(StripPage(images.to_levels(normal, invert=inv), images.to_levels(zimg, invert=inv)))
+            if images.is_colorful(img):
+                # schemi e figure con linee colorate: a colori, con la palette dell'immagine
+                out.append(StripPage(normal.convert("RGB"), zimg.convert("RGB"), color=True, invert=inv))
+            else:
+                out.append(StripPage(images.to_levels(normal, invert=inv), images.to_levels(zimg, invert=inv)))
             continue
         b = g[0]
         if run and run_h(run + [b]) > max_h:

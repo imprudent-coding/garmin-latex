@@ -13,6 +13,9 @@ automatiche a ogni push su `main`.
 - *Sincronizza ora* (e l'apertura dell'app) controlla anche l'indice su GitHub
   Pages (`w/idx.json`): una versione nuova arriva subito dal web, senza
   aspettare l'app del telefono, che nel frattempo non viene interrogata.
+- Figure a colori: le figure delle simulazioni d'esame con linee colorate
+  (urti, gola, stati, curve dei grafici) si vedono a colori, con fino a 15
+  colori più lo sfondo; testo e formule restano a 4 grigi.
 - Simulazioni d'esame raggruppate per prova («Prova del 14/09/2026» → E1,
   E2…), dalla più recente, con l'intestazione della prova sempre visibile.
 

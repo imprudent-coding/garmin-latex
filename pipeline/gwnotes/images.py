@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import base64
 
-from PIL import Image, ImageOps
+from PIL import Image, ImageChops, ImageOps
 
 from . import lz
 
@@ -97,12 +97,109 @@ def encode_resource(levels: Image.Image) -> str:
 
 
 def decode_resource(s: str) -> Image.Image:
+    """Immagine dalla stringa trasmessa: livelli 0..3 (modo L) o, per le immagini a
+    colori (terzo campo 4), RGB."""
     head, _, b64 = s.partition("|")
     f = [int(x) for x in head.split(",")]
     data = base64.b64decode(b64)
     if len(f) >= 4:  # schema 2: RLE compresso con LZ
         data = lz.decompress(data, f[3])
+    if len(f) >= 3 and f[2] == COLOR_BITS:
+        return _color_decode(data, f[0], f[1])
     return rle_decode(data, f[0], f[1])
+
+
+# ------------------------------------------------------------------ immagini a colori
+#
+# Per figure e schemi colorati (shared/FORMAT.md, «Immagine a colori»):
+#   "<w>,<h>,4,<n>|<base64 di LZ(dati)>"
+# dati = K, poi K colori (R, G, B), poi l'RLE a 4 bit: ogni byte è (indice << 4) | (lunghezza − 1)
+# con lunghezza 1–16. L'indice 0 è lo sfondo nero (non disegnato), 1..K i colori della palette.
+# La palette sta nei dati e non nell'intestazione, che resta fatta di soli numeri: le app
+# che non conoscono il formato mostrano un'immagine sbagliata ma non si bloccano.
+
+COLOR_BITS = 4
+MAX_COLORS = 15          # + lo sfondo = 16 voci nella palette della bitmap dell'orologio
+
+
+def is_colorful(img: Image.Image, min_pixels: int = 40) -> bool:
+    """True se l'immagine ha abbastanza pixel colorati (saturi e non scuri) da meritare i colori."""
+    count = _saturated_mask(img.convert("RGB")).histogram()[255]
+    return count >= max(min_pixels, img.width * img.height // 2000)
+
+
+def invert_keep_hue(img: Image.Image) -> Image.Image:
+    """Sfondo bianco -> nero e tratti neri -> bianchi, mantenendo la tinta dei colori
+    (inversione RGB e rotazione della tinta di 180°: una linea rossa resta rossa)."""
+    inv = ImageOps.invert(img.convert("RGB"))
+    h, sat, val = inv.convert("HSV").split()
+    h = h.point(lambda v: (v + 128) % 256)
+    return Image.merge("HSV", (h, sat, val)).convert("RGB")
+
+
+GRAYS = 8                # livelli di grigio della palette (nero = sfondo compreso)
+
+
+def _saturated_mask(rgb: Image.Image) -> Image.Image:
+    _, sat, val = rgb.convert("HSV").split()
+    return ImageChops.multiply(sat.point(lambda v: 255 if v > 90 else 0),
+                               val.point(lambda v: 255 if v > 80 else 0))
+
+
+def color_palette(rgb: Image.Image) -> list[tuple[int, int, int]]:
+    """Palette di un'immagine a colori: GRAYS grigi (fotografie, tratti, testo) e fino a
+    MAX_COLORS + 1 − GRAYS colori scelti fra i soli pixel colorati, così le linee colorate
+    sottili (urti, annotazioni) non si perdono fra i grigi di una fotografia."""
+    grays = [(round(255 * i / (GRAYS - 1)),) * 3 for i in range(GRAYS)]
+    mask = _saturated_mask(rgb)
+    rb, mb = rgb.tobytes(), mask.tobytes()
+    px = [tuple(rb[3 * i:3 * i + 3]) for i, m in enumerate(mb) if m]
+    hues: list[tuple[int, int, int]] = []
+    if px:
+        strip = Image.new("RGB", (len(px), 1))
+        strip.putdata(px)
+        q = strip.quantize(colors=MAX_COLORS + 1 - GRAYS, method=Image.Quantize.MEDIANCUT,
+                           dither=Image.Dither.NONE)
+        pal = q.getpalette() or []
+        hues = [tuple(pal[3 * i:3 * i + 3]) for i in sorted(set(q.tobytes()))]
+    return grays + hues
+
+
+def encode_color(img: Image.Image, invert: bool = True) -> str:
+    """Stringa trasmessa per un'immagine a colori (sfondo nero + al più MAX_COLORS colori)."""
+    rgb = img.convert("RGB")
+    if invert:
+        rgb = invert_keep_hue(rgb)
+    palette = color_palette(rgb)            # palette[0] = nero = sfondo
+    pimg = Image.new("P", (1, 1))
+    flat = [c for col in palette for c in col]
+    pimg.putpalette(flat + flat[-3:] * (256 - len(palette)))
+    q = rgb.quantize(palette=pimg, dither=Image.Dither.NONE)
+    data = [min(v, len(palette) - 1) for v in q.tobytes()]
+    raw = bytearray([len(palette) - 1])
+    for col in palette[1:]:
+        raw += bytes(col)
+    i, n = 0, len(data)
+    while i < n:
+        v = data[i]
+        j = i + 1
+        while j < n and data[j] == v and j - i < 16:
+            j += 1
+        raw.append((v << 4) | (j - i - 1))
+        i = j
+    w, h = rgb.size
+    return f"{w},{h},{COLOR_BITS},{len(raw)}|" + base64.b64encode(lz.compress(bytes(raw))).decode("ascii")
+
+
+def _color_decode(data: bytes, width: int, height: int) -> Image.Image:
+    k = data[0]
+    pal = [(0, 0, 0)] + [tuple(data[1 + 3 * i:4 + 3 * i]) for i in range(k)]
+    px = []
+    for b in data[1 + 3 * k:]:
+        px.extend([pal[b >> 4]] * ((b & 15) + 1))
+    if len(px) != width * height:
+        raise ValueError(f"RLE a colori: attesi {width * height} pixel, trovati {len(px)}")
+    return Image.frombytes("RGB", (width, height), bytes(c for p in px for c in p))
 
 
 def levels_to_display(levels: Image.Image) -> Image.Image:

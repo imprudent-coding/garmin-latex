@@ -471,7 +471,9 @@ mancanza dalla data nel nome della cartella. Cancellando una cartella (o il suo
 `orologio.pdf`) l'esercizio sparisce dalla Release successiva e dall'orologio. Sono PDF già impaginati per l'orologio
 (colonna stretta, scritti lì con `compila.sh`); la pipeline li taglia in
 strisce d'immagine larghe quanto lo schermo, senza spezzare le righe. Figure,
-tabelle ed equazioni lunghe hanno lo zoom (triangolino verde).
+tabelle ed equazioni lunghe hanno lo zoom (triangolino verde). Le figure con
+linee colorate (schemi annotati, grafici) si vedono a colori; testo e formule
+restano in scala di grigi, più leggeri da trasferire.
 
 - **Aggiornamento**: il workflow `notes` li riprende ogni 6 ore (e a ogni
   esecuzione); pubblica una nuova Release solo se qualcosa è cambiato. Per

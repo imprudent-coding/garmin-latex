@@ -307,9 +307,8 @@ def build(args) -> int:
                 strips, meta = pdfstrips.build_pages(pdf, profile)
                 keys = []
                 for st in strips:
-                    k = bb.image(images.encode_resource(st.normal))
-                    z = bb.image(images.encode_resource(st.zoom)) if st.zoom is not None else ""
-                    keys.append((k, z))
+                    n, z = st.encode()
+                    keys.append((bb.image(n), bb.image(z) if z else ""))
                 enc = pdfstrips.layout_pages(strips, keys, profile)
                 pdftitle = meta["title"]
                 print(f"      {pdf.parent.name}: {len(enc)} pagine, {meta['blocks']} blocchi")

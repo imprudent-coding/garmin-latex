@@ -124,6 +124,27 @@ def test_grid_figures_are_split_strips_are_not():
     assert len(panels.grid_panels(_grid_figure(1, 3), mode="split")) == 3
 
 
+def test_color_image_roundtrip_keeps_hues():
+    """Figura a colori: sfondo bianco -> nero, linea rossa resta rossa, tratti neri -> chiari."""
+    img = Image.new("RGB", (120, 60), "white")
+    d = ImageDraw.Draw(img)
+    d.line((0, 10, 119, 10), fill=(220, 30, 30), width=3)      # urto rosso
+    d.line((0, 30, 119, 30), fill=(0, 170, 220), width=3)      # gola ciano
+    d.line((0, 50, 119, 50), fill=(0, 0, 0), width=2)          # tratto nero
+    assert images.is_colorful(img) and not images.is_colorful(img.convert("L"))
+    enc = images.encode_color(img, invert=True)
+    head = enc.split("|")[0].split(",")
+    assert head[:3] == ["120", "60", "4"] and all(x.isdigit() for x in head)  # intestazione solo numerica
+    back = images.decode_resource(enc)
+    assert back.mode == "RGB" and back.size == (120, 60)
+    assert back.getpixel((5, 2)) == (0, 0, 0)                  # sfondo
+    r, g, b = back.getpixel((60, 10))
+    assert r > 150 and g < 100 and b < 100                     # ancora rosso
+    r, g, b = back.getpixel((60, 30))
+    assert b > 150 and r < 100                                 # ancora ciano/blu
+    assert min(back.getpixel((60, 50))) > 200                  # il nero diventa bianco
+
+
 def test_to_levels_inverts_white_background():
     img = Image.new("L", (20, 20), 255)
     ImageDraw.Draw(img).rectangle([5, 5, 14, 14], fill=0)
