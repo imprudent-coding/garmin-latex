@@ -299,28 +299,51 @@ def layout_pages(strips: list[StripPage], keys: list[tuple[str, str]], profile) 
 
 @dataclass
 class ExamLabel:
-    prova: str   # "14/09/2026" (o il nome della cartella, se manca la data)
+    prova: str   # "14/09/2026", o il nome di una prova senza data ("foto 3")
     qid: str     # "E2" ("" se il titolo non dice il numero dell'esercizio)
     topic: str   # argomento
 
+    @property
+    def heading(self) -> str:
+        """Intestazione del gruppo nell'elenco dell'orologio."""
+        if self.prova == OTHER_EXAMS:
+            return OTHER_EXAMS
+        return f"Prova del {self.prova}" if is_date(self.prova) else f"Prova {self.prova}"
+
+
+OTHER_EXAMS = "Altre simulazioni"
+
+
+def is_date(s: str) -> bool:
+    return re.fullmatch(r"\d{1,2}/\d{1,2}/\d{4}", s) is not None
+
 
 def exam_label(pdf_title: str, folder: str) -> ExamLabel:
-    """Prova, esercizio e argomento dal titolo del PDF
-    ("Prova del 14/09/2026 – Esercizio 2: argomento", da \\esercizio del preambolo);
-    in mancanza, la data dal nome della cartella (AAAA-MM-GG_...)."""
+    """Prova, esercizio e argomento dal titolo del PDF, cioè da \\esercizio del preambolo:
+    "Prova del 14/09/2026 – Esercizio 2: argomento" oppure, per una prova senza data,
+    "Prova <nome> – Esercizio 2: argomento". In mancanza, la data dal nome della
+    cartella (AAAA-MM-GG_...), altrimenti il gruppo "Altre simulazioni"."""
     t = re.sub(r"\s+", " ", pdf_title).strip()
-    m = re.match(r"(?:Prova del\s+)?(\d{1,2}/\d{1,2}/\d{4})\s*[–—-]+\s*Esercizio\s+(\w+)\s*:?\s*(.*)$", t)
+    m = re.match(r"Prova\s+(?:del\s+)?(.+?)\s*[–—-]+\s*Esercizio\s+(\w+)\s*:?\s*(.*)$", t)
+    if m:
+        return ExamLabel(m.group(1).strip(), "E" + m.group(2), m.group(3) or folder)
+    m = re.match(r"(\d{1,2}/\d{1,2}/\d{4})\s*[–—-]+\s*Esercizio\s+(\w+)\s*:?\s*(.*)$", t)
     if m:
         return ExamLabel(m.group(1), "E" + m.group(2), m.group(3) or folder)
     d = re.match(r"(\d{4})-(\d{2})-(\d{2})", folder)
-    prova = f"{d.group(3)}/{d.group(2)}/{d.group(1)}" if d else "Altre simulazioni"
+    prova = f"{d.group(3)}/{d.group(2)}/{d.group(1)}" if d else OTHER_EXAMS
     return ExamLabel(prova, "", t or folder)
 
 
-def prova_sort_key(prova: str) -> tuple:
-    """Ordine cronologico delle prove ("GG/MM/AAAA"); le altre in fondo."""
-    m = re.match(r"(\d{1,2})/(\d{1,2})/(\d{4})$", prova)
-    return (1, int(m.group(3)), int(m.group(2)), int(m.group(1))) if m else (0, 0, 0, 0)
+def order_provas(provas) -> list[str]:
+    """Prove con data dalla più recente, poi quelle con un nome (in ordine alfabetico),
+    in fondo "Altre simulazioni"."""
+    def date_key(p):
+        g, mth, y = (int(x) for x in p.split("/"))
+        return (y, mth, g)
+    dated = sorted((p for p in provas if is_date(p)), key=date_key, reverse=True)
+    named = sorted((p for p in provas if not is_date(p) and p != OTHER_EXAMS), key=str.lower)
+    return dated + named + ([OTHER_EXAMS] if OTHER_EXAMS in provas else [])
 
 
 def find_exams(root: Path) -> list[Path]:

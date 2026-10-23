@@ -413,8 +413,12 @@ def test_exam_label_and_order():
     assert (lab.prova, lab.qid, lab.topic) == ("14/09/2026", "E2", "Mach nell'ugello")
     lab = pdfstrips.exam_label("Titolo libero", "2025-01-30_altro")
     assert (lab.prova, lab.qid, lab.topic) == ("30/01/2025", "", "Titolo libero")
-    order = sorted(["14/09/2026", "30/01/2025", "02/10/2026"], key=pdfstrips.prova_sort_key, reverse=True)
-    assert order == ["02/10/2026", "14/09/2026", "30/01/2025"]
+    # prova senza data: un nome qualsiasi
+    lab = pdfstrips.exam_label("Prova foto 3 – Esercizio 1: Tubo d'urto", "prova-foto-3_E01_tubo")
+    assert (lab.prova, lab.qid, lab.topic, lab.heading) == ("foto 3", "E1", "Tubo d'urto", "Prova foto 3")
+    assert pdfstrips.exam_label("Prova del 14/09/2026 – Esercizio 2: x", "f").heading == "Prova del 14/09/2026"
+    order = pdfstrips.order_provas(["foto 3", "14/09/2026", "Altre simulazioni", "30/01/2025", "02/10/2026", "A"])
+    assert order == ["02/10/2026", "14/09/2026", "30/01/2025", "A", "foto 3", "Altre simulazioni"]
 
 
 def test_column_from_pdf_keywords():
