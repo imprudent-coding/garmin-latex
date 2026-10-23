@@ -10,6 +10,9 @@ name: notes
 # (vedi "Release precedente e tipo di build").
 on:
   push:
+    # solo branch: i tag (es. garmin-v*) non cambiano gli appunti
+    branches:
+      - "**"
     paths:
       - "latex/**"
       - "pipeline/**"
@@ -62,8 +65,13 @@ jobs:
           inputs="$(git rev-parse HEAD:latex HEAD:pipeline HEAD:shared HEAD:.github/workflows/notes.yml | sha256sum | cut -c1-16)"
           echo "inputs=$inputs" >> "$GITHUB_OUTPUT"
           mode=full
-          if gh release download --repo "$GITHUB_REPOSITORY" --pattern notes-bundle.zip --pattern notes.pdf \
-               --pattern manifest.json --dir prev 2>/dev/null; then
+          # ultima Release degli appunti (tag notes-*), come l'app Android: le Release
+          # dell'app orologio (garmin-v*) non hanno il bundle
+          tag="$(gh release list --repo "$GITHUB_REPOSITORY" --limit 50 --json tagName \
+                   --jq '[.[] | select(.tagName | startswith("notes-"))][0].tagName // ""')"
+          echo "Release precedente: ${tag:-nessuna}" >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$tag" ] && gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern notes-bundle.zip \
+               --pattern notes.pdf --pattern manifest.json --dir prev 2>/dev/null; then
             old="$(python3 -c 'import json;print(json.load(open("prev/manifest.json")).get("inputs",""))')"
             if [ "$old" = "$inputs" ] && [ "${{ inputs.completa }}" != "true" ]; then
               mode=incremental
