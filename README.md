@@ -356,7 +356,7 @@ di pagine (● = già in cache sull'orologio). L'app riparte dall'ultima domanda
 | Elenco / Lettura / Zoom | orologio da orizzontale a verticale (se *Orologio se verticale* è attivo) | come la pressione prolungata sullo schermo |
 | Orologio | tenere premuto lo schermo o un pulsante per ~2,5 s (regolabile dal menu, *Sblocco orologio*) | torna agli appunti, dove eri |
 | Ovunque | pulsante in basso | indietro |
-| Elenco / Lettura | tocco sui tre puntini in alto / sul numero di pagina (oppure pressione prolungata, se l'orologio stealth è disattivato) | menu: mostra (appunti / simulazioni d'esame), riprendi lettura, torna all'elenco, scorrimento automatico, orologio stealth, sblocco orologio, frecce nell'elenco, movimento, orologio se verticale, sincronizza, svuota cache, test velocità, mostra memoria |
+| Elenco / Lettura | tocco sui tre puntini in alto / sul numero di pagina (oppure pressione prolungata, se l'orologio stealth è disattivato) | menu: riprendi lettura, torna all'elenco, scorrimento automatico, orologio stealth, sblocco orologio, frecce nell'elenco, movimento, orologio se verticale, sincronizza, svuota cache, test velocità, mostra memoria, mostra (appunti / simulazioni d'esame) |
 
 **Scorrimento automatico.** Dal menu, *Scorrimento automatico* cambia a ogni
 tocco: No, 5, 10, 15, 20, 30, 45, 60 secondi per pagina (il menu resta aperto).
@@ -414,7 +414,7 @@ fino a ~10 minuti (cache di GitHub Pages). La stessa verifica avviene a ogni
 apertura dell'app. Finché il telefono ha il bundle precedente, la riga di stato
 mostra «Aggiornato dal web».
 
-**Mostra.** La prima voce del menu sceglie la libreria: *Appunti* (di
+**Mostra.** L'ultima voce del menu (in fondo, per non toccarla per errore) sceglie la libreria: *Appunti* (di
 default) o *Simulazioni d'esame*. Un tocco passa all'altra e torna all'elenco,
 che mostra solo la libreria scelta. In memoria resta solo quella: al cambio (e
 a ogni apertura o sincronizzazione) l'orologio elimina subito dalla cache le
