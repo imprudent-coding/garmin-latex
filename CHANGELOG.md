@@ -4,6 +4,13 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Orologio 1.7.5
+
+- Zoom delle foto a colori «Immagine non leggibile»: l'orologio non decodifica
+  immagini molto più grandi di quelle degli appunti (qui fino a 70 KB). Ora uno
+  zoom grande è diviso in strisce orizzontali, ciascuna entro le dimensioni già
+  provate, che lo zoom mostra una sotto l'altra a piena risoluzione.
+
 ## Orologio 1.7.4
 
 - Zoom «Non in cache» anche a download finito: un'immagine chiesta mentre il

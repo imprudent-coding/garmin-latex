@@ -99,7 +99,12 @@ R<x>,<y>,<w>,<h>,<colore>                      rettangolo pieno (barre dei riqua
 ```
 
 Il testo può contenere virgole: solo le prime due separano i campi.
-`<chiave zoom>` è vuota se l'immagine non ha una versione ingrandita.
+`<chiave zoom>` è vuota se l'immagine non ha una versione ingrandita. Può essere
+anche un elenco `k1;k2;…`: uno zoom troppo grande diviso in strisce orizzontali
+della stessa larghezza, dall'alto, che l'orologio mostra una sotto l'altra.
+Ogni immagine resta entro i limiti provati sull'orologio (stringa ≤ 28 000
+caratteri, RLE decompresso ≤ 24 000 byte, `pdfstrips.MAX_IMAGE_*`): oltre, la
+decodifica fallisce.
 
 ## Testo ricco
 

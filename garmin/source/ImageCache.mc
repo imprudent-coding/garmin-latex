@@ -15,7 +15,8 @@ const F_MEMORY = 3;    // memoria grafica insufficiente
 const F_BROKEN = 4;    // rovinata anche dopo due nuovi download: non si riprova
 
 class ImageCache {
-    const MAX_BITMAPS = 4;
+    // bitmap tenute in memoria: le immagini della pagina e le strisce di uno zoom
+    const MAX_BITMAPS = 8;
     const BYTES_PER_TICK = 1500;
     const LZ_PER_TICK = 4000;   // byte prodotti dalla decompressione LZ per passo
 

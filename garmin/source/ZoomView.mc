@@ -26,7 +26,8 @@ function failText(app as NotesApp, key as String) as String {
 }
 
 class ZoomView extends WatchUi.View {
-    private var _key as String;
+    // una chiave, o le strisce orizzontali di uno zoom grande, dall'alto ("k1;k2;...")
+    private var _keys as Array<String>;
     // spostamento: punto dell'immagine nell'angolo in alto a sinistra dello schermo
     // (negativo = immagine spostata verso destra/basso); parte dall'angolo in alto a sinistra
     var ox as Number = -100000;
@@ -37,13 +38,15 @@ class ZoomView extends WatchUi.View {
 
     function initialize(key as String) {
         View.initialize();
-        _key = key;
+        _keys = Util.split(key, ";");
     }
 
     function onShow() as Void {
         getApp().motion.target = true;
         // riaprendo lo zoom si riprova (es. dopo memoria insufficiente)
-        getApp().images.retry(_key);
+        for (var i = 0; i < _keys.size(); i++) {
+            getApp().images.retry(_keys[i]);
+        }
     }
 
     function onHide() as Void {
@@ -72,22 +75,36 @@ class ZoomView extends WatchUi.View {
         var app = getApp();
         dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
         dc.clear();
-        var bmp = app.images.get(_key);
         var w = dc.getWidth();
         var h = dc.getHeight();
         _w = w;
-        if (bmp == null) {
-            var msg = failText(app, _key);
-            (app.rich as RichText).drawWrapped(dc, msg, w / 2, h / 2 - 20, 260, 2);
-            return;
+        // tutte le strisce pronte, altrimenti il messaggio della prima che manca
+        var bmps = [] as Array<Graphics.BufferedBitmap>;
+        iw = 0;
+        ih = 0;
+        for (var i = 0; i < _keys.size(); i++) {
+            var bmp = app.images.get(_keys[i]);
+            if (bmp == null) {
+                var msg = failText(app, _keys[i]);
+                (app.rich as RichText).drawWrapped(dc, msg, w / 2, h / 2 - 20, 260, 2);
+                return;
+            }
+            var b = bmp as Graphics.BufferedBitmap;
+            bmps.add(b);
+            if (b.getWidth() > iw) {
+                iw = b.getWidth();
+            }
+            ih += b.getHeight();
         }
-        var b = bmp as Graphics.BufferedBitmap;
-        iw = b.getWidth();
-        ih = b.getHeight();
         clamp();
         var x = fits(iw) ? (w - iw) / 2 : -ox;
         var y = fits(ih) ? (h - ih) / 2 : -oy;
-        dc.drawBitmap(x, y, b);
+        for (var i = 0; i < bmps.size(); i++) {
+            if (y < h && y + bmps[i].getHeight() > 0) {
+                dc.drawBitmap(x, y, bmps[i]);
+            }
+            y += bmps[i].getHeight();
+        }
         // barre di posizione (dentro il quadrato inscritto, visibili)
         var m = margin();
         var side = w - 2 * m;
