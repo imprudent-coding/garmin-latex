@@ -4,6 +4,14 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Orologio 1.7.3
+
+- Corretto «web: errore -1»: le figure a colori avevano prodotto immagini zoom
+  da 120–145 KB, e le richieste web così grandi fallivano. Ora una risorsa
+  grande si divide su più file web da ~32 KB (l'orologio ricompone i pezzi), e
+  lo zoom delle fotografie è più leggero (meno grigi, filtro contro la grana,
+  al più 360 000 pixel): le più grandi scendono a 50–70 KB.
+
 ## Orologio 1.7.2
 
 - *Mostra* è ora l'ultima voce del menu: un tocco cambia libreria e svuota
