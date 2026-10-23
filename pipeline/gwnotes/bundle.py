@@ -174,7 +174,10 @@ def build_web_packs(sections: list[tuple[str, str, list[str]]], resources: dict,
 
 def build_index(title: str, font_id: str, content_version: str, chapters: list,
                 web_base: str = "", web_packs: dict[str, list[str]] | None = None) -> list[str]:
-    """chapters: [(title_lines, header_line, [(SectionPages, Resource, starts)])]
+    """chapters: [(title_lines, header_line, [(SectionPages, Resource, starts)][, libreria])]
+
+    La libreria (es. "esami") diventa la riga "L" del capitolo; senza, il capitolo
+    fa parte degli appunti.
 
     Le righe "H" e "Q" (titoli compatti per scorrere l'elenco) e "W"/"F" (download
     via web) sono aggiunte compatibili: le versioni dell'app che non le conoscono
@@ -182,11 +185,13 @@ def build_index(title: str, font_id: str, content_version: str, chapters: list,
     lines = [f"V|{SCHEMA}|{content_version}|{font_id}|{title}"]
     if web_base and web_packs:
         lines.append(f"W|{web_base}")
-    for title_lines, header, secs in chapters:
+    for title_lines, header, secs, *lib in chapters:
         ws = ";".join(str(w) for _, w in title_lines)
         lines.append(f"C|{len(secs)}|{ws}|" + TITLE_SEP.join(t for t, _ in title_lines))
         if header:
             lines.append(f"H|{header[1]}|{header[0]}")
+        if lib and lib[0]:
+            lines.append(f"L|{lib[0]}")
         for sp, res, starts in secs:
             ws = ";".join(str(w) for _, w in sp.title_lines)
             st = ";".join(str(s) for s in starts)

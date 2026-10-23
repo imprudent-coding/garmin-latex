@@ -1,5 +1,10 @@
 import Toybox.Lang;
 
+// librerie dei capitoli; MEM_* scelgono cosa tenere in memoria (opzione del menu)
+const LIB_NOTES = 1;
+const LIB_EXAMS = 2;
+const MEM_ALL = 0;
+
 // Indice degli appunti (formato: shared/FORMAT.md, sezione "Indice").
 class Section {
     var id as String;
@@ -50,6 +55,8 @@ class Chapter {
     // intestazione compatta del gruppo nell'elenco (riga "H"), null se il gruppo ha una sola sezione
     var hLine as String or Null = null;
     var hWidth as Number = 0;
+    // libreria del capitolo (riga "L"): LIB_NOTES appunti, LIB_EXAMS simulazioni d'esame
+    var lib as Number = LIB_NOTES;
 
     function initialize(f as Array<String>) {
         widths = Util.numbers(f[2]);
@@ -101,6 +108,11 @@ class Index {
                 var f = Util.splitN(row, "|", 3);
                 if (f.size() == 3 && secs.size() > 0 && secs[secs.size() - 1].id.equals(f[1])) {
                     secs[secs.size() - 1].packs = Util.split(f[2], ";");
+                }
+            } else if (t.equals("L") && current != null) {
+                var f = Util.splitN(row, "|", 2);
+                if (f.size() == 2 && f[1].equals("esami")) {
+                    (current as Chapter).lib = LIB_EXAMS;
                 }
             } else if (t.equals("H") && current != null) {
                 var f = Util.splitN(row, "|", 3);

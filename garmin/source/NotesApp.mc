@@ -244,6 +244,12 @@ class NotesApp extends Application.AppBase {
         return (v instanceof Lang.Number) ? v as Number : 0;
     }
 
+    // cosa tenere in memoria: MEM_ALL (di default), LIB_NOTES o LIB_EXAMS
+    function memLib() as Number {
+        var v = store.getValue("memlib");
+        return (v instanceof Lang.Number && MEM_STEPS.indexOf(v) >= 0) ? v as Number : MEM_ALL;
+    }
+
     // ------------------------------------------------------------- posizione di lettura
     function savePosition(id as String, page as Number) as Void {
         store.setValue("pos", [id, page]);

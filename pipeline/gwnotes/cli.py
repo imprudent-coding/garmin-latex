@@ -20,7 +20,9 @@ import tempfile
 import time
 from pathlib import Path
 
-from . import images, rich
+from types import SimpleNamespace
+
+from . import images, pdfstrips, rich
 from .assets import AssetBuilder
 from .bundle import (SCHEMA, BundleBuilder, Resource, SectionPages, build_index, build_web_packs, chunk_text,
                      image_keys, res_file, short_hash, write_zip)
@@ -237,9 +239,44 @@ def build(args) -> int:
         chapters_idx.append((encode_title_lines(lay, ch.title, profile.title_w), chapter_header(lay, profile, ch), secs))
         toc.append({"title": plain(ch.title), "sections": tsec})
 
+    # simulazioni d'esame: PDF già impaginati per l'orologio, tagliati in strisce
+    exam_ids: list[str] = []
+    if args.exams:
+        exam_pdfs = pdfstrips.find_exams(Path(args.exams).resolve())
+        print(f"[4b] Simulazioni d'esame: {len(exam_pdfs)} PDF in {args.exams}")
+        ex_secs, ex_nodes, tsec = [], [], []
+        ci = len(chapters_idx)
+        for pdf in exam_pdfs:
+            strips, meta = pdfstrips.build_pages(pdf, profile)
+            keys = []
+            for st in strips:
+                k = bb.image(images.encode_resource(st.normal))
+                z = bb.image(images.encode_resource(st.zoom)) if st.zoom is not None else ""
+                keys.append((k, z))
+            enc = pdfstrips.layout_pages(strips, keys, profile)
+            sid = "x-" + re.sub(r"[^a-z0-9]+", "-", pdf.parent.name.lower()).strip("-")
+            title = re.sub(r"^Prova del\s+", "", meta["title"]).replace(" – ", " ")
+            sec = SimpleNamespace(id=sid, title=[title], kind="section", qid="", label="")
+            ex_nodes.append(sec)
+            full, compact = section_titles(lay, profile, sec, [rules.exams_title], alone=False)
+            sp = SectionPages(sid, title, full, enc, ci, compact=compact)
+            res, starts = bb.section(sp)
+            ex_secs.append((sp, res, starts))
+            all_pages[sid] = enc
+            exam_ids.append(sid)
+            total_pages += len(enc)
+            tsec.append({"id": sid, "title": title, "pages": len(enc), "key": res.key, "hash": res.hash,
+                         "qid": "", "kind": "section"})
+            print(f"      {pdf.parent.name}: {len(enc)} pagine, {meta['blocks']} blocchi")
+        if ex_secs:
+            ch = SimpleNamespace(title=[rules.exams_title], sections=ex_nodes)
+            chapters_idx.append((encode_title_lines(lay, ch.title, profile.title_w),
+                                 chapter_header(lay, profile, ch), ex_secs, "esami"))
+            toc.append({"title": rules.exams_title, "lib": "esami", "sections": tsec})
+
     # file per il download via web (GitHub Pages): sezione + immagini, per sezione
     web_files, web_packs = build_web_packs(
-        [(sp.id, res.key, image_keys(sp.pages)) for _, _, secs in chapters_idx for sp, res, _ in secs],
+        [(sp.id, res.key, image_keys(sp.pages)) for c in chapters_idx for sp, res, _ in c[2]],
         bb.resources)
     web_base = (args.web_base or "").strip()
     if web_base and not web_base.endswith("/"):
@@ -293,11 +330,12 @@ def build(args) -> int:
     prev_dir.mkdir()
     img_res = {k: "".join(r.chunks) for k, r in bb.resources.items() if k.startswith("i:")}
     renderer = Renderer(img_res)
-    chosen = list(all_pages)
+    chosen = [s for s in all_pages if s not in exam_ids]
     if args.preview_sections:
         chosen = [s for s in chosen if any(re.search(p, s) for p in args.preview_sections)] or chosen
+    chosen = chosen[: args.preview] + exam_ids  # le simulazioni d'esame sempre
     count = 0
-    for sid in chosen[: args.preview]:
+    for sid in chosen:
         pages = all_pages[sid]
         imgs = [renderer.render_page(p, i + 1, len(pages)) for i, p in enumerate(pages)]
         contact_sheet(imgs, cols=min(4, len(imgs))).save(prev_dir / f"{sid}.png", optimize=True)
@@ -319,7 +357,8 @@ def build(args) -> int:
         f"# Report di conversione\n",
         f"- Versione contenuti: `{content_version}` (schema {SCHEMA}, font `{metrics.font_id}`)",
         f"- Capitoli: {len(book.chapters)}, sezioni: {sum(len(c.sections) for c in book.chapters)}, "
-        f"pagine orologio: {total_pages}",
+        f"pagine orologio: {total_pages}"
+        + (f" (simulazioni d'esame: {len(exam_ids)})" if args.exams else ""),
         f"- Dati: testo {sizes['text'] / 1024:.0f} KB, immagini {sizes['images'] / 1024:.0f} KB, "
         f"indice {sizes['index'] / 1024:.1f} KB, pezzi da {rules.chunk_bytes} byte",
         f"- Sezione più grande: `{largest.key}` ({largest.bytes / 1024:.1f} KB)",
@@ -346,6 +385,8 @@ def main(argv=None) -> int:
     b.add_argument("--no-pdf", action="store_true", help="non compilare il PDF (solo per sviluppo: niente etichette)")
     b.add_argument("--preview", type=int, default=12, help="numero di sezioni in anteprima")
     b.add_argument("--preview-sections", nargs="*", help="regex degli id di sezione da mostrare in anteprima")
+    b.add_argument("--exams", default="",
+                   help="cartella delle simulazioni d'esame (<cartella>/<esercizio>/orologio.pdf)")
     b.add_argument("--version", default=None, help="versione contenuti (default: data UTC)")
     b.add_argument("--web-base", default="",
                    help="URL dei file web (es. https://utente.github.io/repo/w/); vuoto = solo bundle")

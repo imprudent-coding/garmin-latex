@@ -30,6 +30,8 @@ class Rules:
     box_titles: dict = field(default_factory=dict)
     # titolo del capitolo per il contenuto prima del primo capitolo
     front_title: str = "Introduzione"
+    # titolo del capitolo delle simulazioni d'esame (gwnotes build --exams)
+    exams_title: str = "Simulazioni d'esame"
     # parametri del bundle
     chunk_bytes: int = 1800
     # risoluzione di rendering: pixel per em del testo LaTeX (≈ dimensione del font body)

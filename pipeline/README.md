@@ -7,6 +7,7 @@ python -m pytest -q tests                      # test (quelli end-to-end richied
 python -m gwnotes build --out ../dist           # PDF, notes-bundle.zip, anteprime, report
 python -m gwnotes build --preview-sections q-a1 q-b2   # anteprime solo di alcune sezioni (regex sugli id)
 python -m gwnotes.fontgen                       # rigenera i font dopo aver cambiato shared/font/
+python -m gwnotes build --exams ../../Gasdynamics-fork/simulazione_esame   # con le simulazioni d'esame
 ```
 
 Richiede TeX Live (`latexmk`, `pdflatex`, pacchetti del documento), pandoc 3.x e
@@ -26,6 +27,7 @@ pandoc 3.1.3.
 | `images.py` | 4 livelli di grigio, bianco su nero, RLE a 2 bit + base64 |
 | `layout.py`, `profile.py` | impaginazione per il cerchio 390×390 con le metriche dei font dell'app |
 | `bundle.py` | pezzi ≤ `chunk_bytes`, hash, `manifest.json`, zip deterministico |
+| `pdfstrips.py` | simulazioni d'esame (`--exams`): PDF formato orologio → strisce d'immagine, una per pagina |
 | `preview.py` | PNG delle pagine come le disegna l'orologio (implementazione di riferimento del formato) |
 
 Formato di uscita: [`../shared/FORMAT.md`](../shared/FORMAT.md).

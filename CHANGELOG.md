@@ -4,6 +4,19 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Orologio 1.6.0
+
+- Simulazioni d'esame: nuovo gruppo *Simulazioni d'esame* in fondo all'elenco,
+  una voce per esercizio, letto dai PDF formato orologio della repository di
+  Gasdinamica (tagliati in strisce; figure, tabelle ed equazioni lunghe con lo
+  zoom). Si aggiornano senza reinstallare nulla (workflow `notes`, ogni 6 ore
+  o a mano).
+- Opzione *In memoria* nel menu: Appunti ed esami (di default), Solo appunti,
+  Solo esami. Il download in sottofondo scarica solo la scelta e, finito,
+  libera la memoria occupata dal resto.
+- Indice: riga `L` (libreria del capitolo); le versioni precedenti la ignorano
+  e scaricano tutto.
+
 ## Orologio 1.5.0
 
 - Orologio stealth: opzione *Orologio se verticale* nel menu (No di default,

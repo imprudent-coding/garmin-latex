@@ -297,6 +297,19 @@ class Store {
         return out;
     }
 
+    // Sezioni in cache non comprese in `keep` (librerie escluse dall'opzione "In memoria").
+    function sectionsExcept(keep as Dictionary) as Array<String> {
+        var out = [] as Array<String>;
+        var keys = _meta.keys();
+        for (var i = 0; i < keys.size(); i++) {
+            var k = keys[i] as String;
+            if (k.length() > 2 && k.substring(0, 2).equals("s:") && keep[k] == null) {
+                out.add(k);
+            }
+        }
+        return out;
+    }
+
     function clearAll() as Void {
         Storage.clearValues();
         _meta = {} as Dictionary;
