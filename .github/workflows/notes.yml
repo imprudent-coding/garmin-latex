@@ -92,15 +92,27 @@ jobs:
       # TeX Live 2023 e pandoc 3.1.3 dai pacchetti di Ubuntu 24.04 (versioni fissate dall'immagine)
       - name: Installa TeX Live, pandoc e poppler
         if: steps.mode.outputs.mode == 'full'
-        timeout-minutes: 10
+        timeout-minutes: 22
         run: |
+          # lo specchio a volte si blocca: ogni tentativo ha un tempo massimo, poi si riprova
+          # (i pacchetti già scaricati restano in ~/apt-cache)
           APT=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30)
           mkdir -p ~/apt-cache/partial
-          sudo apt-get "${APT[@]}" update -q
-          sudo apt-get "${APT[@]}" -o Dir::Cache::Archives="$HOME/apt-cache" install -y -q --no-install-recommends \
-            texlive-latex-base texlive-latex-recommended texlive-latex-extra \
-            texlive-fonts-recommended texlive-pictures latexmk lmodern \
-            pandoc poppler-utils
+          ok=""
+          for attempt in 1 2 3; do
+            if timeout 120 sudo apt-get "${APT[@]}" update -q \
+              && timeout 300 sudo apt-get "${APT[@]}" -o Dir::Cache::Archives="$HOME/apt-cache" install -y -q \
+                   --no-install-recommends \
+                   texlive-latex-base texlive-latex-recommended texlive-latex-extra \
+                   texlive-fonts-recommended texlive-pictures latexmk lmodern \
+                   pandoc poppler-utils; then
+              ok=1
+              break
+            fi
+            echo "::warning::Installazione dei pacchetti: tentativo $attempt non riuscito, riprovo"
+            sudo dpkg --configure -a || true
+          done
+          [ -n "$ok" ] || { echo "::error::Specchio di Ubuntu non raggiungibile dopo 3 tentativi: rilancia il workflow"; exit 1; }
           sudo chown -R "$USER" ~/apt-cache
           rm -rf ~/apt-cache/partial ~/apt-cache/lock
           pdflatex --version | head -1
