@@ -229,6 +229,8 @@ def parse_index(lines: list[str]) -> list[dict]:
         elif t == "H":
             _, w, text = l.split("|", 2)
             rows.append({"t": "H", "w": int(w), "text": text})
+        elif t == "L" and rows and rows[-1]["t"] == "H":
+            rows[-1]["lib"] = l.split("|", 1)[1]
         elif t == "S":
             f = l.split("|", 6)
             rows.append({"t": "S", "id": f[1], "pages": int(f[3]),
@@ -237,8 +239,9 @@ def parse_index(lines: list[str]) -> list[dict]:
             f = l.split("|", 5)
             r = rows[-1]
             r.update(kind=f[2], qid=f[3], cw=[int(x) for x in f[4].split(";")], compact=f[5].split(TB))
+    # come l'orologio: intestazioni solo con più gruppi, tranne per gli esami (dicono la prova)
     if chapters <= 1:
-        rows = [r for r in rows if r["t"] != "H"]
+        rows = [r for r in rows if r["t"] != "H" or r.get("lib") == "esami"]
     return rows
 
 

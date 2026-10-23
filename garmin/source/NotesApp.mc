@@ -244,19 +244,25 @@ class NotesApp extends Application.AppBase {
         return (v instanceof Lang.Number) ? v as Number : 0;
     }
 
-    // cosa tenere in memoria: MEM_ALL (di default), LIB_NOTES o LIB_EXAMS
-    function memLib() as Number {
-        var v = store.getValue("memlib");
-        return (v instanceof Lang.Number && MEM_STEPS.indexOf(v) >= 0) ? v as Number : MEM_ALL;
+    // libreria mostrata nell'elenco e tenuta in memoria: LIB_NOTES (di default) o LIB_EXAMS
+    function library() as Number {
+        var v = store.getValue("lib");
+        return (v instanceof Lang.Number && (v as Number) == LIB_EXAMS) ? LIB_EXAMS : LIB_NOTES;
+    }
+
+    // suffisso delle chiavi salvate per libreria (voce selezionata, posizione di lettura):
+    // gli appunti usano le chiavi di sempre
+    function libKey(k as String) as String {
+        return library() == LIB_EXAMS ? k + "2" : k;
     }
 
     // ------------------------------------------------------------- posizione di lettura
     function savePosition(id as String, page as Number) as Void {
-        store.setValue("pos", [id, page]);
+        store.setValue(libKey("pos"), [id, page]);
     }
 
     function lastPosition() as Array or Null {
-        var p = store.getValue("pos");
+        var p = store.getValue(libKey("pos"));
         return (p instanceof Lang.Array) ? p as Array : null;
     }
 }

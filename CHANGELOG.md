@@ -4,6 +4,15 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Orologio 1.7.0
+
+- Menu: *Mostra* (prima voce) sostituisce *In memoria*. Sceglie la libreria,
+  *Appunti* o *Simulazioni d'esame*: l'elenco mostra solo quella e in memoria
+  resta solo quella. Voce selezionata e *Riprendi lettura* sono separati per
+  libreria.
+- Simulazioni d'esame raggruppate per prova («Prova del 14/09/2026» → E1,
+  E2…), dalla più recente, con l'intestazione della prova sempre visibile.
+
 ## Orologio 1.6.0
 
 - Simulazioni d'esame: nuovo gruppo *Simulazioni d'esame* in fondo all'elenco,

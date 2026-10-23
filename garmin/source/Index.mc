@@ -1,9 +1,9 @@
 import Toybox.Lang;
 
-// librerie dei capitoli; MEM_* scelgono cosa tenere in memoria (opzione del menu)
+// librerie dei capitoli (riga "L"): l'opzione "Mostra" del menu sceglie quale
+// vedere nell'elenco e tenere in memoria
 const LIB_NOTES = 1;
 const LIB_EXAMS = 2;
-const MEM_ALL = 0;
 
 // Indice degli appunti (formato: shared/FORMAT.md, sezione "Indice").
 class Section {

@@ -3,6 +3,8 @@ import Toybox.WatchUi;
 
 function showMainMenu() as Void {
     var m = new WatchUi.Menu2({:title => WatchUi.loadResource(Rez.Strings.MenuTitle) as String});
+    m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuLib) as String,
+        libLabel(getApp().library()), :lib, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuResume) as String, null, :resume, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuIndex) as String, null, :index, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuAuto) as String, autoLabel(getApp().autoSeconds()),
@@ -17,8 +19,6 @@ function showMainMenu() as Void {
         motionLabel(getApp().motionThreshold()), :motion, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuVertical) as String,
         verticalLabel(getApp().verticalDelay()), :vertical, null));
-    m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuMem) as String,
-        memLabel(getApp().memLib()), :memlib, null));
     var winfo = getApp().store.getValue("winfo");
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuSync) as String,
         getApp().status + ((winfo instanceof Lang.String) ? " · " + winfo : ""), :sync, null));
@@ -35,17 +35,8 @@ function showMainMenu() as Void {
 // durata della pressione per tornare agli appunti dall'orologio stealth (ms)
 const UNLOCK_STEPS = [1000, 1500, 2000, 2500, 3000, 4000];
 
-// cosa tenere in memoria: tutto, solo appunti, solo simulazioni d'esame
-const MEM_STEPS = [MEM_ALL, LIB_NOTES, LIB_EXAMS];
-
-function memLabel(v as Number) as String {
-    if (v == LIB_NOTES) {
-        return WatchUi.loadResource(Rez.Strings.MemNotes) as String;
-    }
-    if (v == LIB_EXAMS) {
-        return WatchUi.loadResource(Rez.Strings.MemExams) as String;
-    }
-    return WatchUi.loadResource(Rez.Strings.MemAll) as String;
+function libLabel(v as Number) as String {
+    return WatchUi.loadResource(v == LIB_EXAMS ? Rez.Strings.LibExams : Rez.Strings.LibNotes) as String;
 }
 
 // valori dello scorrimento automatico, in secondi per pagina (0 = spento)
@@ -94,20 +85,6 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
             app.store.setValue("motion", nextT);
             app.motion.apply();
             item.setSubLabel(motionLabel(nextT));
-            WatchUi.requestUpdate();
-            return;
-        }
-        if (id == :memlib) {
-            // ogni tocco passa alla scelta successiva; il download riparte con la nuova
-            // scelta e, finito, libera la memoria occupata da ciò che è escluso
-            var curM = app.memLib();
-            var mi = MEM_STEPS.indexOf(curM);
-            var nextM = MEM_STEPS[(mi + 1) % MEM_STEPS.size()] as Number;
-            app.store.setValue("memlib", nextM);
-            item.setSubLabel(memLabel(nextM));
-            if (app.index != null) {
-                app.prefetch.restart(app.index as Index);
-            }
             WatchUi.requestUpdate();
             return;
         }
@@ -165,6 +142,15 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
             app.images.clear();
             app.index = null;
             app.startSync();
+        } else if (id == :lib) {
+            // passa all'altra libreria: l'elenco mostra solo quella, il download in
+            // sottofondo la scarica e, finito, libera la memoria occupata dall'altra
+            app.store.setValue("lib", app.library() == LIB_EXAMS ? LIB_NOTES : LIB_EXAMS);
+            if (app.index != null) {
+                app.prefetch.restart(app.index as Index);
+            }
+            var lv = new QuestionListView();
+            WatchUi.switchToView(lv, new QuestionListDelegate(lv), WatchUi.SLIDE_LEFT);
         } else if (id == :index) {
             // torna alla lista dei capitoli
             var v = new QuestionListView();

@@ -367,6 +367,15 @@ def test_strip_height_fits_circle():
     assert p.band(p.r - h / 2, p.r + h / 2)[1] >= pdfstrips.STRIP_W
 
 
+def test_exam_label_and_order():
+    lab = pdfstrips.exam_label("Prova del 14/09/2026 – Esercizio 2: Mach nell'ugello", "2026-09-14_E02")
+    assert (lab.prova, lab.qid, lab.topic) == ("14/09/2026", "E2", "Mach nell'ugello")
+    lab = pdfstrips.exam_label("Titolo libero", "2025-01-30_altro")
+    assert (lab.prova, lab.qid, lab.topic) == ("30/01/2025", "", "Titolo libero")
+    order = sorted(["14/09/2026", "30/01/2025", "02/10/2026"], key=pdfstrips.prova_sort_key, reverse=True)
+    assert order == ["02/10/2026", "14/09/2026", "30/01/2025"]
+
+
 def test_column_from_pdf_keywords():
     assert pdfstrips.column_cm({"Keywords": "colonna=0.2cm+4.6cm"}) == (0.2, 4.6)
     assert pdfstrips.column_cm({}) == pdfstrips.DEFAULT_COLUMN
@@ -424,8 +433,15 @@ def test_incremental_build_matches_full(tmp_path):
     _exam_dir(exams, "2026-02-02_b", "Secondo esercizio. " * 30)
     log, inc2 = build(tmp_path / "d3", "--reuse", prev, "--notes-from-reuse")
     assert log.count("invariato") == 1 and "2026-02-02_b:" in log
-    assert [len(c["sections"]) for c in inc2["toc"] if c.get("lib") == "esami"] == [2]
+    # un gruppo per prova (data dalla cartella), dalla più recente
+    assert [c["title"] for c in inc2["toc"] if c.get("lib") == "esami"] == \
+        ["Prova del 02/02/2026", "Prova del 01/01/2026"]
     assert inc2["contentHash"] != full["contentHash"]
+    # cartella cancellata: l'esame sparisce dal bundle (e dall'orologio, al nuovo indice)
+    shutil.rmtree(exams / "2026-01-01_a")
+    _, inc3 = build(tmp_path / "d4", "--reuse", str(tmp_path / "d3" / "notes-bundle.zip"), "--notes-from-reuse")
+    assert [c["title"] for c in inc3["toc"] if c.get("lib") == "esami"] == ["Prova del 02/02/2026"]
+    assert not any(k.startswith("s:x-2026-01-01") for k in inc3["resources"])
 
 
 @pytest.mark.skipif(not HAS_TEX, reason="LaTeX non installato")

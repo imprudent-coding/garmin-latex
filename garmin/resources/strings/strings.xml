@@ -30,10 +30,10 @@
     <string id="WebOk">web: ok</string>
     <string id="WebNone">web: indice senza file web</string>
     <string id="WebError">web: errore</string>
-    <string id="MenuMem">In memoria</string>
-    <string id="MemAll">Appunti ed esami</string>
-    <string id="MemNotes">Solo appunti</string>
-    <string id="MemExams">Solo esami</string>
+    <string id="MenuLib">Mostra</string>
+    <string id="LibNotes">Appunti</string>
+    <string id="LibExams">Simulazioni d'esame</string>
+    <string id="NoExams">Nessuna simulazione d'esame. Cambia libreria dal menu (Mostra).</string>
     <string id="MenuSync">Sincronizza ora</string>
     <string id="MenuIndex">Torna all'elenco</string>
     <string id="MenuClear">Svuota cache</string>

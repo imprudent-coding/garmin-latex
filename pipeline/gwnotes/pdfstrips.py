@@ -252,6 +252,32 @@ def layout_pages(strips: list[StripPage], keys: list[tuple[str, str]], profile) 
     return pages
 
 
+@dataclass
+class ExamLabel:
+    prova: str   # "14/09/2026" (o il nome della cartella, se manca la data)
+    qid: str     # "E2" ("" se il titolo non dice il numero dell'esercizio)
+    topic: str   # argomento
+
+
+def exam_label(pdf_title: str, folder: str) -> ExamLabel:
+    """Prova, esercizio e argomento dal titolo del PDF
+    ("Prova del 14/09/2026 – Esercizio 2: argomento", da \\esercizio del preambolo);
+    in mancanza, la data dal nome della cartella (AAAA-MM-GG_...)."""
+    t = re.sub(r"\s+", " ", pdf_title).strip()
+    m = re.match(r"(?:Prova del\s+)?(\d{1,2}/\d{1,2}/\d{4})\s*[–—-]+\s*Esercizio\s+(\w+)\s*:?\s*(.*)$", t)
+    if m:
+        return ExamLabel(m.group(1), "E" + m.group(2), m.group(3) or folder)
+    d = re.match(r"(\d{4})-(\d{2})-(\d{2})", folder)
+    prova = f"{d.group(3)}/{d.group(2)}/{d.group(1)}" if d else "Altre simulazioni"
+    return ExamLabel(prova, "", t or folder)
+
+
+def prova_sort_key(prova: str) -> tuple:
+    """Ordine cronologico delle prove ("GG/MM/AAAA"); le altre in fondo."""
+    m = re.match(r"(\d{1,2})/(\d{1,2})/(\d{4})$", prova)
+    return (1, int(m.group(3)), int(m.group(2)), int(m.group(1))) if m else (0, 0, 0, 0)
+
+
 def find_exams(root: Path) -> list[Path]:
     """PDF in formato orologio: <root>/<cartella>/orologio.pdf, in ordine di cartella."""
     return sorted(root.glob("*/orologio.pdf"))

@@ -29,6 +29,7 @@ class QuestionListView extends WatchUi.View {
     private var _selectable as Array<Number> = [] as Array<Number>;
     var sel as Number = 0;              // posizione in _selectable
     private var _version as String = "";
+    private var _lib as Number = 0;     // libreria delle righe costruite
     // rettangoli disegnati: [top, bottom, posizione in _selectable]
     private var _hits as Array<Array<Number>> = [] as Array<Array<Number>>;
 
@@ -56,16 +57,29 @@ class QuestionListView extends WatchUi.View {
             return;
         }
         var ix = idx as Index;
-        if (ix.version.equals(_version) && _rows.size() > 0) {
+        var lib = getApp().library();
+        if (ix.version.equals(_version) && lib == _lib && _rows.size() > 0) {
             return;
         }
         _version = ix.version;
+        _lib = lib;
         _rows = [] as Array<Array>;
         _selectable = [] as Array<Number>;
         var chs = ix.chapters;
+        // solo i capitoli della libreria scelta (opzione "Mostra")
+        var shown = 0;
+        for (var c = 0; c < chs.size(); c++) {
+            if (chs[c].lib == lib) {
+                shown += 1;
+            }
+        }
         for (var c = 0; c < chs.size(); c++) {
             var ch = chs[c];
-            if (ch.hLine != null && chs.size() > 1) {
+            if (ch.lib != lib) {
+                continue;
+            }
+            // gli esami hanno sempre l'intestazione: dice di quale prova si tratta
+            if (ch.hLine != null && (shown > 1 || ch.lib == LIB_EXAMS)) {
                 _rows.add([T_HEAD, ch, c]);
             }
             for (var s = 0; s < ch.sections.size(); s++) {
@@ -75,7 +89,7 @@ class QuestionListView extends WatchUi.View {
         }
         // riparte dall'ultima voce aperta
         sel = 0;
-        var last = getApp().store.getValue("sel");
+        var last = getApp().store.getValue(getApp().libKey("sel"));
         if (last instanceof Lang.String) {
             for (var i = 0; i < _selectable.size(); i++) {
                 if ((_rows[_selectable[i]][1] as Section).id.equals(last as String)) {
@@ -117,7 +131,8 @@ class QuestionListView extends WatchUi.View {
             dc.fillCircle(cx + d * 9, 36, 2);
         }
         if (_selectable.size() == 0) {
-            rt.drawWrapped(dc, WatchUi.loadResource(Rez.Strings.NoIndex) as String, cx, 150, 280, 0);
+            var empty = (app.index != null && app.library() == LIB_EXAMS) ? Rez.Strings.NoExams : Rez.Strings.NoIndex;
+            rt.drawWrapped(dc, WatchUi.loadResource(empty) as String, cx, 150, 280, 0);
             return;
         }
         if (sel >= _selectable.size()) {
@@ -288,7 +303,7 @@ class QuestionListView extends WatchUi.View {
             return;
         }
         var sec = _rows[_selectable[sel]][1] as Section;
-        getApp().store.setValue("sel", sec.id);
+        getApp().store.setValue(getApp().libKey("sel"), sec.id);
         openReader(sec, 0);
     }
 

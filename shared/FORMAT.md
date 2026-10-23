@@ -185,8 +185,10 @@ La chiave è l'hash del contenuto: immagini identiche sono condivise.
 
 ## Simulazioni d'esame
 
-Con `gwnotes build --exams <cartella>` la pipeline aggiunge un capitolo con riga
-`L|esami`, una sezione per ogni `<cartella>/<esercizio>/orologio.pdf`
+Con `gwnotes build --exams <cartella>` la pipeline aggiunge un capitolo per ogni
+prova («Prova del GG/MM/AAAA», dalla più recente), con riga `H` sempre presente e
+riga `L|esami`, e una sezione di tipo `question` (id `E1`, `E2`…) per ogni
+`<cartella>/<esercizio>/orologio.pdf`
 (`pipeline/gwnotes/pdfstrips.py`). Sono PDF già impaginati in una colonna
 stretta (dichiarata nelle parole chiave del PDF: `colonna=<sinistra>cm+<larghezza>cm`):
 le pagine sono strisce d'immagine larghe 262 px, una per pagina, centrate, con
