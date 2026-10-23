@@ -4,6 +4,13 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Orologio 1.7.1
+
+- *Mostra*: l'altra libreria viene eliminata dalla cache subito, al cambio e a
+  ogni apertura o sincronizzazione, con sezioni e immagini, anche se il
+  download non arriva in fondo (prima solo a download completato senza
+  errori). Al cambio si liberano anche le immagini aperte.
+
 ## Orologio 1.7.0
 
 - Menu: *Mostra* (prima voce) sostituisce *In memoria*. Sceglie la libreria,
