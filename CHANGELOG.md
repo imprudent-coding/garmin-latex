@@ -10,6 +10,9 @@ automatiche a ogni push su `main`.
   *Appunti* o *Simulazioni d'esame*: l'elenco mostra solo quella e in memoria
   resta solo quella. Voce selezionata e *Riprendi lettura* sono separati per
   libreria.
+- *Sincronizza ora* (e l'apertura dell'app) controlla anche l'indice su GitHub
+  Pages (`w/idx.json`): una versione nuova arriva subito dal web, senza
+  aspettare l'app del telefono, che nel frattempo non viene interrogata.
 - Simulazioni d'esame raggruppate per prova («Prova del 14/09/2026» → E1,
   E2…), dalla più recente, con l'intestazione della prova sempre visibile.
 

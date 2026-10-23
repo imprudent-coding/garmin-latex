@@ -30,6 +30,7 @@
     <string id="WebOk">web: ok</string>
     <string id="WebNone">web: indice senza file web</string>
     <string id="WebError">web: errore</string>
+    <string id="FromWeb">Aggiornato dal web</string>
     <string id="MenuLib">Mostra</string>
     <string id="LibNotes">Appunti</string>
     <string id="LibExams">Simulazioni d'esame</string>

@@ -385,6 +385,12 @@ def build(args) -> int:
     (web_dir / "w").mkdir(parents=True)
     for name, body in web_files.items():
         (web_dir / "w" / f"{name}.json").write_bytes(body)
+    # indice attuale, a nome fisso: l'orologio lo controlla con "Sincronizza ora" e
+    # all'avvio, così vede una nuova versione senza aspettare l'app del telefono
+    idx_res = bb.resources["idx"]
+    (web_dir / "w" / "idx.json").write_text(
+        json.dumps({"ver": content_version, "schema": SCHEMA, "font": metrics.font_id, "hash": idx_res.hash,
+                    "chunks": idx_res.chunks}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (web_dir / "index.html").write_text(
         f"<!doctype html><meta charset=utf-8><title>{html.escape(notes.title)}</title>"
         f"<p>File degli appunti per l'app dell'orologio (versione {content_version}).</p>\n", encoding="utf-8")

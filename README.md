@@ -405,6 +405,15 @@ Anche abbassare il braccio per altri motivi (es. per scrivere) lo fa
 scattare. Usa lo stesso sensore di *Movimento*, che resta spento se entrambe
 le opzioni sono su No.
 
+**Sincronizza ora.** Controlla subito anche l'indice pubblicato su GitHub
+Pages: se c'è una versione nuova (per esempio una simulazione d'esame appena
+unita), l'orologio la usa e la scarica dal web, senza aspettare che l'app del
+telefono controlli le Release. Basta che il telefono sia collegato (le
+richieste web passano da Garmin Connect). Dopo una pubblicazione possono servire
+fino a ~10 minuti (cache di GitHub Pages). La stessa verifica avviene a ogni
+apertura dell'app. Finché il telefono ha il bundle precedente, la riga di stato
+mostra «Aggiornato dal web».
+
 **Mostra.** La prima voce del menu sceglie la libreria: *Appunti* (di
 default) o *Simulazioni d'esame*. Un tocco passa all'altra e torna all'elenco,
 che mostra solo la libreria scelta. Il download in sottofondo scarica solo

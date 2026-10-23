@@ -145,7 +145,15 @@ ripete), divise in file con al massimo ~32 KB di dati.
 {"r": [["s:q-a1", "<hash>", ["<pezzo 0>", "<pezzo 1>"]], ["i:3fa…", "<hash>", ["…"]]]}
 ```
 
-Ogni voce è `[chiave, hash, pezzi]`, con gli stessi pezzi del bundle. Il nome del
+Ogni voce è `[chiave, hash, pezzi]`, con gli stessi pezzi del bundle.
+
+Accanto c'è `web/w/idx.json`, a nome fisso: l'indice attuale,
+`{"ver": contentVersion, "schema", "font", "hash", "chunks"}` con gli stessi pezzi
+della risorsa `idx`. L'orologio lo legge all'avvio e con *Sincronizza ora*: se
+`ver` è più recente della sua versione (e schema e font coincidono) lo adotta
+subito e scarica il resto dai file web, senza aspettare l'app del telefono.
+Finché il telefono ha un bundle più vecchio, l'orologio non gli chiede nulla.
+GitHub Pages lo tiene in cache al più 10 minuti. Il nome del
 file è un hash del contenuto (`p` + 12 caratteri esadecimali): un file con lo
 stesso nome non va riscaricato. L'orologio li scarica con `makeWebRequest`
 (JSON), che passa da Garmin Connect ma è molto più veloce dei messaggi tra app;

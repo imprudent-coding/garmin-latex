@@ -1,6 +1,7 @@
 import Toybox.Application;
 import Toybox.Communications;
 import Toybox.Lang;
+import Toybox.PersistedContent;
 import Toybox.System;
 import Toybox.WatchUi;
 
@@ -10,6 +11,8 @@ function getApp() as NotesApp {
 
 class NotesApp extends Application.AppBase {
     const RETRY_MS = 30000;
+    // schema del bundle che l'app sa leggere (come Sync.SCHEMA)
+    const WEB_SCHEMA = 2;
 
     var ticker as Ticker;
     var store as Store;
@@ -24,6 +27,10 @@ class NotesApp extends Application.AppBase {
     // ultima chiusura dell'orologio stealth (System.getTimer)
     var clockClosedAt as Number = -100000;
     var status as String = "";
+    // il telefono ha un bundle più vecchio dell'indice preso dal web: non gli si chiede
+    // nulla finché non si aggiorna (tutto arriva dai file web)
+    var phoneBehind as Boolean = false;
+    private var _webIdxBusy as Boolean = false;
     // indice in arrivo dal telefono
     private var _idxHash as String = "";
     private var _idxChunks as Number = 0;
@@ -87,6 +94,70 @@ class NotesApp extends Application.AppBase {
         status = WatchUi.loadResource(Rez.Strings.Syncing) as String;
         var ver = store.getValue("ver");
         sync.hello(ver instanceof Lang.String ? ver as String : "", method(:onHello));
+        webCheck();
+    }
+
+    // ------------------------------------------------------------- indice dal web
+    // All'avvio e con "Sincronizza ora" l'orologio controlla anche l'indice pubblicato
+    // su GitHub Pages (w/idx.json): se è più recente lo usa subito, senza aspettare che
+    // l'app del telefono scarichi la nuova Release. Serve un indice già in cache (da lì
+    // viene l'indirizzo dei file web).
+    function webCheck() as Void {
+        if (_webIdxBusy || index == null || (index as Index).webBase == null) {
+            return;
+        }
+        _webIdxBusy = true;
+        try {
+            Communications.makeWebRequest(((index as Index).webBase as String) + "idx.json", null, {
+                :method => Communications.HTTP_REQUEST_METHOD_GET,
+                :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON
+            }, method(:onWebIndex));
+        } catch (e) {
+            _webIdxBusy = false;
+        }
+    }
+
+    function onWebIndex(code as Number, data as Dictionary or String or PersistedContent.Iterator or Null) as Void {
+        _webIdxBusy = false;
+        if (code != 200 || !(data instanceof Lang.Dictionary)) {
+            System.println("indice web: " + code);
+            return;
+        }
+        var d = data as Dictionary;
+        var ver = d["ver"];
+        var hash = d["hash"];
+        var chunks = d["chunks"];
+        if (!(ver instanceof Lang.String) || !(hash instanceof Lang.String) || !(chunks instanceof Lang.Array)) {
+            return;
+        }
+        // indice di un'app più recente (font o schema diversi): ci pensa il telefono
+        if (Util.toNum(d["schema"]) != WEB_SCHEMA || !FontInfo.ID.equals(d["font"])) {
+            return;
+        }
+        var cached = store.getValue("ver");
+        if (cached instanceof Lang.String && !Util.newer(ver as String, cached as String)) {
+            return;
+        }
+        prefetch.stop();
+        var cs = chunks as Array;
+        for (var i = 0; i < cs.size(); i++) {
+            if (!store.put("idx", i, cs.size(), hash as String, cs[i] as String)) {
+                return;
+            }
+        }
+        var text = store.getAll("idx", hash as String, "\n");
+        if (text != null) {
+            Mem.log("indice dal web");
+            installIndex(text as String, ver as String);
+            if (sync.state == ST_OK && !sync.phoneVersion.equals(ver)) {
+                // il telefono ha ancora il bundle precedente
+                phoneBehind = true;
+                sync.state = ST_OFFLINE;
+            }
+            status = statusText();
+            prefetch.start(index as Index);
+            WatchUi.requestUpdate();
+        }
     }
 
     // Telefono non raggiungibile con il download incompleto: nuovo hello tra
@@ -118,6 +189,18 @@ class NotesApp extends Application.AppBase {
         _idxHash = d["ih"].toString();
         _idxChunks = Util.toNum(d["ic"]);
         var cachedVer = store.getValue("ver");
+        phoneBehind = false;
+        if (index != null && cachedVer instanceof Lang.String && Util.newer(cachedVer as String, _idxVersion)) {
+            // l'indice in cache (dal web) è più recente del bundle del telefono: niente
+            // richieste al telefono, che risponderebbe "stale"; tutto arriva dal web
+            phoneBehind = true;
+            sync.state = ST_OFFLINE;
+            status = statusText();
+            prefetch.start(index as Index);
+            retrySoon();
+            WatchUi.requestUpdate();
+            return;
+        }
         if (index != null && cachedVer != null && _idxVersion.equals(cachedVer) && store.isComplete("idx", _idxHash)) {
             status = statusText();
             prefetch.start(index as Index);
@@ -145,23 +228,29 @@ class NotesApp extends Application.AppBase {
         // indice completo
         var text = store.getAll("idx", _idxHash, "\n");
         if (text != null) {
-            index = new Index(text as String);
-            store.setValue("ver", _idxVersion);
-            var valid = {} as Dictionary;
-            var chs = (index as Index).chapters;
-            for (var c = 0; c < chs.size(); c++) {
-                for (var s = 0; s < chs[c].sections.size(); s++) {
-                    var sec = chs[c].sections[s];
-                    valid[sec.key()] = sec.hash;
-                }
-            }
-            store.dropStale(valid);
+            installIndex(text as String, _idxVersion);
             Mem.log("nuovo indice");
             status = statusText();
             prefetch.start(index as Index);
         }
         status = statusText();
         WatchUi.requestUpdate();
+    }
+
+    // Nuovo indice (dal telefono o dal web): lo rende attuale ed elimina le sezioni
+    // che non ne fanno più parte (es. una simulazione d'esame cancellata).
+    private function installIndex(text as String, ver as String) as Void {
+        index = new Index(text);
+        store.setValue("ver", ver);
+        var valid = {} as Dictionary;
+        var chs = (index as Index).chapters;
+        for (var c = 0; c < chs.size(); c++) {
+            for (var s = 0; s < chs[c].sections.size(); s++) {
+                var sec = chs[c].sections[s];
+                valid[sec.key()] = sec.hash;
+            }
+        }
+        store.dropStale(valid);
     }
 
     // Aggiorna la riga di stato (avanzamento del prefetch).
@@ -182,6 +271,13 @@ class NotesApp extends Application.AppBase {
 
     function statusText() as String {
         var st = sync.state;
+        if (phoneBehind) {
+            var pw = prefetch.label();
+            if (pw != null) {
+                return pw as String;
+            }
+            return WatchUi.loadResource(prefetch.finished ? Rez.Strings.AllOnWatch : Rez.Strings.FromWeb) as String;
+        }
         if (st == ST_OK) {
             if (index != null && !(index as Index).fontId.equals(FontInfo.ID)) {
                 return WatchUi.loadResource(Rez.Strings.OldApp) as String;

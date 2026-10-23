@@ -280,6 +280,10 @@ def test_end_to_end(tmp_path):
         for name in f[2].split(";"):
             web_keys |= {r[0] for r in json.loads((out / "web" / "w" / f"{name}.json").read_text())["r"]}
     assert web_keys == {k for k in m["resources"] if k != "idx"}
+    # indice attuale sul web, per la sincronizzazione dell'orologio senza telefono
+    widx = json.loads((out / "web" / "w" / "idx.json").read_text())
+    assert widx["ver"] == m["contentVersion"] and widx["hash"] == m["resources"]["idx"]["hash"]
+    assert "\n".join(widx["chunks"]) == idx
     # stesso contenuto, indice diverso (senza file web): il contentHash deve cambiare,
     # altrimenti l'app Android terrebbe il bundle vecchio
     out2 = tmp_path / "dist2"
