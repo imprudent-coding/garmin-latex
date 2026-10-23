@@ -3,8 +3,6 @@ import Toybox.WatchUi;
 
 function showMainMenu() as Void {
     var m = new WatchUi.Menu2({:title => WatchUi.loadResource(Rez.Strings.MenuTitle) as String});
-    m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuLib) as String,
-        libLabel(getApp().library()), :lib, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuResume) as String, null, :resume, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuIndex) as String, null, :index, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuAuto) as String, autoLabel(getApp().autoSeconds()),
@@ -29,6 +27,10 @@ function showMainMenu() as Void {
         sr != null ? sr : WatchUi.loadResource(Rez.Strings.MenuSpeedSub) as String, :speed, null));
     m.addItem(new WatchUi.ToggleMenuItem(WatchUi.loadResource(Rez.Strings.MenuMemory) as String, null, :memory,
         getApp().showMemory, null));
+    // in fondo: un tocco cambia libreria e svuota l'altra dalla memoria, meglio non
+    // trovarlo in cima al menu dove lo si tocca per errore
+    m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuLib) as String,
+        libLabel(getApp().library()), :lib, null));
     WatchUi.pushView(m, new MainMenuDelegate(), WatchUi.SLIDE_UP);
 }
 
