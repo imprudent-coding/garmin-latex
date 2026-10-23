@@ -449,9 +449,11 @@ class Prefetch {
             if (line.length() > 1 && line.substring(0, 1).equals("I")) {
                 var f = Util.splitN(line, ",", 7);
                 if (f.size() == 7) {
-                    for (var k = 5; k < 7; k++) {
-                        if (f[k].length() > 2 && out.indexOf(f[k]) < 0) {
-                            out.add(f[k]);
+                    var ks = [f[5]] as Array<String>;
+                    ks.addAll(Util.split(f[6], ";"));   // zoom diviso in strisce
+                    for (var k = 0; k < ks.size(); k++) {
+                        if (ks[k].length() > 2 && out.indexOf(ks[k]) < 0) {
+                            out.add(ks[k]);
                         }
                     }
                 }
@@ -470,7 +472,11 @@ class Prefetch {
                 var f = Util.splitN(line, ",", 7);
                 if (f.size() == 7) {
                     addImage(f[5]);
-                    addImage(f[6]);
+                    // zoom: una chiave, o più strisce "k1;k2;..." (shared/FORMAT.md)
+                    var zs = Util.split(f[6], ";");
+                    for (var z = 0; z < zs.size(); z++) {
+                        addImage(zs[z]);
+                    }
                 }
             }
         }

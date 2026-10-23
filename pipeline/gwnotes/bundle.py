@@ -129,9 +129,10 @@ def image_keys(pages: list[str]) -> list[str]:
         for line in page.split("\n"):
             if line.startswith("I"):
                 f = line[1:].split(",", 6)
-                for k in f[5:7]:
-                    if k and k not in out:
-                        out.append(k)
+                for field in f[5:7]:
+                    for k in field.split(";"):   # zoom diviso in strisce: "k1;k2;..."
+                        if k and k not in out:
+                            out.append(k)
     return out
 
 

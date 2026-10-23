@@ -385,6 +385,22 @@ def test_strip_blocks_and_kinds():
     assert len(groups[2]) == 2  # i due pezzi della figura restano insieme
 
 
+def test_big_zoom_split_in_bands_within_limits():
+    """Uno zoom troppo grande per l'orologio diventa strisce orizzontali entro i limiti,
+    che ricomposte danno l'immagine intera."""
+    img = Image.effect_noise((600, 500), 90).convert("RGB")   # "grana" fitta che non comprime
+    d = ImageDraw.Draw(img)
+    d.line((0, 250, 599, 250), fill=(220, 30, 30), width=4)
+    enc = lambda im: images.encode_color(im, invert=False, photo=True)  # noqa: E731
+    assert not pdfstrips.image_fits(enc(img))
+    parts = pdfstrips.encode_tiled(img, enc)
+    assert len(parts) > 1 and all(pdfstrips.image_fits(p) for p in parts)
+    tiles = [images.decode_resource(p) for p in parts]
+    assert all(t.width == 600 for t in tiles) and sum(t.height for t in tiles) == 500
+    # una striscia piccola resta intera
+    assert len(pdfstrips.encode_tiled(img.crop((0, 0, 100, 50)), enc)) == 1
+
+
 def test_strip_height_fits_circle():
     h = pdfstrips.strip_height(VIVOACTIVE5, pdfstrips.STRIP_W)
     p = VIVOACTIVE5
@@ -508,6 +524,9 @@ def test_exam_pdf_to_pages(tmp_path):
     for s in strips:
         assert s.normal.width <= VIVOACTIVE5.size and s.normal.height <= meta["strip_h"] + 10
     assert any(s.zoom is not None for s in strips)  # l'equazione lunga ha lo zoom
+    for st in strips:
+        n, tiles = st.encode()
+        assert pdfstrips.image_fits(n) and all(pdfstrips.image_fits(t) for t in tiles)
     keys = [(f"i:{i}", "") for i in range(len(strips))]
     pages = pdfstrips.layout_pages(strips, keys, VIVOACTIVE5)
     assert all(p.startswith("P\nI") for p in pages)

@@ -46,6 +46,11 @@ PAD = 3
 PARA_GAP = 12          # spazio fra blocchi da cui si riconosce l'inizio di un paragrafo o titolo
 ZOOM = 2               # fattore di ingrandimento della versione zoom
 ZOOM_MAX_PX = 360_000   # pixel massimi di una versione zoom
+# Dimensioni massime di una singola immagine (stringa trasmessa e RLE decompresso) già
+# provate sull'orologio: oltre, la decodifica fallisce («Immagine non leggibile»). Uno
+# zoom più grande si divide in strisce orizzontali, ciascuna entro questi limiti.
+MAX_IMAGE_CHARS = 28_000
+MAX_IMAGE_RAW = 24_000
 SHRINK_MAX = 1.45      # un blocco fino a 1,45 volte la colonna resta nel testo, rimpicciolito
 DEFAULT_COLUMN = (0.2, 4.6)  # cm, se il PDF non la dichiara
 
@@ -182,14 +187,33 @@ class StripPage:
     color: bool = False
     invert: bool = True          # solo per color: sfondo bianco -> nero
 
-    def encode(self) -> tuple[str, str]:
-        """Stringhe trasmesse (normale, zoom o "")."""
+    def encode(self) -> tuple[str, list[str]]:
+        """Stringhe trasmesse: (normale, [strisce dello zoom, dall'alto], vuota se senza zoom)."""
         if self.color:
             photo = not self.invert
-            return (images.encode_color(self.normal, self.invert, photo),
-                    images.encode_color(self.zoom, self.invert, photo) if self.zoom is not None else "")
-        return (images.encode_resource(self.normal),
-                images.encode_resource(self.zoom) if self.zoom is not None else "")
+            enc = lambda im: images.encode_color(im, self.invert, photo)  # noqa: E731
+        else:
+            enc = images.encode_resource
+        return enc(self.normal), (encode_tiled(self.zoom, enc) if self.zoom is not None else [])
+
+
+def image_fits(encoded: str) -> bool:
+    """True se l'immagine codificata sta nei limiti provati sull'orologio."""
+    f = encoded.split("|", 1)[0].split(",")
+    raw = int(f[3]) if len(f) > 3 else 0
+    return len(encoded) <= MAX_IMAGE_CHARS and raw <= MAX_IMAGE_RAW
+
+
+def encode_tiled(img: Image.Image, enc) -> list[str]:
+    """L'immagine codificata, o, se supera i limiti, il minimo numero di strisce
+    orizzontali (stessa larghezza, dall'alto) che li rispettano."""
+    parts: list[str] = []
+    for n in range(1, 16):
+        h = -(-img.height // n)
+        parts = [enc(img.crop((0, y, img.width, min(img.height, y + h)))) for y in range(0, img.height, h)]
+        if all(image_fits(p) for p in parts):
+            break
+    return parts
 
 
 def build_pages(pdf: Path, profile) -> tuple[list[StripPage], dict]:
