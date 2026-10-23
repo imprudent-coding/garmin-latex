@@ -40,9 +40,12 @@ on:
 permissions:
   contents: write
 
+# Sui branch una build nuova annulla la precedente; su main no: una build annullata dopo
+# aver pubblicato la Release ma prima di GitHub Pages lasciava Pages indietro (e la build
+# successiva, vedendo la Release già aggiornata, non lo aggiornava più).
 concurrency:
   group: notes-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build:
@@ -50,6 +53,7 @@ jobs:
     timeout-minutes: 30
     outputs:
       publish: ${{ steps.changed.outputs.publish }}
+      pages: ${{ steps.changed.outputs.pages }}
     steps:
       - uses: actions/checkout@v5.0.0
 
@@ -192,6 +196,7 @@ jobs:
             ARGS+=(--notes-from-reuse)
             mkdir -p ../dist && cp ../prev/notes.pdf ../dist/notes.pdf
           fi
+          echo "web_base=$WEB_BASE" >> "$GITHUB_OUTPUT"
           python -m gwnotes build --latex ../latex --out ../dist --version "$VERSION" --preview 16 \
             --web-base "$WEB_BASE" --exams "$EXAMS" "${ARGS[@]}"
           cat ../dist/report.md >> "$GITHUB_STEP_SUMMARY"
@@ -202,6 +207,7 @@ jobs:
         id: changed
         run: |
           publish=true
+          pages=true
           if [ "${{ github.event_name }}" = schedule ] || [ "${{ github.event_name }}" = repository_dispatch ]; then
             new="$(python3 -c 'import json;print(json.load(open("dist/manifest.json"))["contentHash"])')"
             old=""
@@ -210,8 +216,19 @@ jobs:
               publish=false
               echo "Contenuti invariati ($new): niente Release" >> "$GITHUB_STEP_SUMMARY"
             fi
+            # GitHub Pages si controlla a parte: può essere rimasto indietro anche con la
+            # Release aggiornata (versione in w/idx.json, "<data>-<contentHash>")
+            live="$(curl -fsS "${{ steps.build.outputs.web_base }}idx.json" 2>/dev/null \
+                    | python3 -c 'import json,sys;print(json.load(sys.stdin)["ver"].rsplit("-",1)[-1])' 2>/dev/null || true)"
+            if [ "$new" = "$live" ]; then
+              pages=false
+              echo "GitHub Pages già aggiornato" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "GitHub Pages da aggiornare (${live:-assente} -> $new)" >> "$GITHUB_STEP_SUMMARY"
+            fi
           fi
           echo "publish=$publish" >> "$GITHUB_OUTPUT"
+          echo "pages=$pages" >> "$GITHUB_OUTPUT"
 
       - name: Anteprime, report e bundle (artifact)
         if: always()
@@ -229,7 +246,7 @@ jobs:
       # file per GitHub Pages (solo dal branch principale, come la Release)
       - name: File web per GitHub Pages
         if: >-
-          success() && steps.changed.outputs.publish == 'true'
+          success() && steps.changed.outputs.pages == 'true'
           && (github.ref == format('refs/heads/{0}', github.event.repository.default_branch) || inputs.release)
         uses: actions/upload-pages-artifact@v3.0.1
         with:
@@ -256,7 +273,7 @@ jobs:
   pages:
     needs: build
     if: >-
-      needs.build.outputs.publish == 'true'
+      needs.build.outputs.pages == 'true'
       && (github.ref == format('refs/heads/{0}', github.event.repository.default_branch) || inputs.release)
     runs-on: ubuntu-24.04
     continue-on-error: true
