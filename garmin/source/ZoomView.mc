@@ -7,6 +7,24 @@ import Toybox.WatchUi;
 // spostamento arriva quindi fino a portare ogni bordo dell'immagine dentro il
 // quadrato inscritto nel cerchio (margine MARGIN per lato), così ogni angolo
 // dell'immagine si può vedere per intero.
+// Messaggio al posto di un'immagine che non si può mostrare, secondo il motivo.
+function failText(app as NotesApp, key as String) as String {
+    var r = app.images.failReason(key);
+    if (r == F_MEMORY) {
+        return WatchUi.loadResource(Rez.Strings.NoMemory) as String;
+    }
+    if (r == F_BROKEN) {
+        return WatchUi.loadResource(Rez.Strings.Broken) as String;
+    }
+    if (r == F_DATA || (r == F_MISSING && app.prefetch.active)) {
+        return WatchUi.loadResource(Rez.Strings.Downloading) as String;
+    }
+    if (r == F_MISSING) {
+        return WatchUi.loadResource(Rez.Strings.Missing) as String;
+    }
+    return WatchUi.loadResource(Rez.Strings.Loading) as String;
+}
+
 class ZoomView extends WatchUi.View {
     private var _key as String;
     // spostamento: punto dell'immagine nell'angolo in alto a sinistra dello schermo
@@ -24,6 +42,8 @@ class ZoomView extends WatchUi.View {
 
     function onShow() as Void {
         getApp().motion.target = true;
+        // riaprendo lo zoom si riprova (es. dopo memoria insufficiente)
+        getApp().images.retry(_key);
     }
 
     function onHide() as Void {
@@ -57,8 +77,7 @@ class ZoomView extends WatchUi.View {
         var h = dc.getHeight();
         _w = w;
         if (bmp == null) {
-            var msg = app.images.isFailed(_key) ? (WatchUi.loadResource(Rez.Strings.Missing) as String)
-                                                 : (WatchUi.loadResource(Rez.Strings.Loading) as String);
+            var msg = failText(app, _key);
             (app.rich as RichText).drawWrapped(dc, msg, w / 2, h / 2 - 20, 260, 2);
             return;
         }

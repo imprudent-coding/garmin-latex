@@ -8,6 +8,12 @@ import Toybox.WatchUi;
 // La decodifica è incrementale (a blocchi su un timer) per non superare il
 // limite di tempo di esecuzione del watchdog; si tengono in memoria poche
 // bitmap alla volta (LRU).
+// perché un'immagine non c'è (ImageCache.failReason)
+const F_MISSING = 1;   // non ancora scaricata (telefono non disponibile): arriverà dal download
+const F_DATA = 2;      // dati in cache rovinati: eliminati e riscaricati
+const F_MEMORY = 3;    // memoria grafica insufficiente
+const F_BROKEN = 4;    // rovinata anche dopo due nuovi download: non si riprova
+
 class ImageCache {
     const MAX_BITMAPS = 4;
     const BYTES_PER_TICK = 1500;
@@ -19,6 +25,7 @@ class ImageCache {
     private var _sizes as Dictionary = {} as Dictionary;      // chiave -> [w, h]
     private var _order as Array<String> = [] as Array<String>;
     private var _failed as Dictionary = {} as Dictionary;
+    private var _repairs as Dictionary = {} as Dictionary;   // nuovi download per dati rovinati
     private var _wanted as Array<String> = [] as Array<String>;
 
     // stato della decodifica in corso
@@ -67,12 +74,49 @@ class ImageCache {
         return _failed[key] != null;
     }
 
+    // F_MISSING, F_DATA, F_MEMORY o 0
+    function failReason(key as String) as Number {
+        var r = _failed[key];
+        return r instanceof Lang.Number ? r as Number : 0;
+    }
+
     function retryFailed() as Void {
         _failed = {} as Dictionary;
     }
 
+    // Nuovo tentativo per una sola immagine (es. riaprendo lo zoom).
+    function retry(key as String) as Void {
+        _failed.remove(key);
+    }
+
+    private function fail(key as String, reason as Number) as Void {
+        if (reason == F_DATA) {
+            var n = _repairs[key] == null ? 0 : _repairs[key] as Number;
+            if (n >= 2) {
+                _failed[key] = F_BROKEN;
+                return;
+            }
+            _repairs[key] = n + 1;
+        }
+        _failed[key] = reason;
+        if (reason == F_DATA) {
+            // dati rovinati (es. salvati da una versione precedente): via dalla cache, e il
+            // download in sottofondo li riprende dal web
+            _store.remove(key);
+            getApp().prefetch.repair(key);
+        } else if (reason == F_MISSING) {
+            getApp().prefetch.ensure();
+        }
+    }
+
     private function want(key as String) as Void {
-        if (_failed[key] != null || key.equals(_decKey) || _wanted.indexOf(key) >= 0) {
+        var r = _failed[key];
+        // mancante o da riscaricare, e intanto arrivata dal download: si riprova da sola
+        if (r != null && r != F_MEMORY && r != F_BROKEN && _store.isComplete(key, "")) {
+            _failed.remove(key);
+            r = null;
+        }
+        if (r != null || key.equals(_decKey) || _wanted.indexOf(key) >= 0) {
             return;
         }
         _wanted.add(key);
@@ -92,6 +136,16 @@ class ImageCache {
             startDecode(key);
             return;
         }
+        var st = _sync.state;
+        if (st == ST_OFFLINE || st == ST_NOBUNDLE || st == ST_SCHEMA) {
+            // telefono non disponibile (o con un bundle più vecchio dell'indice preso dal
+            // web): niente richiesta, che fallirebbe subito; l'immagine arriva dal web
+            _wanted = _wanted.slice(1, null) as Array<String>;
+            fail(key, F_MISSING);
+            WatchUi.requestUpdate();
+            next();
+            return;
+        }
         // trova il primo pezzo mancante
         var n = 0;
         if (total > 0) {
@@ -107,7 +161,7 @@ class ImageCache {
 
     function onChunk(key, n, total, hash, data) as Void {
         if (data == null) {
-            _failed[key] = true;
+            fail(key as String, F_MISSING);
             _wanted.remove(key);
             next();
             WatchUi.requestUpdate();
@@ -128,12 +182,12 @@ class ImageCache {
     private function startDecode(key as String) as Void {
         var s = _store.getAll(key, "", "");
         if (s == null) {
-            _failed[key] = true;
+            fail(key, F_DATA);
             return;
         }
         var bar = s.find("|");
         if (bar == null) {
-            _failed[key] = true;
+            fail(key, F_DATA);
             return;
         }
         var head = Util.split(s.substring(0, bar) as String, ",");
@@ -155,7 +209,7 @@ class ImageCache {
         if (head.size() >= 4) {
             var rawLen = Util.toNum(head[3]);
             if (rawLen <= 0) {
-                _failed[key] = true;
+                fail(key, F_DATA);
                 return;
             }
             lzIn = bytes;
@@ -165,7 +219,7 @@ class ImageCache {
         if (!color) {
             ref = newBitmap(w, h, Palette.LEVELS);
             if (ref == null) {
-                _failed[key] = true;
+                fail(key, F_MEMORY);
                 return;
             }
         }
@@ -194,18 +248,21 @@ class ImageCache {
             // prima fase: decompressione LZ, a passi
             var r = lzStep();
             if (r < 0) {
-                abortDecode();
+                abortDecode(F_DATA);
             } else if (r > 0) {
                 _lzIn = null;
-                if (_decColor && !startColor()) {
-                    abortDecode();
+                if (_decColor) {
+                    var c = startColor();
+                    if (c != 0) {
+                        abortDecode(c);
+                    }
                 }
             }
             return;
         }
         var bmp = (_decRef as Graphics.BufferedBitmapReference).get();
         if (bmp == null) {
-            abortDecode();
+            abortDecode(F_MEMORY);
             return;
         }
         var dc = (bmp as Graphics.BufferedBitmap).getDc();
@@ -269,35 +326,44 @@ class ImageCache {
         }
     }
 
-    // Bitmap con palette, sfondo nero; null se non c'è memoria grafica.
+    // Bitmap con palette, sfondo nero; null se non c'è memoria grafica nemmeno dopo
+    // aver liberato tutte le altre bitmap.
     private function newBitmap(w as Number, h as Number, palette as Array<Number>) {
         freeRoom();
-        var ref = null;
-        try {
-            ref = Graphics.createBufferedBitmap({:width => w, :height => h, :palette => palette});
-        } catch (e) {
-            return null;
+        var ref = allocBitmap(w, h, palette);
+        if (ref == null && _order.size() > 0) {
+            // zoom grandi: si liberano le altre immagini in memoria e si riprova
+            _refs = {} as Dictionary;
+            _order = [] as Array<String>;
+            ref = allocBitmap(w, h, palette);
         }
         if (ref == null) {
             return null;
         }
-        var bmp = (ref as Graphics.BufferedBitmapReference).get();
-        if (bmp == null) {
-            return null;
-        }
-        var bdc = (bmp as Graphics.BufferedBitmap).getDc();
+        var bmp = (ref as Graphics.BufferedBitmapReference).get() as Graphics.BufferedBitmap;
+        var bdc = bmp.getDc();
         bdc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
         bdc.clear();
         return ref;
     }
 
+    private function allocBitmap(w as Number, h as Number, palette as Array<Number>) {
+        try {
+            var ref = Graphics.createBufferedBitmap({:width => w, :height => h, :palette => palette});
+            return (ref as Graphics.BufferedBitmapReference).get() != null ? ref : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
     // Immagine a colori decompressa: legge la palette (K, poi K colori RGB; l'indice 0 è
     // lo sfondo nero), crea la bitmap e fa partire l'RLE dopo la palette.
-    private function startColor() as Boolean {
+    // 0 se la decodifica può partire, altrimenti il motivo (F_DATA, F_MEMORY).
+    private function startColor() as Number {
         var bytes = _decBytes as ByteArray;
         var k = bytes.size() > 0 ? bytes[0] : 0;
         if (k < 1 || k > 15 || bytes.size() < 1 + 3 * k) {
-            return false;
+            return F_DATA;
         }
         var pal = [0x000000] as Array<Number>;
         for (var i = 0; i < k; i++) {
@@ -306,12 +372,12 @@ class ImageCache {
         }
         var ref = newBitmap(_decW, _decH, pal);
         if (ref == null) {
-            return false;
+            return F_MEMORY;
         }
         _decPal = pal;
         _decRef = ref;
         _decPos = 1 + 3 * k;
-        return true;
+        return 0;
     }
 
     // Un passo di decompressione LZ (formato: pipeline/gwnotes/lz.py) da _lzIn a
@@ -378,12 +444,13 @@ class ImageCache {
         return 0;
     }
 
-    private function abortDecode() as Void {
+    private function abortDecode(reason as Number) as Void {
         _ticker.cancel("img");
-        if (_decKey != null) {
-            _failed[_decKey] = true;
-        }
+        var key = _decKey;
         _decKey = null;
+        if (key != null) {
+            fail(key as String, reason);
+        }
         _decBytes = null;
         _decRef = null;
         _lzIn = null;
