@@ -8,6 +8,7 @@ python -m gwnotes build --out ../dist           # PDF, notes-bundle.zip, antepri
 python -m gwnotes build --preview-sections q-a1 q-b2   # anteprime solo di alcune sezioni (regex sugli id)
 python -m gwnotes.fontgen                       # rigenera i font dopo aver cambiato shared/font/
 python -m gwnotes build --exams ../../Gasdynamics-fork/simulazione_esame   # con le simulazioni d'esame
+python -m gwnotes build --exams … --reuse vecchio/notes-bundle.zip --notes-from-reuse   # incrementale: solo esami
 ```
 
 Richiede TeX Live (`latexmk`, `pdflatex`, pacchetti del documento), pandoc 3.x e

@@ -467,6 +467,13 @@ tabelle ed equazioni lunghe hanno lo zoom (triangolino verde).
   dalla repository degli esami un `repository_dispatch` di tipo `esami` (lì
   c'è il workflow `esami-orologio`, che lo fa a ogni push se ha il secret
   `GARMIN_DISPATCH_TOKEN`).
+- **Build incrementale**: se dall'ultima Release non sono cambiati `latex/`,
+  `pipeline/`, `shared/` né il workflow, gli appunti si copiano dal bundle di
+  quella Release e si convertono solo gli esami nuovi o modificati (ogni
+  `orologio.pdf` è riconosciuto dal suo hash): niente TeX Live né pandoc, e il
+  workflow dura pochi secondi di lavoro vero invece di 2–4 minuti. Il riepilogo
+  del workflow dice quale build ha fatto; *Run workflow* con *completa* forza
+  quella completa.
 - **Repository privata**: aggiungi qui il secret `EXAMS_TOKEN`, un token
   *fine-grained* con permesso *Contents: Read-only* sulla repository degli
   esami. Senza, il workflow segnala un avviso e pubblica solo gli appunti.

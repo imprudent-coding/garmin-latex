@@ -24,6 +24,7 @@ l'orologio le disegna come qualsiasi altra pagina con immagini.
 """
 from __future__ import annotations
 
+import hashlib
 import re
 import subprocess
 import tempfile
@@ -254,3 +255,13 @@ def layout_pages(strips: list[StripPage], keys: list[tuple[str, str]], profile) 
 def find_exams(root: Path) -> list[Path]:
     """PDF in formato orologio: <root>/<cartella>/orologio.pdf, in ordine di cartella."""
     return sorted(root.glob("*/orologio.pdf"))
+
+
+def code_hash() -> str:
+    """Impronta del codice che produce le strisce: un PDF già convertito in un bundle
+    precedente si riusa solo se anche questa è uguale."""
+    here = Path(__file__).parent
+    h = hashlib.sha256()
+    for name in ("pdfstrips.py", "images.py", "lz.py", "assets.py", "layout.py", "profile.py"):
+        h.update((here / name).read_bytes())
+    return h.hexdigest()[:12]

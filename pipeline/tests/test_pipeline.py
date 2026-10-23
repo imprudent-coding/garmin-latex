@@ -382,6 +382,52 @@ def test_index_library_row():
     assert not any(line.startswith("L|") for line in lines)
 
 
+def _exam_dir(root: Path, name: str, text: str) -> Path:
+    d = root / name
+    d.mkdir(parents=True)
+    (d / "orologio.tex").write_text(r"""\documentclass[11pt]{article}
+\usepackage[paperwidth=12cm,paperheight=40cm,left=0.2cm,top=0.2cm,textwidth=4.6cm,textheight=39cm]{geometry}
+\usepackage[pdftitle={Prova},pdfkeywords={colonna=0.2cm+4.6cm}]{hyperref}
+\pagestyle{empty}\hfuzz=20cm\raggedright
+\begin{document}
+""" + text + "\n\\end{document}\n", encoding="utf-8")
+    subprocess.run(["latexmk", "-pdf", "-quiet", "orologio.tex"], cwd=d, check=True, capture_output=True)
+    return d
+
+
+@pytest.mark.skipif(not (HAS_TEX and HAS_PANDOC), reason="servono TeX Live e pandoc")
+def test_incremental_build_matches_full(tmp_path):
+    """Build incrementale (appunti dal bundle precedente, esami invariati riusati) =
+    build completa: stesso contentHash. Un esame nuovo si converte, gli altri no."""
+    src = tmp_path / "latex"
+    src.mkdir()
+    (src / "main.tex").write_text(SAMPLE.replace("\\newtcolorbox{nota}{title={Nota}}\n", ""), encoding="utf-8")
+    exams = tmp_path / "esami"
+    _exam_dir(exams, "2026-01-01_a", "Primo esercizio. " * 30)
+
+    def build(out, *extra):
+        p = subprocess.run([sys.executable, "-m", "gwnotes", "build", "--latex", str(src), "--out", str(out),
+                            "--preview", "0", "--web-base", "https://x.example/w", "--exams", str(exams), *extra],
+                           cwd=ROOT, capture_output=True, text=True)
+        assert p.returncode == 0, p.stdout + p.stderr
+        return p.stdout, json.loads((out / "manifest.json").read_text())
+
+    _, full = build(tmp_path / "d1")
+    prev = str(tmp_path / "d1" / "notes-bundle.zip")
+    log, inc = build(tmp_path / "d2", "--reuse", prev, "--notes-from-reuse")
+    assert "invariato" in log and "Appunti dal bundle precedente" in log
+    assert inc["contentHash"] == full["contentHash"]
+    assert sorted((tmp_path / "d1" / "web" / "w").iterdir()) != [] and \
+        sorted(p.name for p in (tmp_path / "d1" / "web" / "w").iterdir()) == \
+        sorted(p.name for p in (tmp_path / "d2" / "web" / "w").iterdir())
+    # nuovo esame: solo quello si converte; il gruppo esami ha due voci
+    _exam_dir(exams, "2026-02-02_b", "Secondo esercizio. " * 30)
+    log, inc2 = build(tmp_path / "d3", "--reuse", prev, "--notes-from-reuse")
+    assert log.count("invariato") == 1 and "2026-02-02_b:" in log
+    assert [len(c["sections"]) for c in inc2["toc"] if c.get("lib") == "esami"] == [2]
+    assert inc2["contentHash"] != full["contentHash"]
+
+
 @pytest.mark.skipif(not HAS_TEX, reason="LaTeX non installato")
 def test_exam_pdf_to_pages(tmp_path):
     """PDF formato orologio vero: colonna dichiarata, testo, un'equazione lunga, nessuna riga persa."""

@@ -16,6 +16,10 @@ automatiche a ogni push su `main`.
   libera la memoria occupata dal resto.
 - Indice: riga `L` (libreria del capitolo); le versioni precedenti la ignorano
   e scaricano tutto.
+- Workflow: build incrementale quando cambiano solo gli esami (appunti copiati
+  dall'ultima Release, esami invariati riusati), cache dei pacchetti TeX Live
+  con tempi massimi per lo specchio di Ubuntu; app orologio: CLI dell'SDK in
+  cache e pacchetto `.iq` solo per le Release.
 
 ## Orologio 1.5.0
 

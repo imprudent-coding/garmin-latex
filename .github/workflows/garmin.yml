@@ -59,8 +59,17 @@ jobs:
           fi
           [ -z "$AGREEMENT" ] && echo "agreement=missing" >> "$GITHUB_OUTPUT" || echo "agreement=ok" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-go@v5.5.0
+      # il CLI compilato si tiene in cache: Go e la compilazione (~25 s) servono solo al primo giro
+      - name: Cache SDK manager
+        id: sdkmgr
         if: steps.check.outputs.ok == 'true'
+        uses: actions/cache@v4.2.4
+        with:
+          path: ~/go/bin/connect-iq-sdk-manager-cli
+          key: sdkmgr-${{ env.SDK_MANAGER_CLI }}-${{ runner.os }}-${{ runner.arch }}
+
+      - uses: actions/setup-go@v5.5.0
+        if: steps.check.outputs.ok == 'true' && steps.sdkmgr.outputs.cache-hit != 'true'
         with:
           go-version: "1.25"
           cache: false
@@ -74,8 +83,10 @@ jobs:
       - name: SDK manager (connect-iq-sdk-manager-cli ${{ env.SDK_MANAGER_CLI }})
         if: steps.check.outputs.ok == 'true'
         run: |
-          go install "github.com/lindell/connect-iq-sdk-manager-cli@${SDK_MANAGER_CLI}"
-          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          if [ "${{ steps.sdkmgr.outputs.cache-hit }}" != "true" ]; then
+            GOBIN="$HOME/go/bin" go install "github.com/lindell/connect-iq-sdk-manager-cli@${SDK_MANAGER_CLI}"
+          fi
+          echo "$HOME/go/bin" >> "$GITHUB_PATH"
 
       - name: Licenza Connect IQ
         if: steps.check.outputs.ok == 'true'
@@ -151,7 +162,10 @@ jobs:
           mkdir -p out
           monkeyc --version
           monkeyc -f garmin/monkey.jungle -d "$DEVICE" -o "out/appunti-$DEVICE.prg" -y "$RUNNER_TEMP/developer_key.der" -w -r
-          monkeyc -f garmin/monkey.jungle -e -o out/appunti.iq -y "$RUNNER_TEMP/developer_key.der" -w -r
+          # il pacchetto .iq (per tutti i dispositivi) serve solo alle Release: sui push basta il .prg
+          if [[ "$GITHUB_REF" == refs/tags/garmin-v* ]]; then
+            monkeyc -f garmin/monkey.jungle -e -o out/appunti.iq -y "$RUNNER_TEMP/developer_key.der" -w -r
+          fi
           ls -la out
 
       - uses: actions/upload-artifact@v4.6.2

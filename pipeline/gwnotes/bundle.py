@@ -172,6 +172,90 @@ def build_web_packs(sections: list[tuple[str, str, list[str]]], resources: dict,
     return files, by_section
 
 
+@dataclass
+class RawChapter:
+    """Capitolo copiato dall'indice di un bundle precedente (build incrementale).
+
+    head: righe C/H/L; sections: (id, righe S/Q) per ogni sezione. Le righe F (file
+    web) si rigenerano: dipendono da tutte le sezioni del nuovo bundle."""
+    head: list[str]
+    sections: list[tuple[str, list[str]]]
+    resources: dict = field(default_factory=dict, repr=False)
+
+
+def index_sections(chapter) -> list[tuple[str, str, list[str]]]:
+    """(id sezione, chiave risorsa, chiavi immagini) di un capitolo di build_index."""
+    if isinstance(chapter, RawChapter):
+        return [(sid, "s:" + sid, image_keys(["\n".join(chapter.resources["s:" + sid].chunks)]))
+                for sid, _ in chapter.sections]
+    return [(sp.id, res.key, image_keys(sp.pages)) for sp, res, _ in chapter[2]]
+
+
+class PrevBundle:
+    """Bundle di una Release precedente, per le build incrementali."""
+
+    def __init__(self, manifest: dict, resources: dict[str, Resource]):
+        self.manifest = manifest
+        self.resources = resources
+        self.exams: dict = manifest.get("exams") or {}
+        idx = "\n".join(resources["idx"].chunks) if "idx" in resources else ""
+        self.index_lines = idx.split("\n") if idx else []
+        v = self.index_lines[0].split("|", 4) if self.index_lines else []
+        self.title = v[4] if len(v) == 5 else manifest.get("title", "")
+
+    @classmethod
+    def load(cls, path: Path) -> "PrevBundle | None":
+        if not path.exists():
+            return None
+        try:
+            with zipfile.ZipFile(path) as z:
+                manifest = json.loads(z.read("manifest.json"))
+                res = {}
+                for name in z.namelist():
+                    if name.startswith("res/") and name.endswith(".json"):
+                        d = json.loads(z.read(name))
+                        res[d["key"]] = Resource(d["key"], d["chunks"], d["hash"])
+        except (zipfile.BadZipFile, KeyError, ValueError) as e:
+            print(f"Bundle precedente illeggibile ({e}): ignorato")
+            return None
+        return cls(manifest, res)
+
+    def compatible(self, font_id: str, chunk_bytes: int) -> bool:
+        m = self.manifest
+        return m.get("schema") == SCHEMA and m.get("fontId") == font_id and m.get("chunkBytes") == chunk_bytes
+
+    def has_section(self, sid: str) -> bool:
+        return "s:" + sid in self.resources
+
+    def section_pages(self, sid: str) -> list[str]:
+        """Pagine di una sezione (ognuna inizia con la riga "P")."""
+        pages: list[list[str]] = []
+        for line in "\n".join(self.resources["s:" + sid].chunks).split("\n"):
+            if line == "P":
+                pages.append([])
+            pages[-1].append(line)
+        return ["\n".join(p) for p in pages]
+
+    def notes_chapters(self) -> list[RawChapter]:
+        """Capitoli degli appunti (senza la libreria "esami"), righe pronte per build_index."""
+        out: list[RawChapter] = []
+        cur = None
+        for line in self.index_lines[1:]:
+            t = line[:1]
+            if t == "C":
+                cur = RawChapter([line], [], self.resources)
+                out.append(cur)
+            elif cur is None or t in ("V", "W", "F"):
+                continue
+            elif t in ("H", "L"):
+                cur.head.append(line)
+            elif t == "S":
+                cur.sections.append((line.split("|", 2)[1], [line]))
+            elif cur.sections:
+                cur.sections[-1][1].append(line)  # Q e righe future legate alla sezione
+        return [c for c in out if "L|esami" not in c.head]
+
+
 def build_index(title: str, font_id: str, content_version: str, chapters: list,
                 web_base: str = "", web_packs: dict[str, list[str]] | None = None) -> list[str]:
     """chapters: [(title_lines, header_line, [(SectionPages, Resource, starts)][, libreria])]
@@ -185,7 +269,15 @@ def build_index(title: str, font_id: str, content_version: str, chapters: list,
     lines = [f"V|{SCHEMA}|{content_version}|{font_id}|{title}"]
     if web_base and web_packs:
         lines.append(f"W|{web_base}")
-    for title_lines, header, secs, *lib in chapters:
+    for chapter in chapters:
+        if isinstance(chapter, RawChapter):
+            lines += chapter.head
+            for sid, rows in chapter.sections:
+                lines += rows
+                if web_base and web_packs and web_packs.get(sid):
+                    lines.append(f"F|{sid}|" + ";".join(web_packs[sid]))
+            continue
+        title_lines, header, secs, *lib = chapter
         ws = ";".join(str(w) for _, w in title_lines)
         lines.append(f"C|{len(secs)}|{ws}|" + TITLE_SEP.join(t for t, _ in title_lines))
         if header:
