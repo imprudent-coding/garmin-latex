@@ -17,6 +17,8 @@ function showMainMenu() as Void {
         motionLabel(getApp().motionThreshold()), :motion, null));
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuVertical) as String,
         verticalLabel(getApp().verticalDelay()), :vertical, null));
+    m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuMem) as String,
+        memLabel(getApp().memLib()), :memlib, null));
     var winfo = getApp().store.getValue("winfo");
     m.addItem(new WatchUi.MenuItem(WatchUi.loadResource(Rez.Strings.MenuSync) as String,
         getApp().status + ((winfo instanceof Lang.String) ? " · " + winfo : ""), :sync, null));
@@ -32,6 +34,19 @@ function showMainMenu() as Void {
 
 // durata della pressione per tornare agli appunti dall'orologio stealth (ms)
 const UNLOCK_STEPS = [1000, 1500, 2000, 2500, 3000, 4000];
+
+// cosa tenere in memoria: tutto, solo appunti, solo simulazioni d'esame
+const MEM_STEPS = [MEM_ALL, LIB_NOTES, LIB_EXAMS];
+
+function memLabel(v as Number) as String {
+    if (v == LIB_NOTES) {
+        return WatchUi.loadResource(Rez.Strings.MemNotes) as String;
+    }
+    if (v == LIB_EXAMS) {
+        return WatchUi.loadResource(Rez.Strings.MemExams) as String;
+    }
+    return WatchUi.loadResource(Rez.Strings.MemAll) as String;
+}
 
 // valori dello scorrimento automatico, in secondi per pagina (0 = spento)
 const AUTO_STEPS = [0, 5, 10, 15, 20, 30, 45, 60];
@@ -79,6 +94,20 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
             app.store.setValue("motion", nextT);
             app.motion.apply();
             item.setSubLabel(motionLabel(nextT));
+            WatchUi.requestUpdate();
+            return;
+        }
+        if (id == :memlib) {
+            // ogni tocco passa alla scelta successiva; il download riparte con la nuova
+            // scelta e, finito, libera la memoria occupata da ciò che è escluso
+            var curM = app.memLib();
+            var mi = MEM_STEPS.indexOf(curM);
+            var nextM = MEM_STEPS[(mi + 1) % MEM_STEPS.size()] as Number;
+            app.store.setValue("memlib", nextM);
+            item.setSubLabel(memLabel(nextM));
+            if (app.index != null) {
+                app.prefetch.restart(app.index as Index);
+            }
             WatchUi.requestUpdate();
             return;
         }

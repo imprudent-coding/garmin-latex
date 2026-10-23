@@ -62,6 +62,10 @@ F|<id>|<file>;<file>…
 ```
 
 - `C` apre un capitolo; le righe `S` che seguono sono le sue sezioni.
+- `L|<libreria>` (facoltativa, subito dopo `C`/`H`): libreria del capitolo.
+  `esami` = simulazioni d'esame; senza riga `L` il capitolo fa parte degli
+  appunti. L'orologio la usa per l'opzione *In memoria* (vedi «Simulazioni
+  d'esame» sotto).
 - `H` (facoltativa, subito dopo `C`) è l'intestazione del gruppo nell'elenco
   compatto; manca se il gruppo ha una sola sezione.
 - `Q` (facoltativa, subito dopo la sua `S`) descrive la voce nell'elenco compatto:
@@ -178,3 +182,13 @@ L'ultima sequenza ha solo i letterali. Implementazioni: `pipeline/gwnotes/lz.py`
 watchdog), `android/…/render/Lz.kt` (anteprima).
 Palette dei livelli: `#000000`, `#555555`, `#AAAAAA`, `#FFFFFF`.
 La chiave è l'hash del contenuto: immagini identiche sono condivise.
+
+## Simulazioni d'esame
+
+Con `gwnotes build --exams <cartella>` la pipeline aggiunge un capitolo con riga
+`L|esami`, una sezione per ogni `<cartella>/<esercizio>/orologio.pdf`
+(`pipeline/gwnotes/pdfstrips.py`). Sono PDF già impaginati in una colonna
+stretta (dichiarata nelle parole chiave del PDF: `colonna=<sinistra>cm+<larghezza>cm`):
+le pagine sono strisce d'immagine larghe 262 px, una per pagina, centrate, con
+righe `I` normali; figure, tabelle ed equazioni lunghe hanno la versione zoom.
+Per l'orologio sono pagine come le altre: nessun nuovo tipo di elemento.

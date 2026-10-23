@@ -33,6 +33,7 @@ basta fare push delle modifiche in `latex/`.
    6. [Prima sincronizzazione](#6-prima-sincronizzazione)
 3. [Usare l'app sull'orologio](#usare-lapp-sullorologio)
 4. [Aggiornare gli appunti](#aggiornare-gli-appunti)
+   - [Simulazioni d'esame](#simulazioni-desame)
 5. [Se qualcosa viene convertito male](#se-qualcosa-viene-convertito-male)
 6. [Sviluppo locale](#sviluppo-locale)
 7. [Risoluzione dei problemi](#risoluzione-dei-problemi)
@@ -155,6 +156,7 @@ Riepilogo:
 | `ANDROID_KEYSTORE_PASSWORD` | secret | password del keystore | con il keystore |
 | `ANDROID_KEY_ALIAS` | secret | alias della chiave (es. `notes`) | con il keystore |
 | `ANDROID_KEY_PASSWORD` | secret | password della chiave, se diversa | facoltativo |
+| `EXAMS_TOKEN` | secret | lettura delle simulazioni d'esame se la loro repository è privata | no |
 
 Il workflow `notes` non ha bisogno di secrets.
 
@@ -354,7 +356,7 @@ di pagine (● = già in cache sull'orologio). L'app riparte dall'ultima domanda
 | Elenco / Lettura / Zoom | orologio da orizzontale a verticale (se *Orologio se verticale* è attivo) | come la pressione prolungata sullo schermo |
 | Orologio | tenere premuto lo schermo o un pulsante per ~2,5 s (regolabile dal menu, *Sblocco orologio*) | torna agli appunti, dove eri |
 | Ovunque | pulsante in basso | indietro |
-| Elenco / Lettura | tocco sui tre puntini in alto / sul numero di pagina (oppure pressione prolungata, se l'orologio stealth è disattivato) | menu: riprendi lettura, torna all'elenco, scorrimento automatico, orologio stealth, sblocco orologio, frecce nell'elenco, movimento, orologio se verticale, sincronizza, svuota cache, test velocità, mostra memoria |
+| Elenco / Lettura | tocco sui tre puntini in alto / sul numero di pagina (oppure pressione prolungata, se l'orologio stealth è disattivato) | menu: riprendi lettura, torna all'elenco, scorrimento automatico, orologio stealth, sblocco orologio, frecce nell'elenco, movimento, orologio se verticale, in memoria, sincronizza, svuota cache, test velocità, mostra memoria |
 
 **Scorrimento automatico.** Dal menu, *Scorrimento automatico* cambia a ogni
 tocco: No, 5, 10, 15, 20, 30, 45, 60 secondi per pagina (il menu resta aperto).
@@ -403,6 +405,13 @@ Anche abbassare il braccio per altri motivi (es. per scrivere) lo fa
 scattare. Usa lo stesso sensore di *Movimento*, che resta spento se entrambe
 le opzioni sono su No.
 
+**In memoria.** Dal menu, *In memoria* cambia a ogni tocco: Appunti ed esami
+(di default), Solo appunti, Solo esami. Decide cosa l'orologio scarica in
+sottofondo e tiene nella sua memoria: il download riparte subito con la nuova
+scelta e, finito, elimina dalla cache ciò che è escluso. L'elenco mostra
+sempre tutto: aprendo una voce esclusa, le sue pagine arrivano al momento dal
+telefono (o dal web), come prima del download completo.
+
 Nell'elenco, in basso, ci sono l'identificativo e la posizione (`B3 · 21/61`);
 l'arco sul bordo destro indica dove sei nell'elenco. In lettura, in basso c'è il
 numero di pagina (`3/28`) e sul bordo un arco con l'avanzamento nella sezione.
@@ -441,6 +450,36 @@ Prima di fare push puoi controllare il risultato:
   disegnate esattamente come sull'orologio.
 
 ---
+
+### Simulazioni d'esame
+
+Il bundle comprende anche le **simulazioni d'esame** di Gasdinamica, in fondo
+all'elenco nel gruppo *Simulazioni d'esame*: una voce per ogni
+`simulazione_esame/<esercizio>/orologio.pdf` della repository
+`imprudent-coding/Gasdynamics-fork`. Sono PDF già impaginati per l'orologio
+(colonna stretta, scritti lì con `compila.sh`); la pipeline li taglia in
+strisce d'immagine larghe quanto lo schermo, senza spezzare le righe. Figure,
+tabelle ed equazioni lunghe hanno lo zoom (triangolino verde).
+
+- **Aggiornamento**: il workflow `notes` li riprende ogni 6 ore (e a ogni
+  esecuzione); pubblica una nuova Release solo se qualcosa è cambiato. Per
+  averli subito, avvia *Actions → notes → Run workflow*, oppure fai mandare
+  dalla repository degli esami un `repository_dispatch` di tipo `esami` (lì
+  c'è il workflow `esami-orologio`, che lo fa a ogni push se ha il secret
+  `GARMIN_DISPATCH_TOKEN`).
+- **Build incrementale**: se dall'ultima Release non sono cambiati `latex/`,
+  `pipeline/`, `shared/` né il workflow, gli appunti si copiano dal bundle di
+  quella Release e si convertono solo gli esami nuovi o modificati (ogni
+  `orologio.pdf` è riconosciuto dal suo hash): niente TeX Live né pandoc, e il
+  workflow dura pochi secondi di lavoro vero invece di 2–4 minuti. Il riepilogo
+  del workflow dice quale build ha fatto; *Run workflow* con *completa* forza
+  quella completa.
+- **Repository privata**: aggiungi qui il secret `EXAMS_TOKEN`, un token
+  *fine-grained* con permesso *Contents: Read-only* sulla repository degli
+  esami. Senza, il workflow segnala un avviso e pubblica solo gli appunti.
+- **Altra repository o branch**: variabili `EXAMS_REPO` (`proprietario/nome`) ed
+  `EXAMS_REF`.
+- In locale: `python -m gwnotes build --exams ../../Gasdynamics-fork/simulazione_esame`.
 
 ## Se qualcosa viene convertito male
 

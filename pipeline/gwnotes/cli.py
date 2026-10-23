@@ -20,10 +20,12 @@ import tempfile
 import time
 from pathlib import Path
 
-from . import images, rich
+from types import SimpleNamespace
+
+from . import images, pdfstrips, rich
 from .assets import AssetBuilder
-from .bundle import (SCHEMA, BundleBuilder, Resource, SectionPages, build_index, build_web_packs, chunk_text,
-                     image_keys, res_file, short_hash, write_zip)
+from .bundle import (SCHEMA, BundleBuilder, PrevBundle, Resource, SectionPages, build_index, build_web_packs,
+                     chunk_text, image_keys, index_sections, res_file, short_hash, write_zip)
 from .docmodel import Book, Converter, ImageBlock, MathImage, Para, build_book
 from .latexbuild import LatexError, compile_pdf, latex_warnings, read_labels
 from .layout import Layouter, SectionLayout, encode_title_lines
@@ -115,17 +117,10 @@ def _replace_missing(book: Book, assets, jobs):
             s.blocks = nb
 
 
-def build(args) -> int:
-    t0 = time.time()
+def _notes_from_latex(args, rules, warn, metrics, profile, work: Path, out: Path, bb: BundleBuilder):
+    """Appunti dal LaTeX (build completa). Ritorna lo stato per il resto della build, o un
+    codice d'uscita (int) in caso di errore."""
     latex_dir = Path(args.latex).resolve()
-    out = Path(args.out).resolve()
-    out.mkdir(parents=True, exist_ok=True)
-    rules = Rules.load(Path(args.rules) if args.rules else None)
-    warn = Warnings()
-    metrics = load_metrics()
-    profile = VIVOACTIVE5
-    work = Path(tempfile.mkdtemp(prefix="gwnotes-"))
-
     mains = find_main_documents(latex_dir)
     if not mains:
         print(f"ERRORE: nessun documento principale (\\documentclass + \\begin{{document}}) in {latex_dir}")
@@ -200,7 +195,6 @@ def build(args) -> int:
                         s.qid, s.kind = info.text, "question"
                         break
 
-    bb = BundleBuilder(rules.chunk_bytes)
     keys = {}
     for rid, a in assets.items():
         k = bb.image(images.encode_resource(a.normal))
@@ -237,9 +231,112 @@ def build(args) -> int:
         chapters_idx.append((encode_title_lines(lay, ch.title, profile.title_w), chapter_header(lay, profile, ch), secs))
         toc.append({"title": plain(ch.title), "sections": tsec})
 
+    return SimpleNamespace(title=book.title, n_chapters=len(book.chapters),
+                           n_sections=sum(len(c.sections) for c in book.chapters), chapters_idx=chapters_idx,
+                           toc=toc, all_pages=all_pages, total_pages=total_pages, divided=divided, lay=lay)
+
+
+def _notes_from_bundle(prev: PrevBundle, warn, metrics, profile, bb: BundleBuilder):
+    """Appunti copiati dal bundle precedente (build incrementale: cambiano solo gli esami).
+    Nessuna compilazione: indice, sezioni e immagini sono quelli della Release precedente."""
+    chapters = prev.notes_chapters()
+    keys = set()
+    for ch in chapters:
+        for sid, _ in ch.sections:
+            res = prev.resources["s:" + sid]
+            bb.add(res)
+            keys.update(image_keys(["\n".join(res.chunks)]))
+    for k in sorted(keys):
+        if k in prev.resources:
+            bb.add(prev.resources[k])
+    toc = [c for c in prev.manifest.get("toc", []) if c.get("lib") != "esami"]
+    print(f"[1-4/5] Appunti dal bundle precedente: {len(chapters)} capitoli, "
+          f"{sum(len(c.sections) for c in chapters)} sezioni, {len(keys)} immagini")
+    return SimpleNamespace(title=prev.title, n_chapters=len(chapters),
+                           n_sections=sum(len(c.sections) for c in chapters), chapters_idx=list(chapters),
+                           toc=toc, all_pages={}, total_pages=sum(s["pages"] for c in toc for s in c["sections"]),
+                           divided=[], lay=Layouter(metrics, profile, {}, {}, warn))
+
+
+def build(args) -> int:
+    t0 = time.time()
+    out = Path(args.out).resolve()
+    out.mkdir(parents=True, exist_ok=True)
+    rules = Rules.load(Path(args.rules) if args.rules else None)
+    warn = Warnings()
+    metrics = load_metrics()
+    profile = VIVOACTIVE5
+    work = Path(tempfile.mkdtemp(prefix="gwnotes-"))
+    bb = BundleBuilder(rules.chunk_bytes)
+    prev = PrevBundle.load(Path(args.reuse)) if args.reuse else None
+    if prev is not None and not prev.compatible(metrics.font_id, rules.chunk_bytes):
+        print("Bundle precedente con schema, font o pezzi diversi: non riutilizzabile")
+        prev = None
+    if args.notes_from_reuse:
+        if prev is None:
+            print("ERRORE: --notes-from-reuse senza un bundle precedente riutilizzabile")
+            return 3
+        notes = _notes_from_bundle(prev, warn, metrics, profile, bb)
+    else:
+        notes = _notes_from_latex(args, rules, warn, metrics, profile, work, out, bb)
+        if isinstance(notes, int):
+            return notes
+    lay = notes.lay
+    chapters_idx, toc, all_pages = notes.chapters_idx, notes.toc, notes.all_pages
+    total_pages = notes.total_pages
+
+    # simulazioni d'esame: PDF già impaginati per l'orologio, tagliati in strisce
+    exam_ids: list[str] = []
+    exams_meta: dict[str, dict] = {}
+    if args.exams:
+        exam_pdfs = pdfstrips.find_exams(Path(args.exams).resolve())
+        print(f"[4b] Simulazioni d'esame: {len(exam_pdfs)} PDF in {args.exams}")
+        ex_secs, ex_nodes, tsec = [], [], []
+        ci = len(chapters_idx)
+        reused = 0
+        for pdf in exam_pdfs:
+            sid = "x-" + re.sub(r"[^a-z0-9]+", "-", pdf.parent.name.lower()).strip("-")
+            # PDF già convertito nel bundle precedente, con lo stesso codice: si riusa
+            ckey = short_hash(pdf.read_bytes(), 16) + "-" + pdfstrips.code_hash()
+            old = prev.exams.get(sid) if prev is not None else None
+            if old and old.get("key") == ckey and prev.has_section(sid):
+                enc = prev.section_pages(sid)
+                for k in image_keys(enc):
+                    bb.add(prev.resources[k])
+                title = old["title"]
+                reused += 1
+                print(f"      {pdf.parent.name}: invariato, {len(enc)} pagine riprese dal bundle precedente")
+            else:
+                strips, meta = pdfstrips.build_pages(pdf, profile)
+                keys = []
+                for st in strips:
+                    k = bb.image(images.encode_resource(st.normal))
+                    z = bb.image(images.encode_resource(st.zoom)) if st.zoom is not None else ""
+                    keys.append((k, z))
+                enc = pdfstrips.layout_pages(strips, keys, profile)
+                title = re.sub(r"^Prova del\s+", "", meta["title"]).replace(" – ", " ")
+                print(f"      {pdf.parent.name}: {len(enc)} pagine, {meta['blocks']} blocchi")
+            exams_meta[sid] = {"key": ckey, "title": title}
+            sec = SimpleNamespace(id=sid, title=[title], kind="section", qid="", label="")
+            ex_nodes.append(sec)
+            full, compact = section_titles(lay, profile, sec, [rules.exams_title], alone=False)
+            sp = SectionPages(sid, title, full, enc, ci, compact=compact)
+            res, starts = bb.section(sp)
+            ex_secs.append((sp, res, starts))
+            all_pages[sid] = enc
+            exam_ids.append(sid)
+            total_pages += len(enc)
+            tsec.append({"id": sid, "title": title, "pages": len(enc), "key": res.key, "hash": res.hash,
+                         "qid": "", "kind": "section"})
+        if ex_secs:
+            ch = SimpleNamespace(title=[rules.exams_title], sections=ex_nodes)
+            chapters_idx.append((encode_title_lines(lay, ch.title, profile.title_w),
+                                 chapter_header(lay, profile, ch), ex_secs, "esami"))
+            toc.append({"title": rules.exams_title, "lib": "esami", "sections": tsec})
+
     # file per il download via web (GitHub Pages): sezione + immagini, per sezione
     web_files, web_packs = build_web_packs(
-        [(sp.id, res.key, image_keys(sp.pages)) for _, _, secs in chapters_idx for sp, res, _ in secs],
+        [sec for c in chapters_idx for sec in index_sections(c)],
         bb.resources)
     web_base = (args.web_base or "").strip()
     if web_base and not web_base.endswith("/"):
@@ -247,12 +344,12 @@ def build(args) -> int:
     # contentHash copre anche l'indice (tranne la riga V, che contiene la versione):
     # l'app Android salta un bundle con lo stesso contentHash, quindi un cambio solo
     # dell'indice (es. righe W/F dei file web) deve cambiarlo.
-    idx_body = build_index(book.title, metrics.font_id, "", chapters_idx, web_base=web_base, web_packs=web_packs)[1:]
+    idx_body = build_index(notes.title, metrics.font_id, "", chapters_idx, web_base=web_base, web_packs=web_packs)[1:]
     content_hash = short_hash("|".join(f"{k}:{r.hash}" for k, r in sorted(bb.resources.items()))
                               + "|idx:" + short_hash("\n".join(idx_body)), 12)
     version = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d.%H%M%S") if not args.version else args.version
     content_version = f"{version}-{content_hash}"
-    idx_lines = build_index(book.title, metrics.font_id, content_version, chapters_idx,
+    idx_lines = build_index(notes.title, metrics.font_id, content_version, chapters_idx,
                             web_base=web_base, web_packs=web_packs)
     bb.add(Resource("idx", chunk_text(idx_lines, rules.chunk_bytes)))
 
@@ -262,12 +359,15 @@ def build(args) -> int:
         "contentHash": content_hash,
         "generatedAt": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "sourceCommit": git_commit(REPO_ROOT),
-        "title": book.title,
+        "title": notes.title,
         "fontId": metrics.font_id,
         "chunkBytes": rules.chunk_bytes,
         "profile": profile.to_dict(),
         "index": {"key": "idx", "hash": bb.resources["idx"].hash, "chunks": len(bb.resources["idx"].chunks)},
         "toc": toc,
+        # build incrementali: impronta degli ingressi degli appunti e PDF degli esami già convertiti
+        "inputs": args.inputs,
+        "exams": exams_meta,
         "resources": {k: {"hash": r.hash, "chunks": len(r.chunks), "bytes": r.bytes, "file": res_file(k)}
                       for k, r in sorted(bb.resources.items())},
     }
@@ -280,7 +380,7 @@ def build(args) -> int:
     for name, body in web_files.items():
         (web_dir / "w" / f"{name}.json").write_bytes(body)
     (web_dir / "index.html").write_text(
-        f"<!doctype html><meta charset=utf-8><title>{html.escape(plain(book.title))}</title>"
+        f"<!doctype html><meta charset=utf-8><title>{html.escape(notes.title)}</title>"
         f"<p>File degli appunti per l'app dell'orologio (versione {content_version}).</p>\n", encoding="utf-8")
     print(f"      web: {len(web_files)} file, {sum(len(b) for b in web_files.values()) // 1024} KB"
           + (f" su {web_base}" if web_base else " (senza --web-base: l'indice non li cita)"))
@@ -293,11 +393,12 @@ def build(args) -> int:
     prev_dir.mkdir()
     img_res = {k: "".join(r.chunks) for k, r in bb.resources.items() if k.startswith("i:")}
     renderer = Renderer(img_res)
-    chosen = list(all_pages)
+    chosen = [s for s in all_pages if s not in exam_ids]
     if args.preview_sections:
         chosen = [s for s in chosen if any(re.search(p, s) for p in args.preview_sections)] or chosen
+    chosen = chosen[: args.preview] + exam_ids  # le simulazioni d'esame sempre
     count = 0
-    for sid in chosen[: args.preview]:
+    for sid in chosen:
         pages = all_pages[sid]
         imgs = [renderer.render_page(p, i + 1, len(pages)) for i, p in enumerate(pages)]
         contact_sheet(imgs, cols=min(4, len(imgs))).save(prev_dir / f"{sid}.png", optimize=True)
@@ -318,13 +419,15 @@ def build(args) -> int:
     report = [
         f"# Report di conversione\n",
         f"- Versione contenuti: `{content_version}` (schema {SCHEMA}, font `{metrics.font_id}`)",
-        f"- Capitoli: {len(book.chapters)}, sezioni: {sum(len(c.sections) for c in book.chapters)}, "
-        f"pagine orologio: {total_pages}",
+        f"- Capitoli: {notes.n_chapters}, sezioni: {notes.n_sections}, "
+        f"pagine orologio: {total_pages}"
+        + (f" (simulazioni d'esame: {len(exam_ids)})" if args.exams else "")
+        + (" — appunti ripresi dalla Release precedente" if args.notes_from_reuse else ""),
         f"- Dati: testo {sizes['text'] / 1024:.0f} KB, immagini {sizes['images'] / 1024:.0f} KB, "
         f"indice {sizes['index'] / 1024:.1f} KB, pezzi da {rules.chunk_bytes} byte",
         f"- Sezione più grande: `{largest.key}` ({largest.bytes / 1024:.1f} KB)",
         f"- Figure divise in pannelli (una pagina per pannello dopo la figura intera): "
-        f"{', '.join(divided) if divided else 'nessuna'}",
+        f"{', '.join(notes.divided) if notes.divided else 'nessuna'}",
         f"- Tempo: {time.time() - t0:.0f} s, anteprime: {count} sezioni in `preview/`\n",
         "## Avvisi\n",
         warn.markdown(),
@@ -346,6 +449,13 @@ def main(argv=None) -> int:
     b.add_argument("--no-pdf", action="store_true", help="non compilare il PDF (solo per sviluppo: niente etichette)")
     b.add_argument("--preview", type=int, default=12, help="numero di sezioni in anteprima")
     b.add_argument("--preview-sections", nargs="*", help="regex degli id di sezione da mostrare in anteprima")
+    b.add_argument("--exams", default="",
+                   help="cartella delle simulazioni d'esame (<cartella>/<esercizio>/orologio.pdf)")
+    b.add_argument("--reuse", default="",
+                   help="bundle precedente (notes-bundle.zip): gli esami con lo stesso PDF non si riconvertono")
+    b.add_argument("--notes-from-reuse", action="store_true",
+                   help="appunti presi dal bundle di --reuse, senza LaTeX (cambiano solo gli esami)")
+    b.add_argument("--inputs", default="", help="impronta degli ingressi degli appunti, salvata nel manifest")
     b.add_argument("--version", default=None, help="versione contenuti (default: data UTC)")
     b.add_argument("--web-base", default="",
                    help="URL dei file web (es. https://utente.github.io/repo/w/); vuoto = solo bundle")

@@ -46,6 +46,7 @@ class Prefetch {
     private var _sync as Sync;
     private var _ticker as Ticker;
     private var _ver as String = "";
+    private var _mem as Number = MEM_ALL;   // scelta "In memoria" del giro in corso
     private var _secs as Array<Section> = [] as Array<Section>;
     private var _si as Number = 0;
     private var _scanned as Dictionary = {} as Dictionary;  // pezzi della sezione corrente già esaminati
@@ -88,19 +89,25 @@ class Prefetch {
     }
 
     // Da chiamare quando l'indice è pronto e il telefono risponde.
+    // Scarica solo le librerie scelte nel menu ("In memoria"); la chiave "pf"
+    // ricorda versione e scelta, quindi cambiare scelta fa ripartire il download.
     function start(index as Index) as Void {
-        if (active && _ver.equals(index.version)) {
+        var mem = getApp().memLib();
+        if (active && _ver.equals(index.version) && _mem == mem) {
             onIdle();
             return;
         }
         _ver = index.version;
+        _mem = mem;
         _secs = [] as Array<Section>;
         for (var c = 0; c < index.chapters.size(); c++) {
-            _secs.addAll(index.chapters[c].sections);
+            if (mem == MEM_ALL || index.chapters[c].lib == mem) {
+                _secs.addAll(index.chapters[c].sections);
+            }
         }
         secTotal = _secs.size();
         var pf = _store.getValue("pf");
-        if (pf instanceof Lang.String && (pf as String).equals(_ver)) {
+        if (pf instanceof Lang.String && (pf as String).equals(pfKey())) {
             active = false;
             finished = true;
             secDone = secTotal;
@@ -149,6 +156,18 @@ class Prefetch {
         onIdle();
     }
 
+    // valore della chiave "pf": versione degli appunti + scelta "In memoria"
+    private function pfKey() as String {
+        return _ver + "|" + _mem;
+    }
+
+    // Dopo un cambio dell'opzione "In memoria": ricomincia con la nuova scelta.
+    function restart(index as Index) as Void {
+        stop();
+        _ver = "";
+        start(index);
+    }
+
     function stop() as Void {
         active = false;
         _waiting = false;
@@ -180,7 +199,10 @@ class Prefetch {
     function onDrop() as Void {
         var k = 0;
         while (_drop.size() > 0 && k < 10) {
-            _store.remove(_drop[_drop.size() - 1]);
+            var key = _drop[_drop.size() - 1];
+            if (_store.pinned.indexOf(key) < 0) {
+                _store.remove(key);
+            }
             _drop = _drop.slice(0, _drop.size() - 1) as Array<String>;
             k += 1;
         }
@@ -311,8 +333,15 @@ class Prefetch {
         active = false;
         finished = failed == 0;
         if (finished) {
-            _store.setValue("pf", _ver);
+            _store.setValue("pf", pfKey());
+            _store.setValue("wp", _wp);
+            // libera ciò che non fa parte della scelta: immagini non citate e sezioni escluse
             _drop = _store.imagesExcept(_seen);
+            var keep = {} as Dictionary;
+            for (var i = 0; i < _secs.size(); i++) {
+                keep[_secs[i].key()] = true;
+            }
+            _drop.addAll(_store.sectionsExcept(keep));
             if (_drop.size() > 0) {
                 _ticker.schedule("drop", 50, method(:onDrop), false);
             }

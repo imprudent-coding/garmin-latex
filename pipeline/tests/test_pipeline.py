@@ -328,3 +328,128 @@ def test_latex_error_fails_build_with_clear_message(tmp_path):
                         str(tmp_path / "d")], cwd=ROOT, capture_output=True, text=True)
     assert p.returncode == 1
     assert "Undefined control sequence" in p.stdout and "main.tex" in p.stdout
+
+
+# ---------------------------------------------------------------- simulazioni d'esame (PDF a strisce)
+
+from gwnotes import pdfstrips  # noqa: E402
+
+
+def _page_with_lines(rows, width=600, height=900):
+    """Pagina bianca con rettangoli neri (x0, y0, x1, y1) al posto delle righe di testo."""
+    img = Image.new("L", (width, height), 255)
+    d = ImageDraw.Draw(img)
+    for r in rows:
+        d.rectangle(r, fill=0)
+    return img
+
+
+def test_strip_blocks_and_kinds():
+    left, right = 10, 10 + pdfstrips.STRIP_W
+    page = _page_with_lines([
+        (left, 20, right - 20, 40),          # riga di testo
+        (left, 45, right + 60, 75),          # equazione che sporge di poco
+        (left, 100, right + 300, 400),       # figura larga il doppio
+        (left, 404, right + 300, 420),       # suo pezzo staccato da una riga vuota
+        (left, 460, right - 40, 480),        # didascalia
+    ])
+    blocks = pdfstrips.ink_blocks(page, 0)
+    assert [(b.y0, b.y1) for b in blocks] == [(20, 41), (45, 76), (100, 401), (404, 421), (460, 481)]
+    groups = pdfstrips.classify(blocks, left, right, max_h=260)
+    assert [g[0].kind for g in groups] == ["text", "shrink", "page", "text"]
+    assert len(groups[2]) == 2  # i due pezzi della figura restano insieme
+
+
+def test_strip_height_fits_circle():
+    h = pdfstrips.strip_height(VIVOACTIVE5, pdfstrips.STRIP_W)
+    p = VIVOACTIVE5
+    assert 200 < h < 300
+    assert p.band(p.r - h / 2, p.r + h / 2)[1] >= pdfstrips.STRIP_W
+
+
+def test_column_from_pdf_keywords():
+    assert pdfstrips.column_cm({"Keywords": "colonna=0.2cm+4.6cm"}) == (0.2, 4.6)
+    assert pdfstrips.column_cm({}) == pdfstrips.DEFAULT_COLUMN
+
+
+def test_index_library_row():
+    sp = bundle.SectionPages("x-a", "A", [("A", 10)], ["P"], 0)
+    res = bundle.Resource("s:x-a", ["P"])
+    lines = bundle.build_index("T", "f", "v", [([("Esami", 50)], None, [(sp, res, [0])], "esami")])
+    assert lines[1].startswith("C|1|") and lines[2] == "L|esami" and lines[3].startswith("S|x-a|")
+    # senza libreria: nessuna riga L (compatibile con gli indici di prima)
+    lines = bundle.build_index("T", "f", "v", [([("Appunti", 50)], None, [(sp, res, [0])])])
+    assert not any(line.startswith("L|") for line in lines)
+
+
+def _exam_dir(root: Path, name: str, text: str) -> Path:
+    d = root / name
+    d.mkdir(parents=True)
+    (d / "orologio.tex").write_text(r"""\documentclass[11pt]{article}
+\usepackage[paperwidth=12cm,paperheight=40cm,left=0.2cm,top=0.2cm,textwidth=4.6cm,textheight=39cm]{geometry}
+\usepackage[pdftitle={Prova},pdfkeywords={colonna=0.2cm+4.6cm}]{hyperref}
+\pagestyle{empty}\hfuzz=20cm\raggedright
+\begin{document}
+""" + text + "\n\\end{document}\n", encoding="utf-8")
+    subprocess.run(["latexmk", "-pdf", "-quiet", "orologio.tex"], cwd=d, check=True, capture_output=True)
+    return d
+
+
+@pytest.mark.skipif(not (HAS_TEX and HAS_PANDOC), reason="servono TeX Live e pandoc")
+def test_incremental_build_matches_full(tmp_path):
+    """Build incrementale (appunti dal bundle precedente, esami invariati riusati) =
+    build completa: stesso contentHash. Un esame nuovo si converte, gli altri no."""
+    src = tmp_path / "latex"
+    src.mkdir()
+    (src / "main.tex").write_text(SAMPLE.replace("\\newtcolorbox{nota}{title={Nota}}\n", ""), encoding="utf-8")
+    exams = tmp_path / "esami"
+    _exam_dir(exams, "2026-01-01_a", "Primo esercizio. " * 30)
+
+    def build(out, *extra):
+        p = subprocess.run([sys.executable, "-m", "gwnotes", "build", "--latex", str(src), "--out", str(out),
+                            "--preview", "0", "--web-base", "https://x.example/w", "--exams", str(exams), *extra],
+                           cwd=ROOT, capture_output=True, text=True)
+        assert p.returncode == 0, p.stdout + p.stderr
+        return p.stdout, json.loads((out / "manifest.json").read_text())
+
+    _, full = build(tmp_path / "d1")
+    prev = str(tmp_path / "d1" / "notes-bundle.zip")
+    log, inc = build(tmp_path / "d2", "--reuse", prev, "--notes-from-reuse")
+    assert "invariato" in log and "Appunti dal bundle precedente" in log
+    assert inc["contentHash"] == full["contentHash"]
+    assert sorted((tmp_path / "d1" / "web" / "w").iterdir()) != [] and \
+        sorted(p.name for p in (tmp_path / "d1" / "web" / "w").iterdir()) == \
+        sorted(p.name for p in (tmp_path / "d2" / "web" / "w").iterdir())
+    # nuovo esame: solo quello si converte; il gruppo esami ha due voci
+    _exam_dir(exams, "2026-02-02_b", "Secondo esercizio. " * 30)
+    log, inc2 = build(tmp_path / "d3", "--reuse", prev, "--notes-from-reuse")
+    assert log.count("invariato") == 1 and "2026-02-02_b:" in log
+    assert [len(c["sections"]) for c in inc2["toc"] if c.get("lib") == "esami"] == [2]
+    assert inc2["contentHash"] != full["contentHash"]
+
+
+@pytest.mark.skipif(not HAS_TEX, reason="LaTeX non installato")
+def test_exam_pdf_to_pages(tmp_path):
+    """PDF formato orologio vero: colonna dichiarata, testo, un'equazione lunga, nessuna riga persa."""
+    d = tmp_path / "2026-01-01_prova"
+    d.mkdir()
+    (d / "orologio.tex").write_text(r"""\documentclass[11pt]{article}
+\usepackage[paperwidth=12cm,paperheight=40cm,left=0.2cm,top=0.2cm,textwidth=4.6cm,textheight=39cm]{geometry}
+\usepackage[pdftitle={Prova},pdfkeywords={colonna=0.2cm+4.6cm}]{hyperref}
+\pagestyle{empty}\hfuzz=20cm\raggedright
+\begin{document}
+""" + "Testo di prova che va a capo più volte nella colonna stretta. " * 12 + r"""
+\[ a+b+c+d+e+f+g+h+i+j+k+l+m+n+o+p+q+r+s+t+u+v+w+x+y+z = 0 \]
+""" + "Altro testo dopo la formula. " * 8 + r"""
+\end{document}
+""", encoding="utf-8")
+    subprocess.run(["latexmk", "-pdf", "-quiet", "orologio.tex"], cwd=d, check=True, capture_output=True)
+    assert pdfstrips.find_exams(tmp_path) == [d / "orologio.pdf"]
+    strips, meta = pdfstrips.build_pages(d / "orologio.pdf", VIVOACTIVE5)
+    assert meta["title"] == "Prova" and len(strips) >= 2
+    for s in strips:
+        assert s.normal.width <= VIVOACTIVE5.size and s.normal.height <= meta["strip_h"] + 10
+    assert any(s.zoom is not None for s in strips)  # l'equazione lunga ha lo zoom
+    keys = [(f"i:{i}", "") for i in range(len(strips))]
+    pages = pdfstrips.layout_pages(strips, keys, VIVOACTIVE5)
+    assert all(p.startswith("P\nI") for p in pages)
