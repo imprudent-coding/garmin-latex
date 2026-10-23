@@ -525,10 +525,17 @@ class Prefetch {
         var done = 0;
         while (done < PACK_PIECES_PER_TICK && (p[2] as Number) < items.size()) {
             var it = items[p[2] as Number];
-            var ok = it instanceof Lang.Array && (it as Array).size() == 3 && (it as Array)[2] instanceof Lang.Array;
+            var ok = it instanceof Lang.Array && (it as Array).size() >= 3 && (it as Array)[2] instanceof Lang.Array;
             var key = ok ? (it as Array)[0] as String : "";
             var hash = ok ? (it as Array)[1] as String : "";
             var chunks = ok ? (it as Array)[2] as Array : [] as Array;
+            // risorsa divisa su più file: [chiave, hash, pezzi, primo, totale]
+            var first = 0;
+            var total = chunks.size();
+            if (ok && (it as Array).size() >= 5) {
+                first = Util.toNum((it as Array)[3]);
+                total = Util.toNum((it as Array)[4]);
+            }
             var c = p[3] as Number;
             if (!ok || c >= chunks.size() || (c == 0 && _store.isComplete(key, hash))) {
                 // voce non valida, finita o già in cache: alla prossima
@@ -536,7 +543,7 @@ class Prefetch {
                 p[3] = 0;
                 continue;
             }
-            _store.put(key, c, chunks.size(), hash, chunks[c] as String);
+            _store.put(key, first + c, total, hash, chunks[c] as String);
             p[3] = c + 1;
             done += 1;
         }

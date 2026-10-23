@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import base64
 
-from PIL import Image, ImageChops, ImageOps
+from PIL import Image, ImageChops, ImageFilter, ImageOps
 
 from . import lz
 
@@ -138,6 +138,7 @@ def invert_keep_hue(img: Image.Image) -> Image.Image:
 
 
 GRAYS = 8                # livelli di grigio della palette (nero = sfondo compreso)
+PHOTO_GRAYS = 4          # per le fotografie
 
 
 def _saturated_mask(rgb: Image.Image) -> Image.Image:
@@ -146,11 +147,12 @@ def _saturated_mask(rgb: Image.Image) -> Image.Image:
                                val.point(lambda v: 255 if v > 80 else 0))
 
 
-def color_palette(rgb: Image.Image) -> list[tuple[int, int, int]]:
+def color_palette(rgb: Image.Image, grays_n: int = 0) -> list[tuple[int, int, int]]:
     """Palette di un'immagine a colori: GRAYS grigi (fotografie, tratti, testo) e fino a
     MAX_COLORS + 1 − GRAYS colori scelti fra i soli pixel colorati, così le linee colorate
     sottili (urti, annotazioni) non si perdono fra i grigi di una fotografia."""
-    grays = [(round(255 * i / (GRAYS - 1)),) * 3 for i in range(GRAYS)]
+    grays_n = grays_n or GRAYS
+    grays = [(round(255 * i / (grays_n - 1)),) * 3 for i in range(grays_n)]
     mask = _saturated_mask(rgb)
     rb, mb = rgb.tobytes(), mask.tobytes()
     px = [tuple(rb[3 * i:3 * i + 3]) for i, m in enumerate(mb) if m]
@@ -158,19 +160,24 @@ def color_palette(rgb: Image.Image) -> list[tuple[int, int, int]]:
     if px:
         strip = Image.new("RGB", (len(px), 1))
         strip.putdata(px)
-        q = strip.quantize(colors=MAX_COLORS + 1 - GRAYS, method=Image.Quantize.MEDIANCUT,
+        q = strip.quantize(colors=MAX_COLORS + 1 - grays_n, method=Image.Quantize.MEDIANCUT,
                            dither=Image.Dither.NONE)
         pal = q.getpalette() or []
         hues = [tuple(pal[3 * i:3 * i + 3]) for i in sorted(set(q.tobytes()))]
     return grays + hues
 
 
-def encode_color(img: Image.Image, invert: bool = True) -> str:
-    """Stringa trasmessa per un'immagine a colori (sfondo nero + al più MAX_COLORS colori)."""
+def encode_color(img: Image.Image, invert: bool = True, photo: bool = False) -> str:
+    """Stringa trasmessa per un'immagine a colori (sfondo nero + al più MAX_COLORS colori).
+
+    photo: fotografia (grana fitta): meno grigi e un filtro mediano leggero, altrimenti
+    quasi ogni pixel è diverso dal vicino e l'RLE non comprime (zoom da oltre 100 KB)."""
     rgb = img.convert("RGB")
     if invert:
         rgb = invert_keep_hue(rgb)
-    palette = color_palette(rgb)            # palette[0] = nero = sfondo
+    if photo:
+        rgb = rgb.filter(ImageFilter.MedianFilter(3))
+    palette = color_palette(rgb, PHOTO_GRAYS if photo else GRAYS)   # palette[0] = nero = sfondo
     pimg = Image.new("P", (1, 1))
     flat = [c for col in palette for c in col]
     pimg.putpalette(flat + flat[-3:] * (256 - len(palette)))

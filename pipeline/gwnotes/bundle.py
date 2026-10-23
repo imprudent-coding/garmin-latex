@@ -142,15 +142,26 @@ def build_web_packs(sections: list[tuple[str, str, list[str]]], resources: dict,
 
     sections: [(id sezione, chiave risorsa, chiavi immagini)] in ordine di indice.
     Ritorna ({nome file: JSON}, {id sezione: [nomi file]}). Il nome è l'hash del
-    contenuto: un file che non cambia nome non va riscaricato."""
+    contenuto: un file che non cambia nome non va riscaricato.
+
+    Una risorsa più grande di `limit` (es. lo zoom di una fotografia a colori) si
+    divide su più file, a pezzi interi: la voce diventa [chiave, hash, pezzi, primo,
+    totale]. Le richieste web dell'orologio passano dal Bluetooth e le risposte
+    molto grandi falliscono (errore -1)."""
     files: dict[str, bytes] = {}
     by_section: dict[str, list[str]] = {}
     seen: set[str] = set()
 
+    def item(k, a, b):
+        r = resources[k]
+        if a == 0 and b == len(r.chunks):
+            return [k, r.hash, r.chunks]
+        return [k, r.hash, r.chunks[a:b], a, len(r.chunks)]
+
     def flush(items):
-        body = json.dumps({"r": [[k, resources[k].hash, resources[k].chunks] for k in items]},
+        body = json.dumps({"r": [item(k, a, b) for k, a, b in items]},
                           ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-        name = "p" + short_hash("|".join(f"{k}:{resources[k].hash}" for k in items), 12)
+        name = "p" + short_hash("|".join(f"{k}:{resources[k].hash}:{a}:{b}" for k, a, b in items), 12)
         files[name] = body
         return name
 
@@ -160,12 +171,22 @@ def build_web_packs(sections: list[tuple[str, str, list[str]]], resources: dict,
             if k in seen or k not in resources:
                 continue
             seen.add(k)
-            b = resources[k].bytes
-            if cur and cur_b + b > limit:
-                names.append(flush(cur))
-                cur, cur_b = [], 0
-            cur.append(k)
-            cur_b += b
+            r = resources[k]
+            # parti di al più `limit` byte (pezzi interi): di solito una sola
+            parts, a, pb = [], 0, 0
+            for i, c in enumerate(r.chunks):
+                cb = len(c.encode("utf-8"))
+                if i > a and pb + cb > limit:
+                    parts.append((a, i, pb))
+                    a, pb = i, 0
+                pb += cb
+            parts.append((a, len(r.chunks), pb))
+            for a, b, pb in parts:
+                if cur and cur_b + pb > limit:
+                    names.append(flush(cur))
+                    cur, cur_b = [], 0
+                cur.append((k, a, b))
+                cur_b += pb
         if cur:
             names.append(flush(cur))
         by_section[sid] = names

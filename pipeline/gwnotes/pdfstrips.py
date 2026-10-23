@@ -45,6 +45,7 @@ PAGE_GAP = 12          # spazio fra blocchi di pagine PDF diverse
 PAD = 3
 PARA_GAP = 12          # spazio fra blocchi da cui si riconosce l'inizio di un paragrafo o titolo
 ZOOM = 2               # fattore di ingrandimento della versione zoom
+ZOOM_MAX_PX = 360_000   # pixel massimi di una versione zoom
 SHRINK_MAX = 1.45      # un blocco fino a 1,45 volte la colonna resta nel testo, rimpicciolito
 DEFAULT_COLUMN = (0.2, 4.6)  # cm, se il PDF non la dichiara
 
@@ -184,8 +185,9 @@ class StripPage:
     def encode(self) -> tuple[str, str]:
         """Stringhe trasmesse (normale, zoom o "")."""
         if self.color:
-            return (images.encode_color(self.normal, self.invert),
-                    images.encode_color(self.zoom, self.invert) if self.zoom is not None else "")
+            photo = not self.invert
+            return (images.encode_color(self.normal, self.invert, photo),
+                    images.encode_color(self.zoom, self.invert, photo) if self.zoom is not None else "")
         return (images.encode_resource(self.normal),
                 images.encode_resource(self.zoom) if self.zoom is not None else "")
 
@@ -235,6 +237,9 @@ def build_pages(pdf: Path, profile) -> tuple[list[StripPage], dict]:
             zimg = compose(zpages, g, gx0, None, scale=ZOOM)
             if zimg.width > profile.zoom_max:
                 zimg = images.resize_levels(zimg, profile.zoom_max)
+            if zimg.width * zimg.height > ZOOM_MAX_PX:
+                # figure alte (es. un dettaglio verticale): memoria e tempo di decodifica sull'orologio
+                zimg = images.resize_levels(zimg, max(1, int(zimg.width * (ZOOM_MAX_PX / (zimg.width * zimg.height)) ** 0.5)))
             inv = not is_photo(img)
             if images.is_colorful(img):
                 # schemi e figure con linee colorate: a colori, con la palette dell'immagine

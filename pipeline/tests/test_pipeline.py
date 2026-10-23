@@ -406,6 +406,23 @@ def test_column_from_pdf_keywords():
     assert pdfstrips.column_cm({}) == pdfstrips.DEFAULT_COLUMN
 
 
+def test_web_packs_split_big_resource():
+    """Una risorsa più grande del limite va su più file, a pezzi interi, con primo e totale."""
+    big = bundle.Resource("i:big", ["x" * 1000] * 10)
+    small = bundle.Resource("s:a", ["P"])
+    files, by_sec = bundle.build_web_packs([("a", "s:a", ["i:big"])], {"s:a": small, "i:big": big}, limit=3500)
+    assert all(len(b) < 3500 + 500 for b in files.values())
+    got = {}
+    for name in by_sec["a"]:
+        for it in json.loads(files[name])["r"]:
+            if it[0] == "i:big":
+                first, total = (it[3], it[4]) if len(it) == 5 else (0, len(it[2]))
+                assert total == 10
+                for i, c in enumerate(it[2]):
+                    got[first + i] = c
+    assert [got[i] for i in range(10)] == big.chunks
+
+
 def test_index_library_row():
     sp = bundle.SectionPages("x-a", "A", [("A", 10)], ["P"], 0)
     res = bundle.Resource("s:x-a", ["P"])

@@ -145,7 +145,12 @@ ripete), divise in file con al massimo ~32 KB di dati.
 {"r": [["s:q-a1", "<hash>", ["<pezzo 0>", "<pezzo 1>"]], ["i:3fa…", "<hash>", ["…"]]]}
 ```
 
-Ogni voce è `[chiave, hash, pezzi]`, con gli stessi pezzi del bundle.
+Ogni voce è `[chiave, hash, pezzi]`, con gli stessi pezzi del bundle. Una
+risorsa più grande del limite di un file (es. lo zoom di una fotografia) si
+divide su più file, a pezzi interi: le sue voci sono `[chiave, hash, pezzi,
+primo, totale]` (`primo` = indice del primo pezzo contenuto, `totale` = pezzi
+della risorsa). Le richieste web dell'orologio passano dal Bluetooth: le
+risposte molto più grandi di ~32 KB falliscono (errore -1).
 
 Accanto c'è `web/w/idx.json`, a nome fisso: l'indice attuale,
 `{"ver": contentVersion, "schema", "font", "hash", "chunks"}` con gli stessi pezzi
