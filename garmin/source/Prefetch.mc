@@ -79,6 +79,8 @@ class Prefetch {
     // file web in salvataggio: [nome, Array di [chiave, hash, pezzi], risorsa, pezzo]
     private var _pack as Array or Null = null;
     private var _packName as String = "";
+    // file web da cui è arrivata ogni risorsa in questa sessione (per riscaricarla: repair)
+    private var _keyPack as Dictionary = {} as Dictionary;
 
     function initialize(store as Store, sync as Sync, ticker as Ticker) {
         _store = store;
@@ -172,6 +174,36 @@ class Prefetch {
     // valore della chiave "pf": versione degli appunti + libreria scelta
     private function pfKey() as String {
         return _ver + "|" + _mem;
+    }
+
+    // Un'immagine serve e non c'è: se il download in sottofondo è fermo (finito o
+    // interrotto), lo fa ripartire; lui riprende ciò che manca dal web.
+    function ensure() as Void {
+        var ix = getApp().index;
+        if (active || ix == null) {
+            return;
+        }
+        _store.setValue("pf", "");
+        restart(ix as Index);
+    }
+
+    // Risorsa con dati rovinati, già eliminata dalla cache: i file web che la contengono
+    // vanno riscaricati (se non si sa quali, tutti: si salta comunque ciò che è in cache).
+    function repair(key as String) as Void {
+        var packs = _keyPack[key];
+        if (packs != null) {
+            for (var i = 0; i < (packs as Array).size(); i++) {
+                _wp.remove((packs as Array)[i]);
+            }
+        } else {
+            _wp = {} as Dictionary;
+        }
+        _store.setValue("wp", _wp);
+        _store.setValue("pf", "");
+        var ix = getApp().index;
+        if (ix != null) {
+            restart(ix as Index);
+        }
     }
 
     // Dopo un cambio dell'opzione "Mostra": ricomincia con la nuova libreria.
@@ -544,6 +576,12 @@ class Prefetch {
                 continue;
             }
             _store.put(key, first + c, total, hash, chunks[c] as String);
+            var kp = _keyPack[key];
+            if (kp == null) {
+                _keyPack[key] = [p[0]];
+            } else if ((kp as Array).indexOf(p[0]) < 0) {
+                (kp as Array).add(p[0]);
+            }
             p[3] = c + 1;
             done += 1;
         }

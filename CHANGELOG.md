@@ -4,6 +4,20 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Orologio 1.7.4
+
+- Zoom «Non in cache» anche a download finito: un'immagine chiesta mentre il
+  telefono non poteva darla (offline, o con un bundle più vecchio dell'indice
+  preso dal web) restava segnata come mancante per tutta la sessione. Ora si
+  riprova da sola appena il download in sottofondo la porta in memoria, e se il
+  download è fermo lo fa ripartire.
+- Dati rovinati in cache (es. salvati da una versione precedente): l'immagine
+  viene eliminata e riscaricata dal web (al più due volte).
+- Memoria grafica insufficiente per uno zoom: si liberano le altre immagini e
+  si riprova.
+- Il messaggio al posto dell'immagine dice il motivo: in download, non in
+  cache, memoria insufficiente, non leggibile.
+
 ## Orologio 1.7.3
 
 - Corretto «web: errore -1»: le figure a colori avevano prodotto immagini zoom
