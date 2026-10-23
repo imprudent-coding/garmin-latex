@@ -4,6 +4,11 @@ Le app si rilasciano con i tag `garmin-vX.Y.Z` e `android-vX.Y.Z` (vedi README,
 «Prima compilazione e Release»). Le Release degli appunti (`notes-…`) sono
 automatiche a ogni push su `main`.
 
+## Appunti (pipeline)
+
+- Simulazioni d'esame di prove senza data: titolo `Prova <nome> -- Esercizio n`,
+  gruppo «Prova <nome>» dopo le prove con data. Nessun cambio dell'app.
+
 ## Orologio 1.7.5
 
 - Zoom delle foto a colori «Immagine non leggibile»: l'orologio non decodifica

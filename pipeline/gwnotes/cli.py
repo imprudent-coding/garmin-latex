@@ -317,9 +317,9 @@ def build(args) -> int:
             label = pdfstrips.exam_label(pdftitle, pdf.parent.name)
             groups.setdefault(label.prova, []).append((sid, label, enc))
         # una prova per gruppo, dalla più recente; nel gruppo gli esercizi in ordine
-        for prova in sorted(groups, key=pdfstrips.prova_sort_key, reverse=True):
+        for prova in pdfstrips.order_provas(list(groups)):
             ci = len(chapters_idx)
-            ch_title = [f"Prova del {prova}" if re.match(r"\d", prova) else prova]
+            ch_title = [groups[prova][0][1].heading]
             ex_secs, ex_nodes, tsec = [], [], []
             for sid, label, enc in groups[prova]:
                 sec = SimpleNamespace(id=sid, title=[f"{label.qid}  {label.topic}" if label.qid else label.topic],

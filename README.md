@@ -468,9 +468,11 @@ Il bundle comprende anche le **simulazioni d'esame** di Gasdinamica (menu →
 *Mostra* → *Simulazioni d'esame*): una voce per ogni
 `simulazione_esame/<esercizio>/orologio.pdf` della repository
 `imprudent-coding/Gasdynamics-fork`, raggruppate per prova («Prova del
-14/09/2026» → E1, E2…), dalla più recente. Prova ed esercizio vengono dal
-titolo del PDF (`\esercizio{Prova del GG/MM/AAAA -- Esercizio n}{…}`), o in
-mancanza dalla data nel nome della cartella. Cancellando una cartella (o il suo
+14/09/2026» → E1, E2…), dalla più recente; poi le prove senza data, con il loro
+nome («Prova foto 3»). Prova ed esercizio vengono dal titolo del PDF
+(`\esercizio{Prova del GG/MM/AAAA -- Esercizio n}{…}` oppure
+`\esercizio{Prova <nome> -- Esercizio n}{…}`), o in mancanza dalla data nel
+nome della cartella. Cancellando una cartella (o il suo
 `orologio.pdf`) l'esercizio sparisce dalla Release successiva e dall'orologio. Sono PDF già impaginati per l'orologio
 (colonna stretta, scritti lì con `compila.sh`); la pipeline li taglia in
 strisce d'immagine larghe quanto lo schermo, senza spezzare le righe. Figure,

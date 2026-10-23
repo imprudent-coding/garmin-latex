@@ -223,7 +223,8 @@ fotografie restano come sono. Lettura: `garmin/source/ImageCache.mc`,
 ## Simulazioni d'esame
 
 Con `gwnotes build --exams <cartella>` la pipeline aggiunge un capitolo per ogni
-prova («Prova del GG/MM/AAAA», dalla più recente), con riga `H` sempre presente e
+prova («Prova del GG/MM/AAAA», dalla più recente, poi «Prova <nome>» per le prove
+senza data, in ordine alfabetico), con riga `H` sempre presente e
 riga `L|esami`, e una sezione di tipo `question` (id `E1`, `E2`…) per ogni
 `<cartella>/<esercizio>/orologio.pdf`
 (`pipeline/gwnotes/pdfstrips.py`). Sono PDF già impaginati in una colonna
