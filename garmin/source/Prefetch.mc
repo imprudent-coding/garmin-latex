@@ -59,6 +59,10 @@ class Prefetch {
     private var _pend as Array or Null = null;
     // immagini non più usate da eliminare dopo un download completo, poche per passo
     private var _drop as Array<String> = [] as Array<String>;
+    // sezioni in cache dell'altra libreria, da eliminare subito con le loro immagini
+    // (purge): la scelta "Mostra" vale anche per la memoria, non solo per il download
+    private var _purge as Array<String> = [] as Array<String>;
+    private var _purgeN as Number = 0;       // prossimo pezzo da esaminare della prima sezione
     private var _sinceNotify as Number = 0;
     private var _listener as NotifyListener;
 
@@ -100,11 +104,20 @@ class Prefetch {
         _ver = index.version;
         _mem = mem;
         _secs = [] as Array<Section>;
+        var purge = [] as Array<String>;
         for (var c = 0; c < index.chapters.size(); c++) {
+            var secs = index.chapters[c].sections;
             if (index.chapters[c].lib == mem) {
-                _secs.addAll(index.chapters[c].sections);
+                _secs.addAll(secs);
+            } else {
+                for (var s = 0; s < secs.size(); s++) {
+                    if (_store.hashOf(secs[s].key()) != null) {
+                        purge.add(secs[s].key());
+                    }
+                }
             }
         }
+        startPurge(purge);
         secTotal = _secs.size();
         var pf = _store.getValue("pf");
         if (pf instanceof Lang.String && (pf as String).equals(pfKey())) {
@@ -194,6 +207,49 @@ class Prefetch {
             return;
         }
         onIdle();
+    }
+
+    // Elimina dalla cache le sezioni dell'altra libreria e le immagini che citano, a
+    // passi (pochi pezzi per volta, per il watchdog), anche se il download non finisce.
+    private function startPurge(keys as Array<String>) as Void {
+        if (keys.size() == 0) {
+            return;
+        }
+        _purge = keys;
+        _purgeN = 0;
+        if (!_ticker.isScheduled("purge")) {
+            _ticker.schedule("purge", 50, method(:onPurge), false);
+        }
+    }
+
+    function onPurge() as Void {
+        var done = 0;
+        while (_purge.size() > 0 && done < LOCAL_STEPS) {
+            var key = _purge[0];
+            if (_store.pinned.indexOf(key) >= 0) {
+                _purge = _purge.slice(1, null) as Array<String>;
+                _purgeN = 0;
+                continue;
+            }
+            if (_purgeN < _store.totalOf(key)) {
+                var c = _store.get(key, _purgeN, "");
+                if (c != null) {
+                    imagesOf(c as String, _drop);
+                }
+                _purgeN += 1;
+                done += 1;
+                continue;
+            }
+            _drop.add(key);
+            _purge = _purge.slice(1, null) as Array<String>;
+            _purgeN = 0;
+        }
+        if (_purge.size() > 0) {
+            _ticker.schedule("purge", 50, method(:onPurge), false);
+        } else if (_drop.size() > 0 && !_ticker.isScheduled("drop")) {
+            Mem.log("libreria esclusa: " + _drop.size() + " risorse da eliminare");
+            _ticker.schedule("drop", 50, method(:onDrop), false);
+        }
     }
 
     function onDrop() as Void {
@@ -336,7 +392,7 @@ class Prefetch {
             _store.setValue("pf", pfKey());
             _store.setValue("wp", _wp);
             // libera ciò che non fa parte della scelta: immagini non citate e sezioni escluse
-            _drop = _store.imagesExcept(_seen);
+            _drop.addAll(_store.imagesExcept(_seen));
             var keep = {} as Dictionary;
             for (var i = 0; i < _secs.size(); i++) {
                 keep[_secs[i].key()] = true;
@@ -349,6 +405,26 @@ class Prefetch {
         Mem.log("prefetch completato");
         notify();
         getApp().refreshStatus();
+    }
+
+    // Aggiunge a out le chiavi delle immagini citate dalle righe "I" di un pezzo di sezione.
+    private function imagesOf(chunk as String, out as Array<String>) as Void {
+        var rest = chunk;
+        while (rest.length() > 0) {
+            var nl = rest.find("\n");
+            var line = nl == null ? rest : rest.substring(0, nl) as String;
+            rest = nl == null ? "" : rest.substring(nl + 1, rest.length()) as String;
+            if (line.length() > 1 && line.substring(0, 1).equals("I")) {
+                var f = Util.splitN(line, ",", 7);
+                if (f.size() == 7) {
+                    for (var k = 5; k < 7; k++) {
+                        if (f[k].length() > 2 && out.indexOf(f[k]) < 0) {
+                            out.add(f[k]);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // Raccoglie le chiavi delle immagini dalle righe "I" di un pezzo di sezione.

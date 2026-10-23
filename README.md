@@ -416,8 +416,11 @@ mostra «Aggiornato dal web».
 
 **Mostra.** La prima voce del menu sceglie la libreria: *Appunti* (di
 default) o *Simulazioni d'esame*. Un tocco passa all'altra e torna all'elenco,
-che mostra solo la libreria scelta. Il download in sottofondo scarica solo
-quella e, finito, elimina dalla memoria l'altra. Voce selezionata e *Riprendi
+che mostra solo la libreria scelta. In memoria resta solo quella: al cambio (e
+a ogni apertura o sincronizzazione) l'orologio elimina subito dalla cache le
+sezioni dell'altra libreria e le loro immagini, anche se il download non
+finisce, e il download in sottofondo scarica solo la libreria scelta. Resta
+solo l'indice, pochi KB, che serve per l'elenco. Voce selezionata e *Riprendi
 lettura* sono ricordati separatamente per le due librerie.
 
 Nell'elenco, in basso, ci sono l'identificativo e la posizione (`B3 · 21/61`);

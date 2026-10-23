@@ -146,6 +146,9 @@ class MainMenuDelegate extends WatchUi.Menu2InputDelegate {
             // passa all'altra libreria: l'elenco mostra solo quella, il download in
             // sottofondo la scarica e, finito, libera la memoria occupata dall'altra
             app.store.setValue("lib", app.library() == LIB_EXAMS ? LIB_NOTES : LIB_EXAMS);
+            // niente dell'altra libreria resta in memoria: né bitmap aperte né sezione bloccata
+            app.images.clear();
+            app.store.pinned = ["idx"] as Array<String>;
             if (app.index != null) {
                 app.prefetch.restart(app.index as Index);
             }
