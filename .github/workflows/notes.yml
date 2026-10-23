@@ -29,6 +29,10 @@ on:
         description: "Build completa (riconverte anche gli appunti, senza riusare l'ultima Release)"
         type: boolean
         default: false
+      esami_ref:
+        description: "Branch delle simulazioni d'esame da usare (vuoto: EXAMS_REF o il branch principale)"
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -109,7 +113,7 @@ jobs:
         uses: actions/checkout@v5.0.0
         with:
           repository: ${{ vars.EXAMS_REPO || 'imprudent-coding/Gasdynamics-fork' }}
-          ref: ${{ vars.EXAMS_REF || '' }}
+          ref: ${{ inputs.esami_ref || vars.EXAMS_REF || '' }}
           token: ${{ secrets.EXAMS_TOKEN || github.token }}
           path: exams-src
           sparse-checkout: simulazione_esame
@@ -156,8 +160,10 @@ jobs:
           EXAMS=""
           if [ -d ../exams-src/simulazione_esame ]; then
             EXAMS="$(cd ../exams-src/simulazione_esame && pwd)"
+          elif [ "${{ steps.exams.outcome }}" = success ]; then
+            echo "::warning::Nessuna cartella simulazione_esame nel branch scelto della repository degli esami"
           else
-            echo "::warning::Simulazioni d'esame non disponibili (repository privata senza EXAMS_TOKEN?)"
+            echo "::warning::Repository degli esami non leggibile (privata senza EXAMS_TOKEN?)"
           fi
           ARGS=(--inputs "${{ steps.mode.outputs.inputs }}")
           # esami già convertiti nell'ultima Release: si riusano (anche nella build completa)
