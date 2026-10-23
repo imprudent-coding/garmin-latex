@@ -356,7 +356,7 @@ di pagine (● = già in cache sull'orologio). L'app riparte dall'ultima domanda
 | Elenco / Lettura / Zoom | orologio da orizzontale a verticale (se *Orologio se verticale* è attivo) | come la pressione prolungata sullo schermo |
 | Orologio | tenere premuto lo schermo o un pulsante per ~2,5 s (regolabile dal menu, *Sblocco orologio*) | torna agli appunti, dove eri |
 | Ovunque | pulsante in basso | indietro |
-| Elenco / Lettura | tocco sui tre puntini in alto / sul numero di pagina (oppure pressione prolungata, se l'orologio stealth è disattivato) | menu: riprendi lettura, torna all'elenco, scorrimento automatico, orologio stealth, sblocco orologio, frecce nell'elenco, movimento, orologio se verticale, in memoria, sincronizza, svuota cache, test velocità, mostra memoria |
+| Elenco / Lettura | tocco sui tre puntini in alto / sul numero di pagina (oppure pressione prolungata, se l'orologio stealth è disattivato) | menu: mostra (appunti / simulazioni d'esame), riprendi lettura, torna all'elenco, scorrimento automatico, orologio stealth, sblocco orologio, frecce nell'elenco, movimento, orologio se verticale, sincronizza, svuota cache, test velocità, mostra memoria |
 
 **Scorrimento automatico.** Dal menu, *Scorrimento automatico* cambia a ogni
 tocco: No, 5, 10, 15, 20, 30, 45, 60 secondi per pagina (il menu resta aperto).
@@ -405,12 +405,20 @@ Anche abbassare il braccio per altri motivi (es. per scrivere) lo fa
 scattare. Usa lo stesso sensore di *Movimento*, che resta spento se entrambe
 le opzioni sono su No.
 
-**In memoria.** Dal menu, *In memoria* cambia a ogni tocco: Appunti ed esami
-(di default), Solo appunti, Solo esami. Decide cosa l'orologio scarica in
-sottofondo e tiene nella sua memoria: il download riparte subito con la nuova
-scelta e, finito, elimina dalla cache ciò che è escluso. L'elenco mostra
-sempre tutto: aprendo una voce esclusa, le sue pagine arrivano al momento dal
-telefono (o dal web), come prima del download completo.
+**Sincronizza ora.** Controlla subito anche l'indice pubblicato su GitHub
+Pages: se c'è una versione nuova (per esempio una simulazione d'esame appena
+unita), l'orologio la usa e la scarica dal web, senza aspettare che l'app del
+telefono controlli le Release. Basta che il telefono sia collegato (le
+richieste web passano da Garmin Connect). Dopo una pubblicazione possono servire
+fino a ~10 minuti (cache di GitHub Pages). La stessa verifica avviene a ogni
+apertura dell'app. Finché il telefono ha il bundle precedente, la riga di stato
+mostra «Aggiornato dal web».
+
+**Mostra.** La prima voce del menu sceglie la libreria: *Appunti* (di
+default) o *Simulazioni d'esame*. Un tocco passa all'altra e torna all'elenco,
+che mostra solo la libreria scelta. Il download in sottofondo scarica solo
+quella e, finito, elimina dalla memoria l'altra. Voce selezionata e *Riprendi
+lettura* sono ricordati separatamente per le due librerie.
 
 Nell'elenco, in basso, ci sono l'identificativo e la posizione (`B3 · 21/61`);
 l'arco sul bordo destro indica dove sei nell'elenco. In lettura, in basso c'è il
@@ -453,13 +461,19 @@ Prima di fare push puoi controllare il risultato:
 
 ### Simulazioni d'esame
 
-Il bundle comprende anche le **simulazioni d'esame** di Gasdinamica, in fondo
-all'elenco nel gruppo *Simulazioni d'esame*: una voce per ogni
+Il bundle comprende anche le **simulazioni d'esame** di Gasdinamica (menu →
+*Mostra* → *Simulazioni d'esame*): una voce per ogni
 `simulazione_esame/<esercizio>/orologio.pdf` della repository
-`imprudent-coding/Gasdynamics-fork`. Sono PDF già impaginati per l'orologio
+`imprudent-coding/Gasdynamics-fork`, raggruppate per prova («Prova del
+14/09/2026» → E1, E2…), dalla più recente. Prova ed esercizio vengono dal
+titolo del PDF (`\esercizio{Prova del GG/MM/AAAA -- Esercizio n}{…}`), o in
+mancanza dalla data nel nome della cartella. Cancellando una cartella (o il suo
+`orologio.pdf`) l'esercizio sparisce dalla Release successiva e dall'orologio. Sono PDF già impaginati per l'orologio
 (colonna stretta, scritti lì con `compila.sh`); la pipeline li taglia in
 strisce d'immagine larghe quanto lo schermo, senza spezzare le righe. Figure,
-tabelle ed equazioni lunghe hanno lo zoom (triangolino verde).
+tabelle ed equazioni lunghe hanno lo zoom (triangolino verde). Le figure con
+linee colorate (schemi annotati, grafici) si vedono a colori; testo e formule
+restano in scala di grigi, più leggeri da trasferire.
 
 - **Aggiornamento**: il workflow `notes` li riprende ogni 6 ore (e a ogni
   esecuzione); pubblica una nuova Release solo se qualcosa è cambiato. Per

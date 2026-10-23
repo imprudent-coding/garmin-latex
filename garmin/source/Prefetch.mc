@@ -46,7 +46,7 @@ class Prefetch {
     private var _sync as Sync;
     private var _ticker as Ticker;
     private var _ver as String = "";
-    private var _mem as Number = MEM_ALL;   // scelta "In memoria" del giro in corso
+    private var _mem as Number = LIB_NOTES;   // libreria scelta ("Mostra") del giro in corso
     private var _secs as Array<Section> = [] as Array<Section>;
     private var _si as Number = 0;
     private var _scanned as Dictionary = {} as Dictionary;  // pezzi della sezione corrente già esaminati
@@ -89,10 +89,10 @@ class Prefetch {
     }
 
     // Da chiamare quando l'indice è pronto e il telefono risponde.
-    // Scarica solo le librerie scelte nel menu ("In memoria"); la chiave "pf"
-    // ricorda versione e scelta, quindi cambiare scelta fa ripartire il download.
+    // Scarica solo la libreria scelta nel menu ("Mostra"); la chiave "pf" ricorda
+    // versione e scelta, quindi cambiare libreria fa ripartire il download.
     function start(index as Index) as Void {
-        var mem = getApp().memLib();
+        var mem = getApp().library();
         if (active && _ver.equals(index.version) && _mem == mem) {
             onIdle();
             return;
@@ -101,7 +101,7 @@ class Prefetch {
         _mem = mem;
         _secs = [] as Array<Section>;
         for (var c = 0; c < index.chapters.size(); c++) {
-            if (mem == MEM_ALL || index.chapters[c].lib == mem) {
+            if (index.chapters[c].lib == mem) {
                 _secs.addAll(index.chapters[c].sections);
             }
         }
@@ -156,12 +156,12 @@ class Prefetch {
         onIdle();
     }
 
-    // valore della chiave "pf": versione degli appunti + scelta "In memoria"
+    // valore della chiave "pf": versione degli appunti + libreria scelta
     private function pfKey() as String {
         return _ver + "|" + _mem;
     }
 
-    // Dopo un cambio dell'opzione "In memoria": ricomincia con la nuova scelta.
+    // Dopo un cambio dell'opzione "Mostra": ricomincia con la nuova libreria.
     function restart(index as Index) as Void {
         stop();
         _ver = "";

@@ -28,7 +28,11 @@ class ImageCache {
     private var _decX as Number = 0;
     private var _decY as Number = 0;
     private var _decW as Number = 0;
+    private var _decH as Number = 0;
     private var _decRef = null;
+    // immagine a colori (terzo campo 4, shared/FORMAT.md): palette letta dai dati
+    private var _decColor as Boolean = false;
+    private var _decPal as Array<Number> = [] as Array<Number>;
     // decompressione LZ in corso (schema 2): ingresso e posizioni
     private var _lzIn as ByteArray or Null = null;
     private var _lzI as Number = 0;
@@ -143,6 +147,9 @@ class ImageCache {
             :toRepresentation => StringUtil.REPRESENTATION_BYTE_ARRAY
         }) as ByteArray;
         b64 = null;
+        // immagine a colori: la palette è all'inizio dei dati compressi, quindi la bitmap
+        // si crea dopo la decompressione (startColor)
+        var color = head.size() >= 4 && head[2].equals("4");
         // schema 2: "<w>,<h>,2,<byte RLE>" = RLE compresso con LZ, da decomprimere prima
         var lzIn = null;
         if (head.size() >= 4) {
@@ -154,26 +161,17 @@ class ImageCache {
             lzIn = bytes;
             bytes = new [rawLen]b;
         }
-        freeRoom();
         var ref = null;
-        try {
-            ref = Graphics.createBufferedBitmap({:width => w, :height => h, :palette => Palette.LEVELS});
-        } catch (e) {
-            ref = null;
+        if (!color) {
+            ref = newBitmap(w, h, Palette.LEVELS);
+            if (ref == null) {
+                _failed[key] = true;
+                return;
+            }
         }
-        if (ref == null) {
-            _failed[key] = true;
-            return;
-        }
-        var bmp = (ref as Graphics.BufferedBitmapReference).get();
-        if (bmp == null) {
-            _failed[key] = true;
-            return;
-        }
-        var bdc = (bmp as Graphics.BufferedBitmap).getDc();
-        bdc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
-        bdc.clear();
         _decKey = key;
+        _decColor = color;
+        _decH = h;
         _decBytes = bytes;
         _decPos = 0;
         _decX = 0;
@@ -199,6 +197,9 @@ class ImageCache {
                 abortDecode();
             } else if (r > 0) {
                 _lzIn = null;
+                if (_decColor && !startColor()) {
+                    abortDecode();
+                }
             }
             return;
         }
@@ -217,10 +218,11 @@ class ImageCache {
         var x = _decX;
         var y = _decY;
         var lastV = -1;
+        var color = _decColor;
         for (var i = _decPos; i < stop; i++) {
             var b = bytes[i];
-            var v = (b >> 6) & 3;
-            var len = (b & 63) + 1;
+            var v = color ? (b >> 4) & 15 : (b >> 6) & 3;
+            var len = color ? (b & 15) + 1 : (b & 63) + 1;
             if (v == 0) {
                 x += len;
                 while (x >= w) {
@@ -230,7 +232,10 @@ class ImageCache {
                 continue;
             }
             if (v != lastV) {
-                dc.setColor(Palette.LEVELS[v], Graphics.COLOR_TRANSPARENT);
+                if (color && v >= _decPal.size()) {
+                    v = _decPal.size() - 1;
+                }
+                dc.setColor(color ? _decPal[v] : Palette.LEVELS[v], Graphics.COLOR_TRANSPARENT);
                 lastV = v;
             }
             while (len > 0) {
@@ -262,6 +267,51 @@ class ImageCache {
             WatchUi.requestUpdate();
             next();
         }
+    }
+
+    // Bitmap con palette, sfondo nero; null se non c'è memoria grafica.
+    private function newBitmap(w as Number, h as Number, palette as Array<Number>) {
+        freeRoom();
+        var ref = null;
+        try {
+            ref = Graphics.createBufferedBitmap({:width => w, :height => h, :palette => palette});
+        } catch (e) {
+            return null;
+        }
+        if (ref == null) {
+            return null;
+        }
+        var bmp = (ref as Graphics.BufferedBitmapReference).get();
+        if (bmp == null) {
+            return null;
+        }
+        var bdc = (bmp as Graphics.BufferedBitmap).getDc();
+        bdc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+        bdc.clear();
+        return ref;
+    }
+
+    // Immagine a colori decompressa: legge la palette (K, poi K colori RGB; l'indice 0 è
+    // lo sfondo nero), crea la bitmap e fa partire l'RLE dopo la palette.
+    private function startColor() as Boolean {
+        var bytes = _decBytes as ByteArray;
+        var k = bytes.size() > 0 ? bytes[0] : 0;
+        if (k < 1 || k > 15 || bytes.size() < 1 + 3 * k) {
+            return false;
+        }
+        var pal = [0x000000] as Array<Number>;
+        for (var i = 0; i < k; i++) {
+            var o = 1 + 3 * i;
+            pal.add((bytes[o] << 16) | (bytes[o + 1] << 8) | bytes[o + 2]);
+        }
+        var ref = newBitmap(_decW, _decH, pal);
+        if (ref == null) {
+            return false;
+        }
+        _decPal = pal;
+        _decRef = ref;
+        _decPos = 1 + 3 * k;
+        return true;
     }
 
     // Un passo di decompressione LZ (formato: pipeline/gwnotes/lz.py) da _lzIn a

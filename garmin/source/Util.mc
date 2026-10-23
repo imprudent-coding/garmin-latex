@@ -54,6 +54,19 @@ module Util {
         return n == null ? 0 : n;
     }
 
+    // true se la versione degli appunti a ("AAAAMMGG.hhmmss-hash") è più recente di b
+    function newer(a as String, b as String) as Boolean {
+        if (a.length() < 15 || b.length() < 15) {
+            return false;
+        }
+        var da = toNum(a.substring(0, 8));
+        var db = toNum(b.substring(0, 8));
+        if (da != db) {
+            return da > db;
+        }
+        return toNum(a.substring(9, 15)) > toNum(b.substring(9, 15));
+    }
+
     function numbers(s as String) as Array<Number> {
         var out = [] as Array<Number>;
         if (s.length() == 0) {

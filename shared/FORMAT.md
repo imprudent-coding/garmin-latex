@@ -145,7 +145,15 @@ ripete), divise in file con al massimo ~32 KB di dati.
 {"r": [["s:q-a1", "<hash>", ["<pezzo 0>", "<pezzo 1>"]], ["i:3fa…", "<hash>", ["…"]]]}
 ```
 
-Ogni voce è `[chiave, hash, pezzi]`, con gli stessi pezzi del bundle. Il nome del
+Ogni voce è `[chiave, hash, pezzi]`, con gli stessi pezzi del bundle.
+
+Accanto c'è `web/w/idx.json`, a nome fisso: l'indice attuale,
+`{"ver": contentVersion, "schema", "font", "hash", "chunks"}` con gli stessi pezzi
+della risorsa `idx`. L'orologio lo legge all'avvio e con *Sincronizza ora*: se
+`ver` è più recente della sua versione (e schema e font coincidono) lo adotta
+subito e scarica il resto dai file web, senza aspettare l'app del telefono.
+Finché il telefono ha un bundle più vecchio, l'orologio non gli chiede nulla.
+GitHub Pages lo tiene in cache al più 10 minuti. Il nome del
 file è un hash del contenuto (`p` + 12 caratteri esadecimali): un file con lo
 stesso nome non va riscaricato. L'orologio li scarica con `makeWebRequest`
 (JSON), che passa da Garmin Connect ma è molto più veloce dei messaggi tra app;
@@ -183,10 +191,31 @@ watchdog), `android/…/render/Lz.kt` (anteprima).
 Palette dei livelli: `#000000`, `#555555`, `#AAAAAA`, `#FFFFFF`.
 La chiave è l'hash del contenuto: immagini identiche sono condivise.
 
+### Immagine a colori
+
+Per figure e schemi con linee colorate (oggi le figure delle simulazioni d'esame):
+
+```
+<w>,<h>,4,<n>|<base64 di LZ(dati)>
+```
+
+`dati` (n byte dopo la decompressione LZ) = `K` (1–15), poi `K` colori `R G B`,
+poi l'RLE a 4 bit: ogni byte è `(indice << 4) | (lunghezza − 1)`, lunghezza 1–16,
+in ordine raster. L'indice 0 è lo sfondo nero (non si disegna), 1..K i colori.
+La palette sta nei dati e non nell'intestazione, che resta fatta di soli numeri:
+un'app che non conosce il formato mostra un'immagine sbagliata ma non si blocca.
+La pipeline (`images.encode_color`) usa 8 grigi più fino a 7 colori scelti fra i
+soli pixel colorati, così le linee sottili non si perdono; negli schemi lo sfondo
+bianco diventa nero mantenendo la tinta (una linea rossa resta rossa), le
+fotografie restano come sono. Lettura: `garmin/source/ImageCache.mc`,
+`android/…/render/PageRenderer.kt`, `pipeline/gwnotes/images.py`.
+
 ## Simulazioni d'esame
 
-Con `gwnotes build --exams <cartella>` la pipeline aggiunge un capitolo con riga
-`L|esami`, una sezione per ogni `<cartella>/<esercizio>/orologio.pdf`
+Con `gwnotes build --exams <cartella>` la pipeline aggiunge un capitolo per ogni
+prova («Prova del GG/MM/AAAA», dalla più recente), con riga `H` sempre presente e
+riga `L|esami`, e una sezione di tipo `question` (id `E1`, `E2`…) per ogni
+`<cartella>/<esercizio>/orologio.pdf`
 (`pipeline/gwnotes/pdfstrips.py`). Sono PDF già impaginati in una colonna
 stretta (dichiarata nelle parole chiave del PDF: `colonna=<sinistra>cm+<larghezza>cm`):
 le pagine sono strisce d'immagine larghe 262 px, una per pagina, centrate, con

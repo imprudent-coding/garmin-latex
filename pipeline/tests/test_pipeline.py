@@ -124,6 +124,27 @@ def test_grid_figures_are_split_strips_are_not():
     assert len(panels.grid_panels(_grid_figure(1, 3), mode="split")) == 3
 
 
+def test_color_image_roundtrip_keeps_hues():
+    """Figura a colori: sfondo bianco -> nero, linea rossa resta rossa, tratti neri -> chiari."""
+    img = Image.new("RGB", (120, 60), "white")
+    d = ImageDraw.Draw(img)
+    d.line((0, 10, 119, 10), fill=(220, 30, 30), width=3)      # urto rosso
+    d.line((0, 30, 119, 30), fill=(0, 170, 220), width=3)      # gola ciano
+    d.line((0, 50, 119, 50), fill=(0, 0, 0), width=2)          # tratto nero
+    assert images.is_colorful(img) and not images.is_colorful(img.convert("L"))
+    enc = images.encode_color(img, invert=True)
+    head = enc.split("|")[0].split(",")
+    assert head[:3] == ["120", "60", "4"] and all(x.isdigit() for x in head)  # intestazione solo numerica
+    back = images.decode_resource(enc)
+    assert back.mode == "RGB" and back.size == (120, 60)
+    assert back.getpixel((5, 2)) == (0, 0, 0)                  # sfondo
+    r, g, b = back.getpixel((60, 10))
+    assert r > 150 and g < 100 and b < 100                     # ancora rosso
+    r, g, b = back.getpixel((60, 30))
+    assert b > 150 and r < 100                                 # ancora ciano/blu
+    assert min(back.getpixel((60, 50))) > 200                  # il nero diventa bianco
+
+
 def test_to_levels_inverts_white_background():
     img = Image.new("L", (20, 20), 255)
     ImageDraw.Draw(img).rectangle([5, 5, 14, 14], fill=0)
@@ -280,6 +301,10 @@ def test_end_to_end(tmp_path):
         for name in f[2].split(";"):
             web_keys |= {r[0] for r in json.loads((out / "web" / "w" / f"{name}.json").read_text())["r"]}
     assert web_keys == {k for k in m["resources"] if k != "idx"}
+    # indice attuale sul web, per la sincronizzazione dell'orologio senza telefono
+    widx = json.loads((out / "web" / "w" / "idx.json").read_text())
+    assert widx["ver"] == m["contentVersion"] and widx["hash"] == m["resources"]["idx"]["hash"]
+    assert "\n".join(widx["chunks"]) == idx
     # stesso contenuto, indice diverso (senza file web): il contentHash deve cambiare,
     # altrimenti l'app Android terrebbe il bundle vecchio
     out2 = tmp_path / "dist2"
@@ -367,6 +392,15 @@ def test_strip_height_fits_circle():
     assert p.band(p.r - h / 2, p.r + h / 2)[1] >= pdfstrips.STRIP_W
 
 
+def test_exam_label_and_order():
+    lab = pdfstrips.exam_label("Prova del 14/09/2026 – Esercizio 2: Mach nell'ugello", "2026-09-14_E02")
+    assert (lab.prova, lab.qid, lab.topic) == ("14/09/2026", "E2", "Mach nell'ugello")
+    lab = pdfstrips.exam_label("Titolo libero", "2025-01-30_altro")
+    assert (lab.prova, lab.qid, lab.topic) == ("30/01/2025", "", "Titolo libero")
+    order = sorted(["14/09/2026", "30/01/2025", "02/10/2026"], key=pdfstrips.prova_sort_key, reverse=True)
+    assert order == ["02/10/2026", "14/09/2026", "30/01/2025"]
+
+
 def test_column_from_pdf_keywords():
     assert pdfstrips.column_cm({"Keywords": "colonna=0.2cm+4.6cm"}) == (0.2, 4.6)
     assert pdfstrips.column_cm({}) == pdfstrips.DEFAULT_COLUMN
@@ -424,8 +458,15 @@ def test_incremental_build_matches_full(tmp_path):
     _exam_dir(exams, "2026-02-02_b", "Secondo esercizio. " * 30)
     log, inc2 = build(tmp_path / "d3", "--reuse", prev, "--notes-from-reuse")
     assert log.count("invariato") == 1 and "2026-02-02_b:" in log
-    assert [len(c["sections"]) for c in inc2["toc"] if c.get("lib") == "esami"] == [2]
+    # un gruppo per prova (data dalla cartella), dalla più recente
+    assert [c["title"] for c in inc2["toc"] if c.get("lib") == "esami"] == \
+        ["Prova del 02/02/2026", "Prova del 01/01/2026"]
     assert inc2["contentHash"] != full["contentHash"]
+    # cartella cancellata: l'esame sparisce dal bundle (e dall'orologio, al nuovo indice)
+    shutil.rmtree(exams / "2026-01-01_a")
+    _, inc3 = build(tmp_path / "d4", "--reuse", str(tmp_path / "d3" / "notes-bundle.zip"), "--notes-from-reuse")
+    assert [c["title"] for c in inc3["toc"] if c.get("lib") == "esami"] == ["Prova del 02/02/2026"]
+    assert not any(k.startswith("s:x-2026-01-01") for k in inc3["resources"])
 
 
 @pytest.mark.skipif(not HAS_TEX, reason="LaTeX non installato")

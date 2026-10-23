@@ -291,48 +291,53 @@ def build(args) -> int:
     if args.exams:
         exam_pdfs = pdfstrips.find_exams(Path(args.exams).resolve())
         print(f"[4b] Simulazioni d'esame: {len(exam_pdfs)} PDF in {args.exams}")
-        ex_secs, ex_nodes, tsec = [], [], []
-        ci = len(chapters_idx)
-        reused = 0
+        groups: dict[str, list] = {}  # prova -> [(sid, etichetta, pagine)]
         for pdf in exam_pdfs:
             sid = "x-" + re.sub(r"[^a-z0-9]+", "-", pdf.parent.name.lower()).strip("-")
             # PDF già convertito nel bundle precedente, con lo stesso codice: si riusa
             ckey = short_hash(pdf.read_bytes(), 16) + "-" + pdfstrips.code_hash()
             old = prev.exams.get(sid) if prev is not None else None
-            if old and old.get("key") == ckey and prev.has_section(sid):
+            if old and old.get("key") == ckey and old.get("pdftitle") is not None and prev.has_section(sid):
                 enc = prev.section_pages(sid)
                 for k in image_keys(enc):
                     bb.add(prev.resources[k])
-                title = old["title"]
-                reused += 1
+                pdftitle = old["pdftitle"]
                 print(f"      {pdf.parent.name}: invariato, {len(enc)} pagine riprese dal bundle precedente")
             else:
                 strips, meta = pdfstrips.build_pages(pdf, profile)
                 keys = []
                 for st in strips:
-                    k = bb.image(images.encode_resource(st.normal))
-                    z = bb.image(images.encode_resource(st.zoom)) if st.zoom is not None else ""
-                    keys.append((k, z))
+                    n, z = st.encode()
+                    keys.append((bb.image(n), bb.image(z) if z else ""))
                 enc = pdfstrips.layout_pages(strips, keys, profile)
-                title = re.sub(r"^Prova del\s+", "", meta["title"]).replace(" – ", " ")
+                pdftitle = meta["title"]
                 print(f"      {pdf.parent.name}: {len(enc)} pagine, {meta['blocks']} blocchi")
-            exams_meta[sid] = {"key": ckey, "title": title}
-            sec = SimpleNamespace(id=sid, title=[title], kind="section", qid="", label="")
-            ex_nodes.append(sec)
-            full, compact = section_titles(lay, profile, sec, [rules.exams_title], alone=False)
-            sp = SectionPages(sid, title, full, enc, ci, compact=compact)
-            res, starts = bb.section(sp)
-            ex_secs.append((sp, res, starts))
-            all_pages[sid] = enc
-            exam_ids.append(sid)
-            total_pages += len(enc)
-            tsec.append({"id": sid, "title": title, "pages": len(enc), "key": res.key, "hash": res.hash,
-                         "qid": "", "kind": "section"})
-        if ex_secs:
-            ch = SimpleNamespace(title=[rules.exams_title], sections=ex_nodes)
-            chapters_idx.append((encode_title_lines(lay, ch.title, profile.title_w),
-                                 chapter_header(lay, profile, ch), ex_secs, "esami"))
-            toc.append({"title": rules.exams_title, "lib": "esami", "sections": tsec})
+            exams_meta[sid] = {"key": ckey, "pdftitle": pdftitle}
+            label = pdfstrips.exam_label(pdftitle, pdf.parent.name)
+            groups.setdefault(label.prova, []).append((sid, label, enc))
+        # una prova per gruppo, dalla più recente; nel gruppo gli esercizi in ordine
+        for prova in sorted(groups, key=pdfstrips.prova_sort_key, reverse=True):
+            ci = len(chapters_idx)
+            ch_title = [f"Prova del {prova}" if re.match(r"\d", prova) else prova]
+            ex_secs, ex_nodes, tsec = [], [], []
+            for sid, label, enc in groups[prova]:
+                sec = SimpleNamespace(id=sid, title=[f"{label.qid}  {label.topic}" if label.qid else label.topic],
+                                      kind="question" if label.qid else "section", qid=label.qid, label="")
+                ex_nodes.append(sec)
+                full, compact = section_titles(lay, profile, sec, ch_title, alone=False)
+                sp = SectionPages(sid, plain(sec.title), full, enc, ci, qid=sec.qid, kind=sec.kind, compact=compact)
+                res, starts = bb.section(sp)
+                ex_secs.append((sp, res, starts))
+                all_pages[sid] = enc
+                exam_ids.append(sid)
+                total_pages += len(enc)
+                tsec.append({"id": sid, "title": plain(sec.title), "pages": len(enc), "key": res.key,
+                             "hash": res.hash, "qid": sec.qid, "kind": sec.kind})
+            # intestazione del gruppo anche con un solo esercizio: dice di quale prova si tratta
+            header = encode_title_lines(lay, [Styled("small", [rich.color("heading", ch_title)])],
+                                        profile.row_w_header, max_lines=1)[0]
+            chapters_idx.append((encode_title_lines(lay, ch_title, profile.title_w), header, ex_secs, "esami"))
+            toc.append({"title": ch_title[0], "lib": "esami", "sections": tsec})
 
     # file per il download via web (GitHub Pages): sezione + immagini, per sezione
     web_files, web_packs = build_web_packs(
@@ -379,6 +384,12 @@ def build(args) -> int:
     (web_dir / "w").mkdir(parents=True)
     for name, body in web_files.items():
         (web_dir / "w" / f"{name}.json").write_bytes(body)
+    # indice attuale, a nome fisso: l'orologio lo controlla con "Sincronizza ora" e
+    # all'avvio, così vede una nuova versione senza aspettare l'app del telefono
+    idx_res = bb.resources["idx"]
+    (web_dir / "w" / "idx.json").write_text(
+        json.dumps({"ver": content_version, "schema": SCHEMA, "font": metrics.font_id, "hash": idx_res.hash,
+                    "chunks": idx_res.chunks}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (web_dir / "index.html").write_text(
         f"<!doctype html><meta charset=utf-8><title>{html.escape(notes.title)}</title>"
         f"<p>File degli appunti per l'app dell'orologio (versione {content_version}).</p>\n", encoding="utf-8")
