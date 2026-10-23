@@ -10,6 +10,9 @@ name: notes
 # (vedi "Release precedente e tipo di build").
 on:
   push:
+    # solo branch: i tag (es. garmin-v*) non cambiano gli appunti
+    branches:
+      - "**"
     paths:
       - "latex/**"
       - "pipeline/**"
@@ -62,8 +65,13 @@ jobs:
           inputs="$(git rev-parse HEAD:latex HEAD:pipeline HEAD:shared HEAD:.github/workflows/notes.yml | sha256sum | cut -c1-16)"
           echo "inputs=$inputs" >> "$GITHUB_OUTPUT"
           mode=full
-          if gh release download --repo "$GITHUB_REPOSITORY" --pattern notes-bundle.zip --pattern notes.pdf \
-               --pattern manifest.json --dir prev 2>/dev/null; then
+          # ultima Release degli appunti (tag notes-*), come l'app Android: le Release
+          # dell'app orologio (garmin-v*) non hanno il bundle
+          tag="$(gh release list --repo "$GITHUB_REPOSITORY" --limit 50 --json tagName \
+                   --jq '[.[] | select(.tagName | startswith("notes-"))][0].tagName // ""')"
+          echo "Release precedente: ${tag:-nessuna}" >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$tag" ] && gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern notes-bundle.zip \
+               --pattern notes.pdf --pattern manifest.json --dir prev 2>/dev/null; then
             old="$(python3 -c 'import json;print(json.load(open("prev/manifest.json")).get("inputs",""))')"
             if [ "$old" = "$inputs" ] && [ "${{ inputs.completa }}" != "true" ]; then
               mode=incremental
@@ -84,15 +92,27 @@ jobs:
       # TeX Live 2023 e pandoc 3.1.3 dai pacchetti di Ubuntu 24.04 (versioni fissate dall'immagine)
       - name: Installa TeX Live, pandoc e poppler
         if: steps.mode.outputs.mode == 'full'
-        timeout-minutes: 10
+        timeout-minutes: 22
         run: |
+          # lo specchio a volte si blocca: ogni tentativo ha un tempo massimo, poi si riprova
+          # (i pacchetti già scaricati restano in ~/apt-cache)
           APT=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30)
           mkdir -p ~/apt-cache/partial
-          sudo apt-get "${APT[@]}" update -q
-          sudo apt-get "${APT[@]}" -o Dir::Cache::Archives="$HOME/apt-cache" install -y -q --no-install-recommends \
-            texlive-latex-base texlive-latex-recommended texlive-latex-extra \
-            texlive-fonts-recommended texlive-pictures latexmk lmodern \
-            pandoc poppler-utils
+          ok=""
+          for attempt in 1 2 3; do
+            if timeout 120 sudo apt-get "${APT[@]}" update -q \
+              && timeout 300 sudo apt-get "${APT[@]}" -o Dir::Cache::Archives="$HOME/apt-cache" install -y -q \
+                   --no-install-recommends \
+                   texlive-latex-base texlive-latex-recommended texlive-latex-extra \
+                   texlive-fonts-recommended texlive-pictures latexmk lmodern \
+                   pandoc poppler-utils; then
+              ok=1
+              break
+            fi
+            echo "::warning::Installazione dei pacchetti: tentativo $attempt non riuscito, riprovo"
+            sudo dpkg --configure -a || true
+          done
+          [ -n "$ok" ] || { echo "::error::Specchio di Ubuntu non raggiungibile dopo 3 tentativi: rilancia il workflow"; exit 1; }
           sudo chown -R "$USER" ~/apt-cache
           rm -rf ~/apt-cache/partial ~/apt-cache/lock
           pdflatex --version | head -1
